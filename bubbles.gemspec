@@ -9,15 +9,12 @@ Gem::Specification.new do |spec|
   spec.date        = Date.today.strftime("%Y-%m-%d")
   spec.summary     = 'FoamFactory REST Client'
   spec.homepage    = 'http://www.foamfactorybrewing.com'
-  spec.description = 'The client for the API controlling the FoamFactory application backend'
   spec.authors     = ['Scott Johnson']
   spec.email       = 'jaywir3@gmail.com'
-  spec.files       = %w(lib/bubbles.rb lib/bubbles/RestEnvironment.rb lib/bubbles/version.rb)
+  spec.files       = %w(lib/bubbles.rb lib/bubbles/rest_environment.rb lib/bubbles/version.rb)
   spec.license     = 'MPL-2.0'
-
-  # spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  # spec.description   = %q{TODO: Write a longer description or delete this line.}
-  # spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{A gem for easily defining client REST interfaces in Ruby}
+  spec.description   = %q{Retrofit, by Square, allows you to easily define annoations that will generate the necessary boilerplate code for your REST interfaces. Bubbles is a Gem that seeks to bring a similar style of boilerplate generation to Ruby.}
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.

@@ -1,8 +1,8 @@
 require "bubbles/version"
 require 'bubbles/config'
 require 'base64'
-require 'bubbles/RestClientResources'
-require 'bubbles/RestEnvironment'
+require 'bubbles/rest_client_resources'
+require 'bubbles/rest_environment'
 require 'bubbles/version'
 # require 'exceptions'
 require 'rest-client'

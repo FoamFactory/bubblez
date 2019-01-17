@@ -1,5 +1,5 @@
 require 'bubbles/config'
-require 'bubbles/RestEnvironment'
+require 'bubbles/rest_environment'
 
 module Bubbles
   class RestClientResources

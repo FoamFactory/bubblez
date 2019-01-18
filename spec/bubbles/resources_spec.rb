@@ -2,6 +2,26 @@ require 'bubbles'
 require 'spec_helper'
 
 describe Bubbles::Resources do
+  describe 'Endpoints' do
+    before do
+      Bubbles.configure do |config|
+        config.endpoints = [
+          {
+            :type => :get,
+            :location => :version,
+            :authenticated => false,
+            :api_key_required => false
+          }
+        ]
+      end
+    end
+
+    it 'should create a method "version" on each RestEnvironment' do
+      resources = Bubbles::Resources.new
+      methods = Bubbles::RestEnvironment.instance_methods(false)
+      expect(Bubbles::RestEnvironment.instance_methods(false).include?(:version)).to eq(true)
+    end
+  end
   describe '#production_environment' do
     before do
       Bubbles.configure do |config|

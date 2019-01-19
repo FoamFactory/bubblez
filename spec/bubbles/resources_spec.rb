@@ -13,15 +13,37 @@ describe Bubbles::Resources do
             :api_key_required => false
           }
         ]
+
+        config.local_environment = {
+          :scheme => 'http',
+          :host => '127.0.0.1',
+          :port => '1234'
+        }
       end
     end
 
     it 'should create a method "version" on each RestEnvironment' do
-      resources = Bubbles::Resources.new
-      methods = Bubbles::RestEnvironment.instance_methods(false)
       expect(Bubbles::RestEnvironment.instance_methods(false).include?(:version)).to eq(true)
     end
+
+    it 'should connect to http://127.0.0.1/version when the version method is called on local_environment' do
+      VCR.use_cassette('get_version_unauthenticated') do
+        resources = Bubbles::Resources.new
+        local_env = resources.local_environment
+
+        response = JSON.parse(local_env.version, object_class: OpenStruct)
+        expect(response).to_not be_nil
+        expect(response.name).to eq('Sinking Moon API')
+        expect(response.versionName).to eq('2.0.0')
+
+        deploy_date = Date.parse(response.deployDate)
+        expect(deploy_date.year).to eq(2018)
+        expect(deploy_date.month).to eq(1)
+        expect(deploy_date.day).to eq(2)
+      end
+    end
   end
+
   describe '#production_environment' do
     before do
       Bubbles.configure do |config|

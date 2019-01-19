@@ -158,8 +158,11 @@ module Bubbles
 
         Bubbles::RestEnvironment.class_exec do
           define_method(endpoint_name_as_sym) do
-            # TODO Placeholder for actually executing the code via rest_client
-            puts 'blor'
+            if endpoint.method == :get
+              unless endpoint.authenticated?
+                RestClientResources.execute_get_unauthenticated self, endpoint
+              end
+            end
           end
         end
       end

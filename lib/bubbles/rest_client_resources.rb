@@ -35,22 +35,32 @@ module Bubbles
       @auth_token = nil
     end
 
-    def execute_get_unauthenticated(endpoint)
+    ##
+    # Execute a GET request without authentication.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
+    #
+    def self.execute_get_unauthenticated(env, endpoint)
+      url = endpoint.get_expanded_url env
+
       begin
-        if @environment.scheme == 'https'
-          response = RestClient::Resource.new(endpoint, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+        if env.scheme == 'https'
+          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get({
                    :content_type => :json,
                    :accept => :json
                  })
         else
-          response = RestClient.get(endpoint,
+          response = RestClient.get(url.to_s,
                                     {
                                       :content_type => :json
                                     })
         end
       rescue Errno::ECONNREFUSED
-        return {:error => 'Unable to connect to host ' + @environment.host.to_s + ':' + @environment.port.to_s}.to_json
+        return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
 
       response

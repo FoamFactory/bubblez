@@ -1,0 +1,42 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://127.0.0.1:1234/version
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin16.1.0 x86_64) ruby/2.4.0p0
+      Content-Type:
+      - application/json
+      Host:
+      - 127.0.0.1:1234
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Etag:
+      - W/"939eb8a8e26be1cdc231493379b6d17c"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - fab0bd54-b471-46d4-8f1f-9165c1549c8f
+      X-Runtime:
+      - '0.263693'
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"name":"Sinking Moon API","versionName":"2.0.0","versionCode":8,"deployDate":"2018-01-02T22:51:29-06:00"}'
+    http_version:
+  recorded_at: Wed, 03 Jan 2018 04:51:29 GMT
+recorded_with: VCR 3.0.3

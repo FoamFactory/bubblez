@@ -26,10 +26,10 @@ module Bubbles
     attr_accessor :api_key_required
 
     ## A template for specifying the complete URL for endpoints.
-    API_URL = ::Addressable::Template.new("{scheme}://{environment_host}/{endpoint}")
+    API_URL = ::Addressable::Template.new("{scheme}://{host}/{endpoint}")
 
     ## A template for specifying the complete URL for endpoints, with a port attached to the host.
-    API_URL_WITH_PORT = ::Addressable::Template.new("{scheme}://{environment_host}:{port}/{endpoint}")
+    API_URL_WITH_PORT = ::Addressable::Template.new("{scheme}://{host}:{port}/{endpoint}")
 
 
     ## The HTTP methods supported by a rest client utilizing Bubbles.
@@ -77,12 +77,13 @@ module Bubbles
     end
 
     ##
-    # Retrieve the URL for this +Endpoint+, given a +RestEnvironment+.
+    # Retrieve the base URL template for this +Endpoint+, given a +RestEnvironment+.
     #
-    # @param env The +RestEnvironment+ to use to access this endpoint.
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to access this endpoint.
     #
-    # @return [String] A +String+ containing the URL to use to access this +Endpoint+.
-    def get_url(env)
+    # @return [Addressable::Template] A +Template+ containing the URL to use to access this +Endpoint+.
+    #
+    def get_base_url(env)
       unless env.port == 80 || env.port == 443
         return API_URL_WITH_PORT
       end
@@ -91,10 +92,35 @@ module Bubbles
     end
 
     ##
+    # Retrieve the URL to access this +Endpoint+, as a +String+ with all parameters expanded.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to access this +Endpoint+.
+    #
+    # @return [String] A +String+ containing the full URL to access this +Endpoint+ on the given {RestEnvironment}.
+    #
+    def get_expanded_url(env)
+      url = get_base_url env
+
+      if is_complex?
+        special_url_string = '{scheme}://{environment_host}/'
+        unless @port == 80 || @port == 443
+          special_url_string = '{scheme}://{environment_host}:{port}/'
+        end
+
+        special_url_string = special_url_string + @location
+        url = ::Addressable::Template.new(special_url_string)
+
+        return url.expand(scheme: env.scheme, host: env.host, port: env.port)
+      end
+
+      url.expand(scheme: env.scheme, host: env.host, port: env.port, endpoint: @location)
+    end
+
+    ##
     # Determine if the location for this Endpoint is complex.
     #
     # @return [Boolean] true, if the location for this Endpoint is complex (contains a '/'); false, otherwise.
-    def is_complex
+    def is_complex?
       @location.include? '/'
     end
 
@@ -105,11 +131,19 @@ module Bubbles
     #
     # @return [String] The string representation of the location of this endpoint.
     def get_location_string
-      unless is_complex
+      unless is_complex?
         return @location
       end
 
       @location.to_s.gsub('/', '_')
+    end
+
+    ##
+    # Determine if this +Endpoint+ requires authentication/authorization to utilize
+    #
+    # @return [Boolean] true, if this +Endpoint+ requires authentication/authorization to use; false, otherwise.
+    def authenticated?
+      @auth_required
     end
   end
 end

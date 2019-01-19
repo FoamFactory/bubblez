@@ -23,7 +23,7 @@ describe Bubbles::Endpoint do
     ep = Bubbles::Endpoint.new(:get, '/versions/new')
 
     expect(ep.location).to eq('versions/new')
-    expect(ep.is_complex).to eq(true)
+    expect(ep.is_complex?).to eq(true)
   end
 
   it 'should replace all instances of "/" in the location with "_" when get_location_string is called' do

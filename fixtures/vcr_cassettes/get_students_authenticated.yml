@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://127.0.0.1:1234/students
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin16.1.0 x86_64) ruby/2.4.0p0
+      Authorization:
+      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
+      Content-Type:
+      - application/json
+      Host:
+      - 127.0.0.1:1234
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Etag:
+      - W/"9d4b7d98d38caa096dee4e7844662cf6"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - de8e2f1a-4eb7-44a5-9129-84df77d3b938
+      X-Runtime:
+      - '0.014508'
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"students":[{"id":1,"name":"Joe Blow","address":"2234 Bubble Gum Ave.
+        #127","city":"Sometown","state":"CA","zip":"90263","phone":"5558764566","email":"bubblegumbanshee987@bazooka.org","emergencyContactName":"Some
+        Guy","emergencyContactPhone":"5554339182","joinDate":"2017-10-14T00:00:00.000Z","lastAdvancementDate":"2017-10-14T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-14T21:46:42.826Z","updated_at":"2017-10-14T21:46:42.826Z","preferredContact":"phone","rank":"green"}]}'
+    http_version:
+  recorded_at: Sun, 15 Oct 2017 16:51:12 GMT
+recorded_with: VCR 3.0.3

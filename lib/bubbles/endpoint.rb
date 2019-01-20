@@ -44,12 +44,15 @@ module Bubbles
     #        Defaults to +false+.
     # @param [Boolean] api_key_required If true, then an API key is required to access this endpoint. Defaults to
     #        +false+.
+    # @param [String] name An optional name which will be given to the method that will execute this {Endpoint} within
+    #        the context of a {RestClientResources} object.
     #
-    def initialize(method, location, auth_required = false, api_key_required = false)
+    def initialize(method, location, auth_required = false, api_key_required = false, name = nil)
       @method = method
       @location = location
       @auth_required = auth_required
       @api_key_required = api_key_required
+      @name = name
 
       # Strip the leading slash from the endpoint location, if it's there
       if @location.to_s[0] == '/'
@@ -144,6 +147,35 @@ module Bubbles
     # @return [Boolean] true, if this +Endpoint+ requires authentication/authorization to use; false, otherwise.
     def authenticated?
       @auth_required
+    end
+
+    ##
+    # Set the name of the method on {RestClientResources} used to access this {Endpoint}.
+    #
+    # @param [String] name The name of the method used to access this {Endpoint}.
+    #
+    def name=(name)
+      @name = name
+    end
+
+    ##
+    # Retrieve the name of the method on {RestClientResources} used to access this {Endpoint}.
+    #
+    # @return [String] A String containing the name of the method on {RestClientResources} used to access this
+    #         {Endpoint}, or +nil+ if one wasn't provided.
+    #
+    def name
+      @name
+    end
+
+    ##
+    # Determine if this {Endpoint} has a method name, different from the +location+ name, specified for it.
+    #
+    # @return [Boolean] true, if this {Endpoint} has a method name that is different than the +location+ name specified
+    #         for the +Endpoint+, to be defined on {RestClientResources}; false, otherwise.
+    #
+    def name?
+      @name == nil
     end
   end
 end

@@ -35,5 +35,4 @@ describe Bubbles::Endpoint do
 
     expect(ep.get_location_string).to eq('management_clients_new')
   end
-
 end

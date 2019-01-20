@@ -66,6 +66,50 @@ module Bubbles
       response
     end
 
+    ##
+    # Execute a GET request with authentication.
+    #
+    # Currently, only Authorization: Bearer is supported.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token to use for authentication.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
+    #
+    def self.execute_get_authenticated(env, endpoint, auth_token)
+      url = endpoint.get_expanded_url env
+
+      begin
+        if env.scheme == 'https'
+          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .get({
+                   :authorization => 'Bearer ' + auth_token,
+                   :content_type => :json,
+                   :accept => :json
+                 })
+        else
+          response = RestClient.get(url.to_s,
+                                    {
+                                      :authorization => 'Bearer ' + auth_token,
+                                      :content_type => :json
+                                    })
+        end
+      rescue Errno::ECONNREFUSED
+        return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
+      end
+
+      response
+    end
+
+    ##
+    # Retrieve the {RestEnvironment} to utilize from a {Symbol} describing it.
+    #
+    # @param [Symbol] environment A {Symbol} describing the environment to use. Must be one of:
+    #        [:production, :staging, :local, nil]. If +nil+, note that +:production+ will be used.
+    #
+    # @return [RestEnvironment] The {RestEnvironment} corresponding to the given {Symbol}.
+    #
     def get_environment(environment)
       if !environment || environment == :production
         return self.production_environment

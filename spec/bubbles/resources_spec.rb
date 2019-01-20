@@ -11,10 +11,23 @@ describe Bubbles::Resources do
             :location => :version,
             :authenticated => false,
             :api_key_required => false
+          },
+          {
+            :type => :get,
+            :location => :students,
+            :authenticated => true,
+            :api_key_required => false,
+            :name => :list_students
           }
         ]
 
         config.local_environment = {
+          :scheme => 'http',
+          :host => '127.0.0.1',
+          :port => '1234'
+        }
+
+        config.staging_environment = {
           :scheme => 'http',
           :host => '127.0.0.1',
           :port => '1234'
@@ -26,20 +39,46 @@ describe Bubbles::Resources do
       expect(Bubbles::RestEnvironment.instance_methods(false).include?(:version)).to eq(true)
     end
 
-    it 'should connect to http://127.0.0.1/version when the version method is called on local_environment' do
-      VCR.use_cassette('get_version_unauthenticated') do
-        resources = Bubbles::Resources.new
-        local_env = resources.local_environment
+    it 'should create a method "list_students" on each RestEnvironment' do
+      expect(Bubbles::RestEnvironment.instance_methods(false).include?(:list_students)).to eq(true)
+    end
 
-        response = JSON.parse(local_env.version, object_class: OpenStruct)
-        expect(response).to_not be_nil
-        expect(response.name).to eq('Sinking Moon API')
-        expect(response.versionName).to eq('2.0.0')
+    describe 'GET requests' do
+      describe 'unauthenticated' do
+        it 'should be able to retrieve a version from localhost' do
+          VCR.use_cassette('get_version_unauthenticated') do
+            resources = Bubbles::Resources.new
+            local_env = resources.local_environment
 
-        deploy_date = Date.parse(response.deployDate)
-        expect(deploy_date.year).to eq(2018)
-        expect(deploy_date.month).to eq(1)
-        expect(deploy_date.day).to eq(2)
+            response = JSON.parse(local_env.version, object_class: OpenStruct)
+            expect(response).to_not be_nil
+            expect(response.name).to eq('Sinking Moon API')
+            expect(response.versionName).to eq('2.0.0')
+
+            deploy_date = Date.parse(response.deployDate)
+            expect(deploy_date.year).to eq(2018)
+            expect(deploy_date.month).to eq(1)
+            expect(deploy_date.day).to eq(2)
+          end
+        end
+      end
+
+      describe 'authenticated' do
+        it 'should be able to list students from the staging environment' do
+          VCR.use_cassette('get_students_authenticated') do
+            auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
+            resources = Bubbles::Resources.new
+            local_env = resources.local_environment
+
+            response = JSON.parse(local_env.list_students(auth_token), object_class: OpenStruct)
+            expect(response).to_not be_nil
+
+            students = response.students
+            expect(students.length).to eq(1)
+            expect(students[0].name).to eq('Joe Blow')
+            expect(students[0].zip).to eq('90263')
+          end
+        end
       end
     end
   end

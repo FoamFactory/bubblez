@@ -133,14 +133,33 @@ module Bubbles
       @production_environment_port = env[:port]
     end
 
+    ##
+    # Retrieve the list of +Endpoint+s configured in this +Configuration+ object.
+    #
+    # @return {Array} An Array of {Endpoint}s.
+    #
     def endpoints
       @endpoints
     end
 
+    ##
+    # Add all {Endpoint} objects within this {Configuration} instance.
+    #
+    # {Endpoint} objects are defined using two required parameters: type and location, and three optional parameters:
+    # authenticated, api_key_required and name.
+    #   - type: Indicates the HTTP method used to access the endpoint. Must be one of {Endpoint::METHODS}.
+    #   - location: Indicates the path at which the {Endpoint} can be accessed on the host environment.
+    #   - authenticated: (Optional) A true or false value indicating whether the {Endpoint} requires an authorization
+    #                    token to access it. Defaults to false.
+    #   - api_key_required: (Optional) A true or false value indicating whether the {Endpoint} requires a API key to
+    #                       access it. Defaults to false.
+    #   - name: (Optional): A +String+ indicating the name of the method to add. If not provided, the method name will
+    #           be the same as the +location+.
+    #
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:type], ep[:location].to_s, ep[:authenticated], ep[:api_key_required]
+        endpoint_object = Endpoint.new ep[:type], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end
@@ -149,17 +168,28 @@ module Bubbles
 
       # Define all of the endpoints as methods on RestEnvironment
       @endpoints.values.each do |endpoint|
-        endpoint_name_as_sym = endpoint.get_location_string.to_sym
+        if endpoint.name != nil
+          endpoint_name_as_sym = endpoint.name.to_sym
+        else
+          endpoint_name_as_sym = endpoint.get_location_string.to_sym
+        end
+
         if Bubbles::RestEnvironment.instance_methods(false).include? (endpoint_name_as_sym)
           Bubbles::RestEnvironment.class_exec do
             remove_method endpoint_name_as_sym
           end
         end
 
-        Bubbles::RestEnvironment.class_exec do
-          define_method(endpoint_name_as_sym) do
-            if endpoint.method == :get
-              unless endpoint.authenticated?
+        if endpoint.method == :get
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              define_method(endpoint_name_as_sym) do |auth_token|
+                RestClientResources.execute_get_authenticated self, endpoint, auth_token
+              end
+            end
+          else
+            Bubbles::RestEnvironment.class_exec do
+              define_method(endpoint_name_as_sym) do
                 RestClientResources.execute_get_unauthenticated self, endpoint
               end
             end

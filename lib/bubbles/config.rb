@@ -1,4 +1,5 @@
 require 'bubbles/rest_environment'
+require 'bubbles/endpoint'
 
 module Bubbles
   class << self

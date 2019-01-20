@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bubbles (0.0.5)
+    bubbles-rest-client (0.0.6)
       addressable (~> 2.5)
       rest-client (~> 2.0)
 
@@ -71,7 +71,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bubbles!
+  bubbles-rest-client!
   bundler (~> 1.14)
   minitest (~> 5.0)
   minitest-reporters (~> 1.1)

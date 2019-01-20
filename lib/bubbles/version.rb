@@ -1,11 +1,11 @@
 module Bubbles
   class VersionInformation
     def self.package_name
-      return 'bubbles'
+      return 'bubbles-rest-client'
     end
 
     def self.version_name
-      '0.0.5'
+      '0.0.6'
     end
 
     def self.version_code

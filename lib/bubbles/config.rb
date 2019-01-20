@@ -147,7 +147,7 @@ module Bubbles
     #
     # {Endpoint} objects are defined using two required parameters: type and location, and three optional parameters:
     # authenticated, api_key_required and name.
-    #   - type: Indicates the HTTP method used to access the endpoint. Must be one of {Endpoint::METHODS}.
+    #   - method: Indicates the HTTP method used to access the endpoint. Must be one of {Endpoint::METHODS}.
     #   - location: Indicates the path at which the {Endpoint} can be accessed on the host environment.
     #   - authenticated: (Optional) A true or false value indicating whether the {Endpoint} requires an authorization
     #                    token to access it. Defaults to false.
@@ -159,7 +159,7 @@ module Bubbles
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:type], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name]
+        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end

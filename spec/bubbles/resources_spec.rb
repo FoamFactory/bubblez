@@ -7,13 +7,13 @@ describe Bubbles::Resources do
       Bubbles.configure do |config|
         config.endpoints = [
           {
-            :type => :get,
+            :method => :get,
             :location => :version,
             :authenticated => false,
             :api_key_required => false
           },
           {
-            :type => :get,
+            :method => :get,
             :location => :students,
             :authenticated => true,
             :api_key_required => false,

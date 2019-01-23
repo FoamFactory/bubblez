@@ -10,14 +10,16 @@ describe Bubbles::Resources do
             :method => :get,
             :location => :version,
             :authenticated => false,
-            :api_key_required => false
+            :api_key_required => false,
+            :expect_json => true
           },
           {
             :method => :get,
             :location => :students,
             :authenticated => true,
             :api_key_required => false,
-            :name => :list_students
+            :name => :list_students,
+            :expect_json => true
           }
         ]
 
@@ -50,7 +52,7 @@ describe Bubbles::Resources do
             resources = Bubbles::Resources.new
             local_env = resources.local_environment
 
-            response = JSON.parse(local_env.version, object_class: OpenStruct)
+            response = local_env.version
             expect(response).to_not be_nil
             expect(response.name).to eq('Sinking Moon API')
             expect(response.versionName).to eq('2.0.0')
@@ -70,7 +72,7 @@ describe Bubbles::Resources do
             resources = Bubbles::Resources.new
             local_env = resources.local_environment
 
-            response = JSON.parse(local_env.list_students(auth_token), object_class: OpenStruct)
+            response = local_env.list_students(auth_token)
             expect(response).to_not be_nil
 
             students = response.students

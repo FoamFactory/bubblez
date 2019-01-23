@@ -63,7 +63,11 @@ module Bubbles
         return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
 
-      response
+      unless endpoint.expect_json
+        return response
+      end
+
+      return JSON.parse(response, object_class: OpenStruct)
     end
 
     ##
@@ -99,7 +103,11 @@ module Bubbles
         return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
 
-      response
+      unless endpoint.expect_json
+        return response
+      end
+
+      return JSON.parse(response, object_class: OpenStruct)
     end
 
     ##

@@ -97,7 +97,8 @@ describe Bubbles::Resources do
           config.local_environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
-            :port => '1234'
+            :port => '1234',
+            :api_key => 'e4150c01953cd24ac18084b1cb0ddcb3766de03a'
           }
         end
       end
@@ -106,13 +107,12 @@ describe Bubbles::Resources do
         context 'with a valid username and password' do
           it 'should successfully login' do
             VCR.use_cassette('login') do
-              api_key = 'e4150c01953cd24ac18084b1cb0ddcb3766de03a'
               resources = Bubbles::Resources.new
               local_env = resources.local_environment
 
 
-              login_object = local_env.login api_key, { :username => 'scottj', :password => '123qwe456' }
-              # expect(response).to have_http_status(:ok)
+              data = { :username => 'scottj', :password => '123qwe456' }
+              login_object = local_env.login data
 
               expect(login_object.id).to eq(1)
               expect(login_object.name).to eq('Scott Johnson')

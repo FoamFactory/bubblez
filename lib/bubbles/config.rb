@@ -206,8 +206,7 @@ module Bubbles
           if endpoint.authenticated?
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |auth_token, data|
-                raise 'Authenticated POST requests are not currently implemented'
-                # RestClientResources.execute_post_authenticated self, endpoint, auth_token, data
+                RestClientResources.execute_post_authenticated self, endpoint, auth_token, data
               end
             end
           else

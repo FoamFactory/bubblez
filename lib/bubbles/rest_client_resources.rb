@@ -100,7 +100,7 @@ module Bubbles
                                     })
         end
       rescue Errno::ECONNREFUSED
-        return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
+        response = {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
 
       unless endpoint.expect_json
@@ -147,7 +147,57 @@ module Bubbles
           response = RestClient.post url.to_s, data.to_json, additional_headers
         end
       rescue Errno::ECONNREFUSED
-        return { :error => 'Unable to connect to host ' + env.host.to_s + ":" + env.port.to_s }.to_json
+        response = { :error => 'Unable to connect to host ' + env.host.to_s + ":" + env.port.to_s }.to_json
+      end
+
+      unless endpoint.expect_json
+        return response
+      end
+
+      JSON.parse(response, object_class: OpenStruct)
+    end
+
+    ##
+    # Execute a POST request with authentication in the form of an authorization token.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token retrieved during some former authentication call. Will be
+    #        placed into a Authorization header.
+    # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
+    #
+    def self.execute_post_authenticated(env, endpoint, auth_token, data)
+      if auth_token.nil?
+        raise 'Cannot execute an authenticated POST request with no auth_token'
+      end
+
+      if data.nil?
+        raise 'Cannot execute POST command with an empty data set'
+      end
+
+      url = endpoint.get_expanded_url env
+
+      begin
+        headers = {
+          :content_type => :json,
+          :authorization => 'Bearer ' + auth_token
+        }
+
+        if endpoint.expect_json
+          headers[:accept] = :json
+        end
+
+        if env.scheme == 'https'
+          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .post(data.to_json, headers)
+
+        else
+          response = RestClient.post(url.to_s, data.to_json, headers)
+        end
+      rescue Errno::ECONNREFUSED
+        response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
       end
 
       unless endpoint.expect_json

@@ -1,5 +1,6 @@
 require 'bubbles/rest_environment'
 require 'bubbles/endpoint'
+require 'base64'
 
 module Bubbles
   class << self
@@ -160,7 +161,7 @@ module Bubbles
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:expect_json]
+        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:expect_json], ep[:encode_authorization]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end
@@ -192,6 +193,51 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do
                 RestClientResources.execute_get_unauthenticated self, endpoint
+              end
+            end
+          end
+        elsif endpoint.method == :post
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              define_method(endpoint_name_as_sym) do |auth_token, data|
+                raise 'Authenticated POST requests are not currently implemented'
+                # RestClientResources.execute_post_authenticated self, endpoint, auth_token, data
+              end
+            end
+          else
+            if endpoint.api_key_required?
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |api_key, data|
+                  additional_headers = {}
+                  if endpoint.encode_authorization_header?
+                    count = 0
+                    auth_value = ''
+                    endpoint.encode_authorization.each { |auth_key|
+                      if data[auth_key]
+                        if count > 0
+                          auth_value = auth_value + ':' + data[auth_key]
+                        else
+                          auth_value = data[auth_key]
+                        end
+
+                        count = count + 1
+
+                        data.delete(auth_key)
+                      end
+                    }
+
+                    additional_headers[:Authorization] = 'Basic ' + Base64.strict_encode64(auth_value)
+                  end
+
+                  RestClientResources.execute_post_unauthenticated_with_api_key self, endpoint, api_key, data, additional_headers
+                end
+              end
+            else
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |data|
+                  raise 'Unauthenticated POST requests without an API key are not currently implemented'
+                  # RestClientResources.execute_post_unauthenticated self, endpoint, data
+                end
               end
             end
           end

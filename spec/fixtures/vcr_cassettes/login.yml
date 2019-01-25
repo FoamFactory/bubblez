@@ -21,6 +21,8 @@ http_interactions:
       - '2'
       Host:
       - 127.0.0.1:1234
+      Content-Type:
+      - application/json
   response:
     status:
       code: 200

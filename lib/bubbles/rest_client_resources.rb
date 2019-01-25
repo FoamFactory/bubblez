@@ -44,30 +44,14 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_get_unauthenticated(env, endpoint)
-      url = endpoint.get_expanded_url env
-
-      begin
+      execute_rest_call(env, endpoint, nil, nil, nil) do |env, url, data, headers|
         if env.scheme == 'https'
-          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .get({
-                   :content_type => :json,
-                   :accept => :json
-                 })
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .get(headers)
         else
-          response = RestClient.get(url.to_s,
-                                    {
-                                      :content_type => :json
-                                    })
+          next RestClient.get(url.to_s, headers)
         end
-      rescue Errno::ECONNREFUSED
-        return {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
-
-      unless endpoint.expect_json
-        return response
-      end
-
-      return JSON.parse(response, object_class: OpenStruct)
     end
 
     ##
@@ -82,32 +66,14 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_get_authenticated(env, endpoint, auth_token)
-      url = endpoint.get_expanded_url env
-
-      begin
+      execute_rest_call(env, endpoint, nil, auth_token, nil) do |env, url, data, headers|
         if env.scheme == 'https'
-          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .get({
-                   :authorization => 'Bearer ' + auth_token,
-                   :content_type => :json,
-                   :accept => :json
-                 })
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .get(headers)
         else
-          response = RestClient.get(url.to_s,
-                                    {
-                                      :authorization => 'Bearer ' + auth_token,
-                                      :content_type => :json
-                                    })
+          next RestClient.get(url.to_s, headers)
         end
-      rescue Errno::ECONNREFUSED
-        response = {:error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s}.to_json
       end
-
-      unless endpoint.expect_json
-        return response
-      end
-
-      return JSON.parse(response, object_class: OpenStruct)
     end
 
     ##
@@ -127,34 +93,20 @@ module Bubbles
         'X-Api-Key' => api_key
       }
 
-      url = endpoint.get_expanded_url env
-
-      if endpoint.expect_json
-        additional_headers[:accept] = 'application/json'
-      end
-
       unless headers.nil?
         headers.each { |nextHeader|
           additional_headers[nextHeader[0]] = nextHeader[1]
         }
       end
 
-      begin
+      execute_rest_call(env, endpoint, data, nil, additional_headers) do |env, url, data, headers|
         if env.scheme == 'https'
-          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .post(data.to_json, additional_headers)
         else
-          response = RestClient.post url.to_s, data.to_json, additional_headers
+          next RestClient.post url.to_s, data.to_json, additional_headers
         end
-      rescue Errno::ECONNREFUSED
-        response = { :error => 'Unable to connect to host ' + env.host.to_s + ":" + env.port.to_s }.to_json
       end
-
-      unless endpoint.expect_json
-        return response
-      end
-
-      JSON.parse(response, object_class: OpenStruct)
     end
 
     ##
@@ -169,42 +121,15 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
     def self.execute_post_authenticated(env, endpoint, auth_token, data)
-      if auth_token.nil?
-        raise 'Cannot execute an authenticated POST request with no auth_token'
-      end
-
-      if data.nil?
-        raise 'Cannot execute POST command with an empty data set'
-      end
-
-      url = endpoint.get_expanded_url env
-
-      begin
-        headers = {
-          :content_type => :json,
-          :authorization => 'Bearer ' + auth_token
-        }
-
-        if endpoint.expect_json
-          headers[:accept] = :json
-        end
-
+      return execute_rest_call(env, endpoint, data, auth_token, nil) do |env, url, data, headers|
         if env.scheme == 'https'
-          response = RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .post(data.to_json, headers)
 
         else
-          response = RestClient.post(url.to_s, data.to_json, headers)
+          next RestClient.post(url.to_s, data.to_json, headers)
         end
-      rescue Errno::ECONNREFUSED
-        response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
       end
-
-      unless endpoint.expect_json
-        return response
-      end
-
-      JSON.parse(response, object_class: OpenStruct)
     end
 
     ##
@@ -224,6 +149,66 @@ module Bubbles
 
 
       self.local_environment
+    end
+
+    private
+
+    ##
+    # Execute a REST call to the API.
+    #
+    # This is the workhorse of the +RestClientResources+ class. It performs the necessary setup of headers and the HTTP
+    # request, and then executes the remote API call.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to make this API call. Must not be +nil+.
+    # @param [Endpoint] The +Endpoint+ to call. Must not be +nil+.
+    # @param [Hash] The body of the request. May be +nil+ or empty for requests not requiring a body.
+    # @param [String] auth_token The authorization token used to authenticate to the API. May be +nil+ for requests that
+    #        don't require authentication.
+    # @param [Hash] headers A +Hash+ of key-value pairs to add to the HTTP request as headers. May be +nil+ if none are
+    #        required.
+    # @param [Block] block The block to execute that actually performs the HTTP request.
+    #
+    # @return [RestClient::Response|OpenStruct] If "expect_json" is enabled for the +Endpoint+ being executed, then this
+    #         will return an +OpenStruct+; otherwise, the +Response+ will be returned.
+    #
+    def self.execute_rest_call(env, endpoint, data, auth_token, headers, &block)
+      unless block
+        raise ArgumentError('This method requires that a block is given.')
+      end
+
+      url = endpoint.get_expanded_url env
+
+      begin
+        if data == nil
+          data = {}
+        end
+
+        if headers == nil
+          headers = {
+            :content_type => :json
+          }
+        else
+          headers[:content_type] = :json
+        end
+
+        unless auth_token == nil
+          headers[:authorization] = 'Bearer ' + auth_token
+        end
+
+        if endpoint.expect_json
+          headers[:accept] = :json
+        end
+
+        response = block.call(env, url, data, headers)
+      rescue Errno::ECONNREFUSED
+        response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
+      end
+
+      unless endpoint.expect_json
+        return response
+      end
+
+      JSON.parse(response, object_class: OpenStruct)
     end
   end
 end

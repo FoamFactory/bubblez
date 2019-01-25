@@ -1,5 +1,6 @@
 require 'bubbles/rest_environment'
 require 'bubbles/endpoint'
+require 'base64'
 
 module Bubbles
   class << self
@@ -41,14 +42,17 @@ module Bubbles
       @local_environment_scheme = 'http'
       @local_environment_host = '127.0.0.1'
       @local_environment_port = '1234'
+      @local_environment_api_key = nil
 
       @staging_environment_scheme = 'http'
       @staging_environment_host = '127.0.0.1'
       @staging_environment_port = '1234'
+      @staging_environment_api_key = nil
 
       @production_environment_scheme = 'http'
       @production_environment_host = '127.0.0.1'
       @production_environment_port = '1234'
+      @production_environment_api_key = nil
 
       @endpoints = Hash.new
     end
@@ -57,7 +61,7 @@ module Bubbles
     # Retrieve the local {RestEnvironment} object defined as part of this Configuration.
     #
     def local_environment
-      RestEnvironment.new(@local_environment_scheme, @local_environment_host, @local_environment_port)
+      RestEnvironment.new(@local_environment_scheme, @local_environment_host, @local_environment_port, @local_environment_api_key)
     end
 
     ##
@@ -78,13 +82,14 @@ module Bubbles
       @local_environment_scheme = env[:scheme]
       @local_environment_host = env[:host]
       @local_environment_port = env[:port]
+      @local_environment_api_key = env[:api_key]
     end
 
     ##
     # Retrieve the staging {RestEnvironment} object defined as part of this Configuration.
     #
     def staging_environment
-      RestEnvironment.new(@staging_environment_scheme, @staging_environment_host, @staging_environment_port)
+      RestEnvironment.new(@staging_environment_scheme, @staging_environment_host, @staging_environment_port, @staging_environment_api_key)
     end
 
     ##
@@ -105,13 +110,14 @@ module Bubbles
       @staging_environment_scheme = env[:scheme]
       @staging_environment_host = env[:host]
       @staging_environment_port = env[:port]
+      @staging_environment_api_key = env[:api_key]
     end
 
     ##
     # Retrieve the production {RestEnvironment} object defined as part of this Configuration.
     #
     def production_environment
-      RestEnvironment.new(@production_environment_scheme, @production_environment_host, @production_environment_port)
+      RestEnvironment.new(@production_environment_scheme, @production_environment_host, @production_environment_port, @production_environment_api_key)
     end
 
     ##
@@ -124,7 +130,7 @@ module Bubbles
     #      config.production_environment = {
     #         :scheme => 'https',
     #         :host => 'api.somehost.com',
-    #         :port => '443'
+    #         :port => '443',
     #      }
     #    end
     #
@@ -132,6 +138,7 @@ module Bubbles
       @production_environment_scheme = env[:scheme]
       @production_environment_host = env[:host]
       @production_environment_port = env[:port]
+      @production_environment_api_key = env[:api_key]
     end
 
     ##
@@ -160,7 +167,7 @@ module Bubbles
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name]
+        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:expect_json], ep[:encode_authorization]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end
@@ -192,6 +199,49 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do
                 RestClientResources.execute_get_unauthenticated self, endpoint
+              end
+            end
+          end
+        elsif endpoint.method == :post
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              define_method(endpoint_name_as_sym) do |auth_token, data|
+                RestClientResources.execute_post_authenticated self, endpoint, auth_token, data
+              end
+            end
+          else
+            if endpoint.api_key_required?
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |data|
+                  additional_headers = {}
+                  if endpoint.encode_authorization_header?
+                    count = 0
+                    auth_value = ''
+                    endpoint.encode_authorization.each { |auth_key|
+                      if data[auth_key]
+                        if count > 0
+                          auth_value = auth_value + ':' + data[auth_key]
+                        else
+                          auth_value = data[auth_key]
+                        end
+
+                        count = count + 1
+
+                        data.delete(auth_key)
+                      end
+                    }
+
+                    additional_headers[:Authorization] = 'Basic ' + Base64.strict_encode64(auth_value)
+                  end
+
+                  RestClientResources.execute_post_with_api_key self, endpoint, self.api_key, data, additional_headers
+                end
+              end
+            else
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |data|
+                  raise 'Unauthenticated POST requests without an API key are not allowed'
+                end
               end
             end
           end

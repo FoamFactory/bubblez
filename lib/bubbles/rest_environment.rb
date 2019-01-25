@@ -2,16 +2,17 @@ require 'addressable/template'
 
 module Bubbles
   class RestEnvironment
-    attr_accessor :scheme, :host, :port
+    attr_accessor :scheme, :host, :port, :api_key
 
     ##
     # Construct a new instance of +RestEnvironment+.
     #
-    # @param scheme The scheme to use for communicating with the host. Currently, http and https are supported.
-    # @param host The host to communicate with.
-    # @param port The port on which the communication channel should operate.
+    # @param [String] scheme The scheme to use for communicating with the host. Currently, http and https are supported.
+    # @param [String] host The host to communicate with.
+    # @param [Integer] port The port on which the communication channel should operate.
+    # @param [String] api_key (Optional) The API key to use to identify your client with the API. Defaults to +nil+.
     #
-    def initialize(scheme='https', host='api.foamfactory.com', port=443)
+    def initialize(scheme='https', host='api.foamfactory.com', port=443, api_key=nil)
       @scheme = scheme
       @port = port
 
@@ -20,49 +21,7 @@ module Bubbles
       end
 
       @host = host
+      @api_key = api_key
     end
-
-    ##
-    # Add an unauthenticated endpoint to this +RestEnvironment+.
-    #
-    # @param type The type of the endpoint. Must be one of [:get].
-    # @param endpoint The path to the endpoint, without the leading slash.
-    #
-    # def add_unauthenticated_endpoint(type, endpoint)
-    #   if type == :get
-    #     unless endpoint.include? "/"
-    #       @endpoints[endpoint] = get_url.expand(scheme: @scheme, environment_host: @host, port: @port, endpoint: endpoint).to_s
-    #       return
-    #     end
-    #
-    #     @endpoints[endpoint] = get_url_with_special_endpoint.expand(scheme: @scheme, environment_host: @host, port: @port, endpoint: endpoint).to_s
-    #   end
-    # end
-
-    # def get_endpoint_string(endpoint)
-    #   @endpoints[endpoint]
-    # end
-
-    def get_base_url
-
-    end
-
-    private
-      ##
-      # Get an addressable template for a 'special' endpoint (one containing '/' characters)
-      #
-      # @param endpoint The endpoint to get an addressable URL to.
-      #
-      # @returns The ::Addressable::Template without the endpoint parameter encoded in the URI.
-      #
-      # def get_url_with_special_endpoint(endpoint)
-      #   special_url_string = '{scheme}://{environment_host}/'
-      #   unless @port == 80 || @port == 443
-      #     special_url_string = '{scheme}://{environment_host}:{port}/'
-      #   end
-      #
-      #   special_url_string = special_url_string + endpoint
-      #   ::Addressable::Template.new(special_url_string)
-      # end
   end
 end

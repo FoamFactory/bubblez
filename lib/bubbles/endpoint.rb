@@ -9,21 +9,37 @@ module Bubbles
   # Endpoint can be used with any +RestEnvironment+.
   #
   class Endpoint
-    ## Controls the method used to access the endpoint. Must be one of {Endpoint::Methods}.
+    ##
+    # Controls the method used to access the endpoint. Must be one of {Endpoint::Methods}.
     # @return [Symbol] the method used to access the endpoint. Will always be one of the symbols defined in {Endpoint::METHODS}.
     attr_accessor :method
 
-    ## Controls the location, relative to the web root of the host, used to access the endpoint.
+    ##
+    # Controls the location, relative to the web root of the host, used to access the endpoint.
     # @return [String] the location relative to the web root of the host used to access the endpoint
     attr_accessor :location
 
-    ## Controls whether authentication is required to access this endpoint. Defaults to false.
+    ##
+    # Controls whether authentication is required to access this endpoint. Defaults to false.
     # @return [Boolean] true, if authentication is required to access this endpoint; false, otherwise.
     attr_accessor :authentication_required
 
-    ## Controls whether an API key is required to access this endpoint. Defaults to false.
+    ##
+    # Controls whether an API key is required to access this endpoint. Defaults to false.
     # @return [Boolean] true, if an API key is required to access this endpoint; false, otherwise.
     attr_accessor :api_key_required
+
+    ##
+    # Controls whether JSON is the expected form of output from this +Endpoint+.
+    # @return [Boolean] true, if JSON is the expected form of output from this +Endpoint+; false, otherwise.
+    attr_accessor :expect_json
+
+    ##
+    # Controls which data values should be encoded as part of an Authorization header. They will be separated with a
+    # colon in the order they are received and Base64-encoded.
+    # @return [Array] An array of +Symbol+s specifying which of the data attributes should be Base64-encoded as part of
+    #         an Authorization header. The values will be encoded in the order they are received.
+    attr_accessor :encode_authorization
 
     ## A template for specifying the complete URL for endpoints.
     API_URL = ::Addressable::Template.new("{scheme}://{host}/{endpoint}")
@@ -46,13 +62,16 @@ module Bubbles
     #        +false+.
     # @param [String] name An optional name which will be given to the method that will execute this {Endpoint} within
     #        the context of a {RestClientResources} object.
+    # @param [Boolean] expect_json Whether or not to expect a JSON response from this +Endpoint+. Defaults to +false+.
     #
-    def initialize(method, location, auth_required = false, api_key_required = false, name = nil)
+    def initialize(method, location, auth_required = false, api_key_required = false, name = nil, expect_json = false, encode_authorization = {})
       @method = method
       @location = location
       @auth_required = auth_required
       @api_key_required = api_key_required
       @name = name
+      @expect_json = expect_json
+      @encode_authorization = encode_authorization
 
       # Strip the leading slash from the endpoint location, if it's there
       if @location.to_s[0] == '/'
@@ -150,6 +169,14 @@ module Bubbles
     end
 
     ##
+    # Determine if an API key is required
+    #
+    # @return [Boolean] true, if an API key is required to make the request; false, otherwise.
+    def api_key_required?
+      api_key_required
+    end
+
+    ##
     # Set the name of the method on {RestClientResources} used to access this {Endpoint}.
     #
     # @param [String] name The name of the method used to access this {Endpoint}.
@@ -176,6 +203,16 @@ module Bubbles
     #
     def name?
       @name == nil
+    end
+
+    ##
+    # Whether or not an Authorization header should be Base64-encoded.
+    #
+    # @return [Boolean] true, if attributes from the data array have been specified to be Base64-encoded as part of an
+    #         Authorization header; false, otherwise.
+    #
+    def encode_authorization_header?
+      @encode_authorization.length > 0
     end
   end
 end

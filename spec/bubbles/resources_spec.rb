@@ -111,92 +111,126 @@ describe Bubbles::Resources do
       end
 
       context 'when using the local environment' do
-        context 'with a valid username and password' do
-          it 'should successfully login' do
+        context 'with a valid authorization token' do
+          before do
+            @resources = Bubbles::Resources.new
+            @local_env = @resources.local_environment
+
             VCR.use_cassette('login') do
+              data = { :username => 'scottj', :password => '123qwe456' }
+              login_object = @local_env.login data
+
+              @auth_token = login_object.auth_token
+            end
+          end
+
+          context 'when the host is not available' do
+            it 'should respond with an error message' do
+              # NOTE: The following cassette file should NOT exist.
+              VCR.use_cassette('create_student_unable_to_connect') do
+                data = {
+                  :name => 'Scott Klein',
+                  :address => '871 Anywhere St. #109',
+                  :city => 'Minneapolis',
+                  :state => 'MN',
+                  :zip => '55412',
+                  :phone => '(612) 761-8172',
+                  :email => 'scotty.kleiny@gmail.com',
+                  :preferredContact => 'text',
+                  :emergencyContactName => 'Nancy Klein',
+                  :emergencyContactPhone => '(701) 762-5442',
+                  :rank => 'white',
+                  :joinDate => Date.today,
+                  :lastAdvancementDate => Date.today,
+                  :waiverSigned => true
+                }
+
+                student = @local_env.create_student @auth_token, data
+
+                expect(student).to_not be_nil
+                expect(student.error).to eq('Unable to connect to host 127.0.0.1:1234')
+              end
+            end
+          end
+
+          context 'when the host response is available' do
+            it 'should respond with the correct API response' do
+              VCR.use_cassette('post_student_authenticated') do
+                data = {
+                  :name => 'Scott Klein',
+                  :address => '871 Anywhere St. #109',
+                  :city => 'Minneapolis',
+                  :state => 'MN',
+                  :zip => '55412',
+                  :phone => '(612) 761-8172',
+                  :email => 'scotty.kleiny@gmail.com',
+                  :preferredContact => 'text',
+                  :emergencyContactName => 'Nancy Klein',
+                  :emergencyContactPhone => '(701) 762-5442',
+                  :rank => 'white',
+                  :joinDate => Date.today,
+                  :lastAdvancementDate => Date.today,
+                  :waiverSigned => true
+                }
+
+                student = @local_env.create_student @auth_token, data
+                expect(student.name).to eq('Scott Klein')
+                expect(student.address).to eq('871 Anywhere St. #109')
+                expect(student.waiverSigned).to be_truthy
+              end
+            end
+          end
+        end
+
+        context 'with a valid API key' do
+          context 'with a valid username and password' do
+            it 'should successfully login' do
+              VCR.use_cassette('login') do
+                resources = Bubbles::Resources.new
+                local_env = resources.local_environment
+
+
+                data = { :username => 'scottj', :password => '123qwe456' }
+                login_object = local_env.login data
+
+                expect(login_object.id).to eq(1)
+                expect(login_object.name).to eq('Scott Johnson')
+                expect(login_object.username).to eq('scottj')
+                expect(login_object.email).to eq('scottj@sinkingmoon.com')
+                expect(login_object.auth_token).to_not be_nil
+              end
+            end
+          end
+        end
+
+        context 'with neither an API key nor an authorization token' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                {
+                  :method => :post,
+                  :location => :dummy,
+                  :authenticated => false,
+                  :api_key_required => false,
+                  :expect_json => true
+                }
+              ]
+
+              config.local_environment = {
+                :scheme => 'http',
+                :host => '127.0.0.1',
+                :port => '1234'
+              }
+            end
+          end
+
+          it 'should report an error that completely unauthenticated POST requests are not supported' do
+            VCR.use_cassette('unauthenticated_post') do
               resources = Bubbles::Resources.new
               local_env = resources.local_environment
 
-
-              data = { :username => 'scottj', :password => '123qwe456' }
-              login_object = local_env.login data
-
-              expect(login_object.id).to eq(1)
-              expect(login_object.name).to eq('Scott Johnson')
-              expect(login_object.username).to eq('scottj')
-              expect(login_object.email).to eq('scottj@sinkingmoon.com')
-              expect(login_object.auth_token).to_not be_nil
-            end
-          end
-        end
-      end
-
-      context 'with a valid authorization token' do
-        before do
-          @resources = Bubbles::Resources.new
-          @local_env = @resources.local_environment
-
-          VCR.use_cassette('login') do
-            data = { :username => 'scottj', :password => '123qwe456' }
-            login_object = @local_env.login data
-
-            @auth_token = login_object.auth_token
-          end
-        end
-
-        context 'when the host is not available' do
-          it 'should respond with an error message' do
-            # NOTE: The following cassette file should NOT exist.
-            VCR.use_cassette('create_student_unable_to_connect') do
-              data = {
-                :name => 'Scott Klein',
-                :address => '871 Anywhere St. #109',
-                :city => 'Minneapolis',
-                :state => 'MN',
-                :zip => '55412',
-                :phone => '(612) 761-8172',
-                :email => 'scotty.kleiny@gmail.com',
-                :preferredContact => 'text',
-                :emergencyContactName => 'Nancy Klein',
-                :emergencyContactPhone => '(701) 762-5442',
-                :rank => 'white',
-                :joinDate => Date.today,
-                :lastAdvancementDate => Date.today,
-                :waiverSigned => true
-              }
-
-              student = @local_env.create_student @auth_token, data
-
-              expect(student).to_not be_nil
-              expect(student.error).to eq('Unable to connect to host 127.0.0.1:1234')
-            end
-          end
-        end
-
-        context 'when the host response is available' do
-          it 'should respond with the correct API response' do
-            VCR.use_cassette('post_student_authenticated') do
-              data = {
-                :name => 'Scott Klein',
-                :address => '871 Anywhere St. #109',
-                :city => 'Minneapolis',
-                :state => 'MN',
-                :zip => '55412',
-                :phone => '(612) 761-8172',
-                :email => 'scotty.kleiny@gmail.com',
-                :preferredContact => 'text',
-                :emergencyContactName => 'Nancy Klein',
-                :emergencyContactPhone => '(701) 762-5442',
-                :rank => 'white',
-                :joinDate => Date.today,
-                :lastAdvancementDate => Date.today,
-                :waiverSigned => true
-              }
-
-              student = @local_env.create_student @auth_token, data
-              expect(student.name).to eq('Scott Klein')
-              expect(student.address).to eq('871 Anywhere St. #109')
-              expect(student.waiverSigned).to be_truthy
+              data = { :foo => :bar }
+              expect { local_env.dummy(data) }.to raise_error(RuntimeError, 'Unauthenticated POST requests without an API key are not allowed')
             end
           end
         end

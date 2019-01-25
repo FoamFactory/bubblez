@@ -234,14 +234,13 @@ module Bubbles
                     additional_headers[:Authorization] = 'Basic ' + Base64.strict_encode64(auth_value)
                   end
 
-                  RestClientResources.execute_post_unauthenticated_with_api_key self, endpoint, self.api_key, data, additional_headers
+                  RestClientResources.execute_post_with_api_key self, endpoint, self.api_key, data, additional_headers
                 end
               end
             else
               Bubbles::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |data|
-                  raise 'Unauthenticated POST requests without an API key are not currently implemented'
-                  # RestClientResources.execute_post_unauthenticated self, endpoint, data
+                  raise 'Unauthenticated POST requests without an API key are not allowed'
                 end
               end
             end

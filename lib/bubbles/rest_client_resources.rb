@@ -88,7 +88,7 @@ module Bubbles
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
-    def self.execute_post_unauthenticated_with_api_key(env, endpoint, api_key, data, headers=nil)
+    def self.execute_post_with_api_key(env, endpoint, api_key, data, headers=nil)
       additional_headers = {
         'X-Api-Key' => api_key
       }

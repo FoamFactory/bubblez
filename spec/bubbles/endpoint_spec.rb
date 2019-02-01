@@ -1,38 +1,68 @@
 require 'bubbles/endpoint'
 
 describe Bubbles::Endpoint do
-  it 'should allow the creation of an endpoint with a type of GET and a location of version' do
-    ep = Bubbles::Endpoint.new(:get, 'version')
+  describe '#initialize' do
+    context 'when the method is GET' do
+      context 'when no authentication is required' do
+        it 'should create an endpoint for /version' do
+          ep = Bubbles::Endpoint.new(:get, 'version')
 
-    expect(ep.get_key_string).to eq('get-version-unauthenticated')
+          expect(ep.get_key_string).to eq('get-version-unauthenticated')
+        end
+      end
+
+      context 'when authentication is required' do
+        it 'should create a simple endpoint for /versions' do
+          ep = Bubbles::Endpoint.new(:get, 'versions', true)
+
+          expect(ep.get_key_string).to eq('get-versions-authenticated')
+        end
+
+        context 'when the endpoint contains a URI parameter' do
+          it 'should show the URI parameter in the expanded url' do
+            ep = Bubbles::Endpoint.new(:get, 'student/{id}', true)
+
+            expect(ep.uri_params).to contain_exactly(:id)
+          end
+        end
+      end
+    end
+
+    context 'when the method is POST' do
+      context 'when no authentication is required' do
+        context 'when an API key is required' do
+          it 'should create an endpoint for /login' do
+            ep = Bubbles::Endpoint.new(:post, 'login', false, true)
+
+            expect(ep.get_key_string).to eq('post-login-unauthenticated-with-api-key')
+          end
+        end
+      end
+    end
   end
 
-  it 'should allow the creation of a new endpoint with a type of POST and a location of login that requires no authentication, but an API key' do
-    ep = Bubbles::Endpoint.new(:post, 'login', false, true)
+  describe '#is_complex' do
+    context 'after having created an endpoint at /versions/new' do
+      it 'should show that the endpoint is complex' do
+        ep = Bubbles::Endpoint.new(:get, '/versions/new')
 
-    expect(ep.get_key_string).to eq('post-login-unauthenticated-with-api-key')
+        expect(ep.location).to eq('versions/new')
+        expect(ep.is_complex?).to eq(true)
+      end
+    end
   end
 
-  it 'should allow the creation of a new endpoint that requires authentication, has a type of get and a location of versions' do
-    ep = Bubbles::Endpoint.new(:get, 'versions', true)
+  describe '#get_location' do
+    context 'with an endpoint that is complex' do
+      it 'should replace all instances of / with _ in the location string' do
+        ep = Bubbles::Endpoint.new :get, 'versions'
 
-    expect(ep.get_key_string).to eq('get-versions-authenticated')
-  end
+        expect(ep.get_location_string).to eq('versions')
 
-  it 'should show that a location of "/versions/new" is a complex endpoint' do
-    ep = Bubbles::Endpoint.new(:get, '/versions/new')
+        ep = Bubbles::Endpoint.new :get, '/management/clients/new'
 
-    expect(ep.location).to eq('versions/new')
-    expect(ep.is_complex?).to eq(true)
-  end
-
-  it 'should replace all instances of "/" in the location with "_" when get_location_string is called' do
-    ep = Bubbles::Endpoint.new :get, 'versions'
-
-    expect(ep.get_location_string).to eq('versions')
-
-    ep = Bubbles::Endpoint.new :get, '/management/clients/new'
-
-    expect(ep.get_location_string).to eq('management_clients_new')
+        expect(ep.get_location_string).to eq('management_clients_new')
+      end
+    end
   end
 end

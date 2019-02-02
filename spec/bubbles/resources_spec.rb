@@ -253,6 +253,7 @@ describe Bubbles::Resources do
           @resources = Bubbles::Resources.new
           @local_env = @resources.local_environment
         end
+
         context 'with a valid authorization token' do
           before do
             @auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
@@ -263,6 +264,112 @@ describe Bubbles::Resources do
               response = @local_env.delete_student @auth_token, {:id => 2}
 
               expect(response.success).to eq(true)
+            end
+          end
+        end
+      end
+    end
+
+    context 'accessed with a PATCH request' do
+      before do
+        Bubbles.configure do |config|
+          config.endpoints = [
+            {
+              :method => :patch,
+              :location => 'students/{id}',
+              :authenticated => true,
+              :expect_json => true,
+              :name => 'update_student'
+            }
+          ]
+
+          config.local_environment = {
+            :scheme => 'http',
+            :host => '127.0.0.1',
+            :port => '1234'
+          }
+        end
+      end
+
+      context 'when using the local environment' do
+
+        before do
+          @resources = Bubbles::Resources.new
+          @local_env = @resources.local_environment
+        end
+
+        context 'with a valid authorization token' do
+
+          before do
+            @auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
+          end
+
+          it 'should successfully update the student record' do
+            VCR.use_cassette('patch_update_student') do
+              response = @local_env.update_student @auth_token, {:id => 3}, {:student => { :email => 'mike_morib@gmail.com' } }
+
+              expect(response.id).to eq(3)
+              expect(response.name).to eq('Michael Moribsu')
+              expect(response.address).to eq('123 Anywhere St.')
+              expect(response.city).to eq('Onetown')
+              expect(response.state).to eq('MN')
+              expect(response.zip).to eq('55081')
+              expect(response.phone).to eq('5551239045')
+              expect(response.emergencyContactPhone).to eq('76519281234')
+              expect(response.emergencyContactName).to eq('Katie Moribsu')
+            end
+          end
+        end
+      end
+    end
+
+    context 'accessed with a PUT request' do
+      before do
+        Bubbles.configure do |config|
+          config.endpoints = [
+            {
+              :method => :put,
+              :location => 'students/{id}',
+              :authenticated => true,
+              :expect_json => true,
+              :name => 'update_student'
+            }
+          ]
+
+          config.local_environment = {
+            :scheme => 'http',
+            :host => '127.0.0.1',
+            :port => '1234'
+          }
+        end
+      end
+
+      context 'when using the local environment' do
+
+        before do
+          @resources = Bubbles::Resources.new
+          @local_env = @resources.local_environment
+        end
+
+        context 'with a valid authorization token' do
+
+          before do
+            @auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
+          end
+
+          it 'should successfully update the student record' do
+            VCR.use_cassette('put_update_student') do
+              response = @local_env.update_student @auth_token, {:id => 3}, {:student => { :email => 'mike_morib@gmail.com' } }
+
+              expect(response.id).to eq(3)
+              expect(response.name).to eq('Michael Moribsu')
+              expect(response.address).to eq('123 Anywhere St.')
+              expect(response.city).to eq('Onetown')
+              expect(response.state).to eq('MN')
+              expect(response.zip).to eq('55081')
+              expect(response.phone).to eq('5551239045')
+              expect(response.emergencyContactPhone).to eq('76519281234')
+              expect(response.emergencyContactName).to eq('Katie Moribsu')
             end
           end
         end

@@ -273,6 +273,48 @@ module Bubbles
               # end
             # end
           end
+        elsif endpoint.method == :patch
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
+                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, uri_params, data
+                end
+              else
+                define_method(endpoint_name_as_sym) do |auth_token, data|
+                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, nil, data
+                end
+              end
+            end
+          else
+            raise 'Unauthenticated PATCH requests are not implemented'
+            # Bubbles::RestEnvironment.class_exec do
+            # define_method(endpoint_name_as_sym) do
+            #   RestClientResources.execute_delete_unauthenticated self, endpoint
+            # end
+            # end
+          end
+        elsif endpoint.method == :put
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
+                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, uri_params, data
+                end
+              else
+                define_method(endpoint_name_as_sym) do |auth_token, data|
+                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, nil, data
+                end
+              end
+            end
+          else
+            raise 'Unauthenticated PUT requests are not implemented'
+            # Bubbles::RestEnvironment.class_exec do
+            # define_method(endpoint_name_as_sym) do
+            #   RestClientResources.execute_delete_unauthenticated self, endpoint
+            # end
+            # end
+          end
         end
       end
     end

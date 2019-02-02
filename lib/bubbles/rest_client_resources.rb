@@ -132,6 +132,30 @@ module Bubbles
       end
     end
 
+    def self.execute_patch_authenticated(env, endpoint, auth_token, uri_params, data)
+      return execute_rest_call(env, endpoint, data, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .patch(data.to_json, headers)
+
+        else
+          next RestClient.patch(url.to_s, data.to_json, headers)
+        end
+      end
+    end
+
+    def self.execute_put_authenticated(env, endpoint, auth_token, uri_params, data)
+      return execute_rest_call(env, endpoint, data, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .put(data.to_json, headers)
+
+        else
+          next RestClient.put(url.to_s, data.to_json, headers)
+        end
+      end
+    end
+
     def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params)
       execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'

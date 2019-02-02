@@ -1,0 +1,48 @@
+---
+http_interactions:
+- request:
+    method: patch
+    uri: http://127.0.0.1:1234/students/3
+    body:
+      encoding: UTF-8
+      string: '{"student":{"email":"mike_morib@gmail.com"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin16.1.0 x86_64) ruby/2.4.0p0
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
+      Content-Length:
+      - '44'
+      Host:
+      - 127.0.0.1:1234
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Etag:
+      - W/"8951250ecf4500dcd93390871f2f2b0c"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - c6dee383-8feb-4df1-adc4-663334dcc488
+      X-Runtime:
+      - '0.012718'
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"email":"mike_morib@gmail.com","id":3,"name":"Michael Moribsu","address":"123
+        Anywhere St.","city":"Onetown","state":"MN","zip":"55081","phone":"5551239045","preferredContact":"phone","emergencyContactName":"Katie
+        Moribsu","emergencyContactPhone":"76519281234","rank":"white","joinDate":"2017-10-15T00:00:00.000Z","lastAdvancementDate":"2017-10-15T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-15T16:58:18.092Z","updated_at":"2017-10-15T17:00:42.906Z"}'
+    http_version:
+  recorded_at: Sun, 15 Oct 2017 17:00:42 GMT
+recorded_with: VCR 3.0.3

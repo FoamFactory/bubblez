@@ -111,5 +111,137 @@ describe 'Bubbles.config' do
         end
       end
     end
+
+    context 'when setting up a PUT request' do
+      context 'that uses the local environment' do
+        context 'that is authenticated' do
+          context 'that requires URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :put,
+                    :location => 'student/{id}',
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :expect_json => true,
+                    :name => :update_student
+                  }
+                ]
+
+                config.local_environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => '8888'
+                }
+              end
+            end
+
+            it 'should create a method on RestEnvironment taking two parameters' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:update_student)).to eq(true)
+              expect(resources.local_environment.method(:update_student).arity()).to eq(3)
+            end
+          end
+
+          context 'that does not require URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :put,
+                    :location => :students,
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :expect_json => true,
+                    :name => :update_student
+                  }
+                ]
+
+                config.local_environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => '8888'
+                }
+              end
+            end
+
+            it 'should create a method on RestEnvironment taking two parameters' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:update_student)).to eq(true)
+              expect(resources.local_environment.method(:update_student).arity()).to eq(2)
+            end
+          end
+        end
+      end
+    end
+
+    context 'when setting up a PATCH request' do
+      context 'that uses the local environment' do
+        context 'that is authenticated' do
+          context 'that requires URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :patch,
+                    :location => 'student/{id}',
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :expect_json => true,
+                    :name => :update_student
+                  }
+                ]
+
+                config.local_environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => '8888'
+                }
+              end
+            end
+
+            it 'should create a method on RestEnvironment taking two parameters' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:update_student)).to eq(true)
+              expect(resources.local_environment.method(:update_student).arity()).to eq(3)
+            end
+          end
+
+          context 'that does not require URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :patch,
+                    :location => :students,
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :expect_json => true,
+                    :name => :update_student
+                  }
+                ]
+
+                config.local_environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => '8888'
+                }
+              end
+            end
+
+            it 'should create a method on RestEnvironment taking two parameters' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:update_student)).to eq(true)
+              expect(resources.local_environment.method(:update_student).arity()).to eq(2)
+            end
+          end
+        end
+      end
+    end
   end
 end

@@ -62,6 +62,7 @@ module Bubbles
     # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
     # @param [String] auth_token The authorization token to use for authentication.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
@@ -132,6 +133,18 @@ module Bubbles
       end
     end
 
+    ##
+    # Execute a PATCH request with authentication in the form of an authorization token.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token retrieved during some former authentication call. Will be
+    #        placed into a Authorization header.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
+    #
     def self.execute_patch_authenticated(env, endpoint, auth_token, uri_params, data)
       return execute_rest_call(env, endpoint, data, auth_token, nil, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
@@ -144,6 +157,18 @@ module Bubbles
       end
     end
 
+    ##
+    # Execute a PUT request with authentication in the form of an authorization token.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token retrieved during some former authentication call. Will be
+    #        placed into a Authorization header.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
+    #
     def self.execute_put_authenticated(env, endpoint, auth_token, uri_params, data)
       return execute_rest_call(env, endpoint, data, auth_token, nil, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
@@ -156,6 +181,17 @@ module Bubbles
       end
     end
 
+    ##
+    # Execute a DELETE request with authentication in the form of an authorization token.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token retrieved during some former authentication call. Will be
+    #        placed into a Authorization header.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the DELETE call.
+    #
     def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params)
       execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'

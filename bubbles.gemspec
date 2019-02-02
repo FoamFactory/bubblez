@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Bubbles::VersionInformation.version_name
   spec.date        = Date.today.strftime("%Y-%m-%d")
   spec.summary     = 'FoamFactory REST Client'
-  spec.homepage    = 'http://www.foamfactorybrewing.com'
+  spec.homepage    = 'https://github.com/FoamFactory/bubbles'
   spec.authors     = ['Scott Johnson']
   spec.email       = 'jaywir3@gmail.com'
   spec.files       = %w(lib/bubbles.rb lib/bubbles/rest_environment.rb lib/bubbles/version.rb)

@@ -21,6 +21,13 @@ describe Bubbles::Resources do
               :api_key_required => false,
               :name => :list_students,
               :expect_json => true
+            },
+            {
+              :method => :get,
+              :location => 'students/{id}',
+              :authenticated => true,
+              :name => :get_student,
+              :expect_json => true
             }
           ]
 
@@ -60,8 +67,8 @@ describe Bubbles::Resources do
       end
 
       context 'that require an authorization token' do
-        context 'when using the staging environment' do
-          it 'should be able to list students from the staging environment' do
+        context 'when using the local environment' do
+          it 'should be able to list students' do
             VCR.use_cassette('get_students_authenticated') do
               auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
               resources = Bubbles::Resources.new
@@ -74,6 +81,20 @@ describe Bubbles::Resources do
               expect(students.length).to eq(1)
               expect(students[0].name).to eq('Joe Blow')
               expect(students[0].zip).to eq('90263')
+            end
+          end
+
+          it 'should be able to retrieve a single student by id' do
+            VCR.use_cassette('get_student_by_id') do
+              auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
+
+              resources = Bubbles::Resources.new
+              local_env = resources.local_environment
+
+              student = local_env.get_student(auth_token, {:id => 2})
+              expect(student).to_not be_nil
+
+              expect(student.id).to eq(2)
             end
           end
         end
@@ -202,35 +223,46 @@ describe Bubbles::Resources do
             end
           end
         end
+      end
+    end
 
-        context 'with neither an API key nor an authorization token' do
+    context 'accessed with a DELETE request' do
+      before do
+        Bubbles.configure do |config|
+          config.endpoints = [
+            {
+              :method => :delete,
+              :location => 'students/{id}',
+              :authenticated => true,
+              :expect_json => true,
+              :name => 'delete_student'
+            }
+          ]
+
+          config.local_environment = {
+            :scheme => 'http',
+            :host => '127.0.0.1',
+            :port => '1234',
+            :api_key => 'e4150c01953cd24ac18084b1cb0ddcb3766de03a'
+          }
+        end
+      end
+
+      context 'when using the local environment' do
+        before do
+          @resources = Bubbles::Resources.new
+          @local_env = @resources.local_environment
+        end
+        context 'with a valid authorization token' do
           before do
-            Bubbles.configure do |config|
-              config.endpoints = [
-                {
-                  :method => :post,
-                  :location => :dummy,
-                  :authenticated => false,
-                  :api_key_required => false,
-                  :expect_json => true
-                }
-              ]
-
-              config.local_environment = {
-                :scheme => 'http',
-                :host => '127.0.0.1',
-                :port => '1234'
-              }
-            end
+            @auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
           end
 
-          it 'should report an error that completely unauthenticated POST requests are not supported' do
-            VCR.use_cassette('unauthenticated_post') do
-              resources = Bubbles::Resources.new
-              local_env = resources.local_environment
+          it 'should successfully delete a student' do
+            VCR.use_cassette('delete_student_by_id') do
+              response = @local_env.delete_student @auth_token, {:id => 2}
 
-              data = { :foo => :bar }
-              expect { local_env.dummy(data) }.to raise_error(RuntimeError, 'Unauthenticated POST requests without an API key are not allowed')
+              expect(response.success).to eq(true)
             end
           end
         end

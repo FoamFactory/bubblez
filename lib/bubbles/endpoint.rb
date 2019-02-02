@@ -41,6 +41,10 @@ module Bubbles
     #         an Authorization header. The values will be encoded in the order they are received.
     attr_accessor :encode_authorization
 
+    ##
+    # An array of parameters that are specified on the URI of this endpoint for each call.
+    attr_accessor :uri_params
+
     ## A template for specifying the complete URL for endpoints.
     API_URL = ::Addressable::Template.new("{scheme}://{host}/{endpoint}")
 
@@ -49,7 +53,7 @@ module Bubbles
 
 
     ## The HTTP methods supported by a rest client utilizing Bubbles.
-    METHODS = %w[get].freeze
+    METHODS = %w[get post].freeze
 
     ##
     # Construct a new instance of an Endpoint.
@@ -72,10 +76,21 @@ module Bubbles
       @name = name
       @expect_json = expect_json
       @encode_authorization = encode_authorization
+      @uri_params = []
 
       # Strip the leading slash from the endpoint location, if it's there
       if @location.to_s[0] == '/'
         @location = @location.to_s.slice(1, @location.to_s.length)
+      end
+
+      # Extract URI parameters and create symbols for them
+      # URI parameters are enclosed by curly braces '{' and '}'
+      @location.to_s.split('/').each do |uri_segment|
+
+        match_data = /\{(.*)\}/.match(uri_segment)
+        unless match_data == nil
+          @uri_params.push(match_data[1].to_sym)
+        end
       end
     end
 
@@ -120,16 +135,22 @@ module Bubbles
     #
     # @return [String] A +String+ containing the full URL to access this +Endpoint+ on the given {RestEnvironment}.
     #
-    def get_expanded_url(env)
+    def get_expanded_url(env, uri_params = {})
       url = get_base_url env
 
       if is_complex?
-        special_url_string = '{scheme}://{environment_host}/'
+        special_url_string = '{scheme}://{host}/'
         unless @port == 80 || @port == 443
-          special_url_string = '{scheme}://{environment_host}:{port}/'
+          special_url_string = '{scheme}://{host}:{port}/'
         end
 
         special_url_string = special_url_string + @location
+
+        uri_params.each do |param, value|
+          needle = "{#{param.to_s}}"
+          special_url_string = special_url_string.sub(needle, value.to_s)
+        end
+
         url = ::Addressable::Template.new(special_url_string)
 
         return url.expand(scheme: env.scheme, host: env.host, port: env.port)
@@ -213,6 +234,10 @@ module Bubbles
     #
     def encode_authorization_header?
       @encode_authorization.length > 0
+    end
+
+    def has_uri_params?
+      !@uri_params.empty?
     end
   end
 end

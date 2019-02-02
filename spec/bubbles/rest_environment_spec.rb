@@ -8,13 +8,6 @@ describe Bubbles::RestEnvironment do
         config.endpoints = [
           {
             :method => :get,
-            :location => :version,
-            :authenticated => false,
-            :api_key_required => false,
-            :expect_json => true
-          },
-          {
-            :method => :get,
             :location => :students,
             :authenticated => true,
             :api_key_required => false,

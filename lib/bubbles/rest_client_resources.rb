@@ -65,8 +65,8 @@ module Bubbles
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_authenticated(env, endpoint, auth_token)
-      execute_rest_call(env, endpoint, nil, auth_token, nil) do |env, url, data, headers|
+    def self.execute_get_authenticated(env, endpoint, auth_token, uri_params)
+      execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get(headers)
@@ -132,6 +132,17 @@ module Bubbles
       end
     end
 
+    def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params)
+      execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .delete(headers)
+        else
+          next RestClient.delete(url.to_s, headers)
+        end
+      end
+    end
+
     ##
     # Retrieve the {RestEnvironment} to utilize from a {Symbol} describing it.
     #
@@ -171,12 +182,12 @@ module Bubbles
     # @return [RestClient::Response|OpenStruct] If "expect_json" is enabled for the +Endpoint+ being executed, then this
     #         will return an +OpenStruct+; otherwise, the +Response+ will be returned.
     #
-    def self.execute_rest_call(env, endpoint, data, auth_token, headers, &block)
+    def self.execute_rest_call(env, endpoint, data, auth_token, headers, uri_params = {}, &block)
       unless block
         raise ArgumentError('This method requires that a block is given.')
       end
 
-      url = endpoint.get_expanded_url env
+      url = endpoint.get_expanded_url env, uri_params
 
       begin
         if data == nil

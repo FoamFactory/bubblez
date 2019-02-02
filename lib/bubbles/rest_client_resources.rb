@@ -132,6 +132,17 @@ module Bubbles
       end
     end
 
+    def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params)
+      execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .delete(headers)
+        else
+          next RestClient.delete(url.to_s, headers)
+        end
+      end
+    end
+
     ##
     # Retrieve the {RestEnvironment} to utilize from a {Symbol} describing it.
     #

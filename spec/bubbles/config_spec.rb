@@ -243,5 +243,90 @@ describe 'Bubbles.config' do
         end
       end
     end
+
+    context 'when setting up a HEAD request' do
+      context 'that uses the local environment' do
+        before do
+          Bubbles.configure do |config|
+            config.local_environment = {
+              :scheme => 'http',
+              :host => '127.0.0.1',
+              :port => '8888'
+            }
+          end
+        end
+        context 'that is authenticated' do
+          context 'that does not require an API key' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :head,
+                    :location => :students,
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :name => :list_students_head
+                  }
+                ]
+              end
+            end
+
+            it 'should create a method on RestEnvironment that takes 1 argument' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:list_students_head)).to eq(true)
+              expect(resources.local_environment.method(:list_students_head).arity()).to eq(1)
+            end
+          end
+        end
+
+        context 'that is not authenticated' do
+          context 'that does not require an API key' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :head,
+                    :location => :students,
+                    :authenticated => false,
+                    :api_key_required => false,
+                    :name => :list_students_head
+                  }
+                ]
+              end
+            end
+
+            it 'should create a method on RestEnvironment that takes 0 arguments' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:list_students_head)).to eq(true)
+              expect(resources.local_environment.method(:list_students_head).arity()).to eq(0)
+            end
+          end
+
+          context 'that does require an API key' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :head,
+                    :location => :students,
+                    :authenticated => false,
+                    :api_key_required => true,
+                    :name => :list_students_head
+                  }
+                ]
+              end
+            end
+            it 'should create a method on RestEnvironment that takes 1 argument' do
+              resources = Bubbles::Resources.new
+
+              expect(Bubbles::RestEnvironment.instance_methods(false).include?(:list_students_head)).to eq(true)
+              expect(resources.local_environment.method(:list_students_head).arity()).to eq(1)
+            end
+          end
+        end
+      end
+    end
   end
 end

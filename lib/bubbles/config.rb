@@ -315,6 +315,48 @@ module Bubbles
             # end
             # end
           end
+        elsif endpoint.method == :head
+          if endpoint.authenticated?
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |auth_token, uri_params|
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params
+                end
+              else
+                define_method(endpoint_name_as_sym) do |auth_token|
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, {}
+                end
+              end
+            end
+          elsif endpoint.api_key_required?
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |api_key, uri_params|
+                  additional_headers = {}
+                  additional_headers['X-Api-Key'] = api_key
+                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, additional_headers
+                end
+              else
+                define_method(endpoint_name_as_sym) do |api_key|
+                  additional_headers = {}
+                  additional_headers['X-Api-Key'] = api_key
+                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, additional_headers
+                end
+              end
+            end
+          else
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |uri_params|
+                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, {}
+                end
+              else
+                define_method(endpoint_name_as_sym) do
+                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, {}
+                end
+              end
+            end
+          end
         end
       end
     end

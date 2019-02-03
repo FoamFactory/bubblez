@@ -53,7 +53,7 @@ module Bubbles
 
 
     ## The HTTP methods supported by a rest client utilizing Bubbles.
-    METHODS = %w[get post patch put delete].freeze
+    METHODS = %w[get post patch put delete head].freeze
 
     ##
     # Construct a new instance of an Endpoint.

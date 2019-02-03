@@ -78,6 +78,51 @@ module Bubbles
     end
 
     ##
+    # Execute a HEAD request without authentication.
+    #
+    # This is the same as a GET request, but will only return headers and not the response body.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
+    #
+    def self.execute_head_unauthenticated(env, endpoint, uri_params, additional_headers)
+      execute_rest_call(env, endpoint, nil, nil, additional_headers, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .head(headers)
+        else
+          next RestClient.head(url.to_s, headers)
+        end
+      end
+    end
+
+    ##
+    # Execute a HEAD request with authentication.
+    #
+    # Currently, only Authorization: Bearer is supported. This is the same as a GET request, but will only return
+    # headers and not the response body.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] auth_token The authorization token to use for authentication.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
+    #
+    def self.execute_head_authenticated(env, endpoint, auth_token, uri_params)
+      execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .head(headers)
+        else
+          next RestClient.head(url.to_s, headers)
+        end
+      end
+    end
+
+    ##
     # Execute a POST request without authentication, but requiring an API key.
     #
     # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
@@ -275,7 +320,7 @@ module Bubbles
         response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
       end
 
-      unless endpoint.expect_json
+      unless endpoint.expect_json or endpoint.method != :head
         return response
       end
 

@@ -345,7 +345,6 @@ describe Bubbles::Resources do
       end
 
       context 'when using the local environment' do
-
         before do
           @resources = Bubbles::Resources.new
           @local_env = @resources.local_environment
@@ -371,6 +370,90 @@ describe Bubbles::Resources do
               expect(response.emergencyContactPhone).to eq('76519281234')
               expect(response.emergencyContactName).to eq('Katie Moribsu')
             end
+          end
+        end
+      end
+    end
+
+    context 'when accessed with a HEAD request' do
+      before do
+        Bubbles.configure do |config|
+          config.local_environment = {
+            :scheme => 'http',
+            :host => '127.0.0.1',
+            :port => '1234'
+          }
+
+          config.staging_environment = {
+            :scheme => 'http',
+            :host => 'www.google.com',
+            :port => '80'
+          }
+        end
+      end
+
+      context 'when accessing www.google.com' do
+        before do
+          @resources = Bubbles::Resources.new
+          @staging_env = @resources.staging_environment
+        end
+
+        context 'without an authorization token' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                {
+                  :method => :head,
+                  :location => '/',
+                  :authenticated => false,
+                  :expect_json => false,
+                  :name => 'head_google'
+                }
+              ]
+            end
+          end
+
+          it 'should return a 200 ok response' do
+            VCR.use_cassette('head_google') do
+              response = @staging_env.head_google
+
+              expect(response).to_not be_nil
+              expect(response.code).to eq(200)
+            end
+          end
+        end
+      end
+    end
+
+    context 'when using the local environment' do
+      before do
+        @resources = Bubbles::Resources.new
+        @local_env = @resources.local_environment
+      end
+
+      context 'with a valid authorization token' do
+        before do
+          Bubbles.configure do |config|
+            config.endpoints = [
+              {
+                :method => :head,
+                :location => '/students',
+                :authenticated => true,
+                :expect_json => false,
+                :name => 'head_students'
+              }
+            ]
+          end
+
+          @auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
+        end
+
+        it 'should return a 200 ok response' do
+          VCR.use_cassette('head_students_authenticated') do
+            response = @local_env.head_students @auth_token
+
+            expect(response).to_not be_nil
+            expect(response.code).to eq(200)
           end
         end
       end

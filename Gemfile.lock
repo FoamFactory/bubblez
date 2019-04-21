@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bubbles-rest-client (0.0.8)
+    bubbles-rest-client (0.1.0)
       addressable (~> 2.5)
       rest-client (~> 2.0)
 

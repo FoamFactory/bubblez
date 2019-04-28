@@ -103,7 +103,7 @@ module Bubbles
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:expect_json], ep[:encode_authorization]
+        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:return_type], ep[:encode_authorization]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end

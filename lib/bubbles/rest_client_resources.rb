@@ -303,20 +303,20 @@ module Bubbles
           headers[:authorization] = 'Bearer ' + auth_token
         end
 
-        if endpoint.expect_json
-          headers[:accept] = :json
-        end
+        headers[:accept] = :json
 
         response = block.call(env, url, data, headers)
       rescue Errno::ECONNREFUSED
         response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
       end
 
-      unless endpoint.expect_json or endpoint.method != :head
-        return response
+      if endpoint.return_type == :body_as_object and endpoint.method != :head
+          return JSON.parse(response, object_class: OpenStruct)
+      elsif endpoint.return_type == :body_as_string and endpoint.method != :head
+        return response.body
       end
 
-      JSON.parse(response, object_class: OpenStruct)
+      response
     end
   end
 end

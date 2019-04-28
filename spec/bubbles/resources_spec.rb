@@ -31,13 +31,7 @@ describe Bubbles::Resources do
             }
           ]
 
-          config.local_environment = {
-            :scheme => 'http',
-            :host => '127.0.0.1',
-            :port => '1234'
-          }
-
-          config.staging_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234'
@@ -46,13 +40,13 @@ describe Bubbles::Resources do
       end
 
       context 'that require no authentication' do
-        context 'when using the local environment' do
+        context 'when using a defined environment' do
           it 'should be able to retrieve a version from the API' do
             VCR.use_cassette('get_version_unauthenticated') do
               resources = Bubbles::Resources.new
-              local_env = resources.local_environment
+              environment = resources.environment
 
-              response = local_env.version
+              response = environment.version
               expect(response).to_not be_nil
               expect(response.name).to eq('Sinking Moon API')
               expect(response.versionName).to eq('2.0.0')
@@ -67,14 +61,14 @@ describe Bubbles::Resources do
       end
 
       context 'that require an authorization token' do
-        context 'when using the local environment' do
+        context 'when using a defined environment' do
           it 'should be able to list students' do
             VCR.use_cassette('get_students_authenticated') do
               auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
               resources = Bubbles::Resources.new
-              local_env = resources.local_environment
+              environment = resources.environment
 
-              response = local_env.list_students(auth_token)
+              response = environment.list_students(auth_token)
               expect(response).to_not be_nil
 
               students = response.students
@@ -89,9 +83,9 @@ describe Bubbles::Resources do
               auth_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU'
 
               resources = Bubbles::Resources.new
-              local_env = resources.local_environment
+              environment = resources.environment
 
-              student = local_env.get_student(auth_token, {:id => 2})
+              student = environment.get_student(auth_token, {:id => 2})
               expect(student).to_not be_nil
 
               expect(student.id).to eq(2)
@@ -122,7 +116,7 @@ describe Bubbles::Resources do
             }
           ]
 
-          config.local_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234',
@@ -131,15 +125,15 @@ describe Bubbles::Resources do
         end
       end
 
-      context 'when using the local environment' do
+      context 'when using a defined environment' do
         context 'with a valid authorization token' do
           before do
             @resources = Bubbles::Resources.new
-            @local_env = @resources.local_environment
+            @environment = @resources.environment
 
             VCR.use_cassette('login') do
               data = { :username => 'scottj', :password => '123qwe456' }
-              login_object = @local_env.login data
+              login_object = @environment.login data
 
               @auth_token = login_object.auth_token
             end
@@ -166,7 +160,7 @@ describe Bubbles::Resources do
                   :waiverSigned => true
                 }
 
-                student = @local_env.create_student @auth_token, data
+                student = @environment.create_student @auth_token, data
 
                 expect(student).to_not be_nil
                 expect(student.error).to eq('Unable to connect to host 127.0.0.1:1234')
@@ -194,7 +188,7 @@ describe Bubbles::Resources do
                   :waiverSigned => true
                 }
 
-                student = @local_env.create_student @auth_token, data
+                student = @environment.create_student @auth_token, data
                 expect(student.name).to eq('Scott Klein')
                 expect(student.address).to eq('871 Anywhere St. #109')
                 expect(student.waiverSigned).to be_truthy
@@ -208,11 +202,11 @@ describe Bubbles::Resources do
             it 'should successfully login' do
               VCR.use_cassette('login') do
                 resources = Bubbles::Resources.new
-                local_env = resources.local_environment
+                environment = resources.environment
 
 
                 data = { :username => 'scottj', :password => '123qwe456' }
-                login_object = local_env.login data
+                login_object = environment.login data
 
                 expect(login_object.id).to eq(1)
                 expect(login_object.name).to eq('Scott Johnson')
@@ -239,7 +233,7 @@ describe Bubbles::Resources do
             }
           ]
 
-          config.local_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234',
@@ -248,10 +242,10 @@ describe Bubbles::Resources do
         end
       end
 
-      context 'when using the local environment' do
+      context 'when using a defined environment' do
         before do
           @resources = Bubbles::Resources.new
-          @local_env = @resources.local_environment
+          @environment = @resources.environment
         end
 
         context 'with a valid authorization token' do
@@ -261,7 +255,7 @@ describe Bubbles::Resources do
 
           it 'should successfully delete a student' do
             VCR.use_cassette('delete_student_by_id') do
-              response = @local_env.delete_student @auth_token, {:id => 2}
+              response = @environment.delete_student @auth_token, {:id => 2}
 
               expect(response.success).to eq(true)
             end
@@ -283,7 +277,7 @@ describe Bubbles::Resources do
             }
           ]
 
-          config.local_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234'
@@ -291,11 +285,10 @@ describe Bubbles::Resources do
         end
       end
 
-      context 'when using the local environment' do
-
+      context 'when using a defined environment' do
         before do
           @resources = Bubbles::Resources.new
-          @local_env = @resources.local_environment
+          @environment = @resources.environment
         end
 
         context 'with a valid authorization token' do
@@ -306,7 +299,7 @@ describe Bubbles::Resources do
 
           it 'should successfully update the student record' do
             VCR.use_cassette('patch_update_student') do
-              response = @local_env.update_student @auth_token, {:id => 3}, {:student => { :email => 'mike_morib@gmail.com' } }
+              response = @environment.update_student @auth_token, {:id => 3}, {:student => {:email => 'mike_morib@gmail.com' } }
 
               expect(response.id).to eq(3)
               expect(response.name).to eq('Michael Moribsu')
@@ -336,7 +329,7 @@ describe Bubbles::Resources do
             }
           ]
 
-          config.local_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234'
@@ -344,10 +337,10 @@ describe Bubbles::Resources do
         end
       end
 
-      context 'when using the local environment' do
+      context 'when using a defined environment' do
         before do
           @resources = Bubbles::Resources.new
-          @local_env = @resources.local_environment
+          @environment = @resources.environment
         end
 
         context 'with a valid authorization token' do
@@ -358,7 +351,7 @@ describe Bubbles::Resources do
 
           it 'should successfully update the student record' do
             VCR.use_cassette('put_update_student') do
-              response = @local_env.update_student @auth_token, {:id => 3}, {:student => { :email => 'mike_morib@gmail.com' } }
+              response = @environment.update_student @auth_token, {:id => 3}, {:student => {:email => 'mike_morib@gmail.com' } }
 
               expect(response.id).to eq(3)
               expect(response.name).to eq('Michael Moribsu')
@@ -375,30 +368,31 @@ describe Bubbles::Resources do
       end
     end
 
-    context 'when accessed with a HEAD request' do
+    context 'with a defined environment' do
       before do
         Bubbles.configure do |config|
-          config.local_environment = {
+          config.environment = {
             :scheme => 'http',
             :host => '127.0.0.1',
             :port => '1234'
           }
-
-          config.staging_environment = {
-            :scheme => 'http',
-            :host => 'www.google.com',
-            :port => '80'
-          }
         end
       end
 
-      context 'when accessing www.google.com' do
+      context 'after redefining the environment to use Google' do
         before do
+          Bubbles.configure do |config|
+            config.environment = {
+              :scheme => 'http',
+              :host => 'www.google.com',
+              :port => '80'
+            }
+          end
+
           @resources = Bubbles::Resources.new
-          @staging_env = @resources.staging_environment
         end
 
-        context 'without an authorization token' do
+        context 'when making a HEAD request without an authorization token' do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
@@ -415,7 +409,7 @@ describe Bubbles::Resources do
 
           it 'should return a 200 ok response' do
             VCR.use_cassette('head_google') do
-              response = @staging_env.head_google
+              response = @resources.environment.head_google
 
               expect(response).to_not be_nil
               expect(response.code).to eq(200)
@@ -425,10 +419,19 @@ describe Bubbles::Resources do
       end
     end
 
-    context 'when using the local environment' do
+    context 'when using a defined environment' do
       before do
         @resources = Bubbles::Resources.new
-        @local_env = @resources.local_environment
+
+        Bubbles.configure do |config|
+          config.environment = {
+            :scheme => 'http',
+            :host => '127.0.0.1',
+            :port => '1234'
+          }
+        end
+
+        @environment = @resources.environment
       end
 
       context 'with a valid authorization token' do
@@ -450,7 +453,7 @@ describe Bubbles::Resources do
 
         it 'should return a 200 ok response' do
           VCR.use_cassette('head_students_authenticated') do
-            response = @local_env.head_students @auth_token
+            response = @environment.head_students @auth_token
 
             expect(response).to_not be_nil
             expect(response.code).to eq(200)

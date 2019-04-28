@@ -3,16 +3,8 @@ require 'bubbles/rest_environment'
 
 module Bubbles
   class RestClientResources
-    def local_environment
-      Bubbles.configuration.local_environment
-    end
-
-    def staging_environment
-      Bubbles.configuration.staging_environment
-    end
-
-    def production_environment
-      Bubbles.configuration.production_environment
+    def environment
+      Bubbles.configuration.environment
     end
 
     ##
@@ -256,16 +248,16 @@ module Bubbles
     #
     # @return [RestEnvironment] The {RestEnvironment} corresponding to the given {Symbol}.
     #
-    def get_environment(environment)
-      if !environment || environment == :production
-        return self.production_environment
-      elsif environment == :staging
-        return self.staging_environment
-      end
-
-
-      self.local_environment
-    end
+    # def get_environment(environment)
+    #   if !environment || environment == :production
+    #     return self.production_environment
+    #   elsif environment == :staging
+    #     return self.staging_environment
+    #   end
+    #
+    #
+    #   self.local_environment
+    # end
 
     private
 

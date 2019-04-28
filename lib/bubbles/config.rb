@@ -39,106 +39,42 @@ module Bubbles
   #
   class Configuration
     def initialize
-      @local_environment_scheme = 'http'
-      @local_environment_host = '127.0.0.1'
-      @local_environment_port = '1234'
-      @local_environment_api_key = nil
-
-      @staging_environment_scheme = 'http'
-      @staging_environment_host = '127.0.0.1'
-      @staging_environment_port = '1234'
-      @staging_environment_api_key = nil
-
-      @production_environment_scheme = 'http'
-      @production_environment_host = '127.0.0.1'
-      @production_environment_port = '1234'
-      @production_environment_api_key = nil
+      @environment_scheme = 'http'
+      @environment_host = '127.0.0.1'
+      @environment_port = '1234'
+      @environment_api_key = nil
 
       @endpoints = Hash.new
     end
 
     ##
-    # Retrieve the local {RestEnvironment} object defined as part of this Configuration.
+    # Retrieve the {RestEnvironment} object defined as part of this Configuration.
     #
-    def local_environment
-      RestEnvironment.new(@local_environment_scheme, @local_environment_host, @local_environment_port, @local_environment_api_key)
+    # Note that this constructs a new +RestEnvironment+ and returns it, rather than returning an existing object.
+    #
+    def environment
+      RestEnvironment.new(@environment_scheme, @environment_host, @environment_port, @environment_api_key)
     end
 
     ##
-    # Set the local environment.
+    # Set the current environment.
     #
     # @param [Object] env The environment, as a generic Ruby Object.
     #
-    # @example In app/config/initializers/bubbles.rb
+    # @example In app/config/environments/staging.rb:
     #    Bubbles.configure do |config|
-    #      config.local_environment = {
+    #      config.environment = {
     #         :scheme => 'https',
-    #         :host => 'api.somehost.com',
+    #         :host => 'stage.api.somehost.com',
     #         :port => '443'
     #      }
     #    end
     #
-    def local_environment=(env)
-      @local_environment_scheme = env[:scheme]
-      @local_environment_host = env[:host]
-      @local_environment_port = env[:port]
-      @local_environment_api_key = env[:api_key]
-    end
-
-    ##
-    # Retrieve the staging {RestEnvironment} object defined as part of this Configuration.
-    #
-    def staging_environment
-      RestEnvironment.new(@staging_environment_scheme, @staging_environment_host, @staging_environment_port, @staging_environment_api_key)
-    end
-
-    ##
-    # Set the staging environment.
-    #
-    # @param [Object] env The environment, as a generic Ruby Object.
-    #
-    # @example In app/config/initializers/bubbles.rb
-    #    Bubbles.configure do |config|
-    #      config.staging_environment = {
-    #         :scheme => 'https',
-    #         :host => 'api.somehost.com',
-    #         :port => '443'
-    #      }
-    #    end
-    #
-    def staging_environment=(env)
-      @staging_environment_scheme = env[:scheme]
-      @staging_environment_host = env[:host]
-      @staging_environment_port = env[:port]
-      @staging_environment_api_key = env[:api_key]
-    end
-
-    ##
-    # Retrieve the production {RestEnvironment} object defined as part of this Configuration.
-    #
-    def production_environment
-      RestEnvironment.new(@production_environment_scheme, @production_environment_host, @production_environment_port, @production_environment_api_key)
-    end
-
-    ##
-    # Set the production environment.
-    #
-    # @param [Object] env The environment, as a generic Ruby Object.
-    #
-    # @example In app/config/initializers/bubbles.rb
-    #    Bubbles.configure do |config|
-    #      config.production_environment = {
-    #         :scheme => 'https',
-    #         :host => 'api.somehost.com',
-    #         :port => '443',
-    #      }
-    #    end
-    #
-    def production_environment=(env)
-      @production_environment_scheme = env[:scheme]
-      @production_environment_host = env[:host]
-      @production_environment_port = env[:port]
-      @production_environment_api_key = env[:api_key]
+    def environment=(env)
+      @environment_scheme = env[:scheme]
+      @environment_host = env[:host]
+      @environment_port = env[:port]
+      @environment_api_key = env[:api_key]
     end
 
     ##
@@ -182,7 +118,7 @@ module Bubbles
           endpoint_name_as_sym = endpoint.get_location_string.to_sym
         end
 
-        if Bubbles::RestEnvironment.instance_methods(false).include? (endpoint_name_as_sym)
+        if Bubbles::RestEnvironment.instance_methods(false).include?(endpoint_name_as_sym)
           Bubbles::RestEnvironment.class_exec do
             remove_method endpoint_name_as_sym
           end

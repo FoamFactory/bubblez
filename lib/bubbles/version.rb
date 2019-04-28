@@ -1,3 +1,5 @@
+require 'date'
+
 module Bubbles
   class VersionInformation
     def self.package_name
@@ -5,7 +7,7 @@ module Bubbles
     end
 
     def self.version_name
-      '0.1.1'
+      '0.2.0'
     end
 
     def self.version_code

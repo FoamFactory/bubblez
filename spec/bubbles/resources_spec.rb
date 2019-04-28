@@ -4,6 +4,50 @@ require 'spec_helper'
 # expect(response).to eq('{"email":"mike_morib@gmail.com","id":3,"name":"Michael Moribsu","address":"123 Anywhere St.","city":"Onetown","state":"MN","zip":"55081","phone":"5551239045","preferredContact":"phone","emergencyContactName":"Katie Moribsu","emergencyContactPhone":"76519281234","rank":"white","joinDate":"2017-10-15T00:00:00.000Z","lastAdvancementDate":"2017-10-15T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-15T16:58:18.092Z","updated_at":"2017-10-15T17:00:42.906Z"}')
 
 describe Bubbles::Resources do
+  context 'when using the local environment or a recorded call' do
+    before do
+      Bubbles.configure do |config|
+        config.environment = {
+          :scheme => 'http',
+          :host => '127.0.0.1',
+          :port => '9002',
+          :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+        }
+      end
+    end
+    context 'accessed with a POST request' do
+      context 'when one of the endpoints has a slash in its path' do
+        before do
+          Bubbles.configure do |config|
+            config.endpoints = [
+              {
+                :method => :post,
+                :location => 'password/forgot',
+                :name => :forgot_password,
+                :authenticated => false,
+                :api_key_required => true,
+                :return_type => :body_as_object
+              }
+            ]
+          end
+        end
+
+        it 'should successfully send a request to the server at the correct location' do
+          VCR.use_cassette('post_unauthenticated_slash_in_path') do
+            resources = Bubbles::Resources.new
+            environment = resources.environment
+
+            data = { :email => 'eat@example.com' }
+            response = environment.forgot_password data
+
+            expect(response).to_not be_nil
+            expect(response.success).to be_truthy
+          end
+        end
+      end
+    end
+  end
+
   describe 'Endpoint' do
     context 'accessed with a GET request' do
       context 'when using a return type of body_as_object' do

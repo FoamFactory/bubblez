@@ -245,7 +245,7 @@ module Bubbles
     #         Authorization header; false, otherwise.
     #
     def encode_authorization_header?
-      @encode_authorization.length > 0
+      !@encode_authorization.nil? and @encode_authorization.length > 0
     end
 
     ##

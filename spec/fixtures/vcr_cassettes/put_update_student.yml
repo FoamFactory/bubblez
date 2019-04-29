@@ -2,10 +2,13 @@
 http_interactions:
 - request:
     method: put
-    uri: http://127.0.0.1:1234/students/3
+    uri: http://127.0.0.1:9002/students/4
     body:
       encoding: UTF-8
-      string: '{"student":{"email":"mike_morib@gmail.com"}}'
+      string: '{"student":{"email":"michael.moribs@mikesmail-moribss.com","name":"Michael
+        Moribsu","address":"123 Anywhere St.","city":"Onetown","state":"MN","zip":"55081","phone":"(555)
+        123-9045","emergencyContactName":"Katie Moribsu","emergencyContactPhone":"(765)
+        192-8123"}}'
     headers:
       Accept:
       - application/json
@@ -16,11 +19,11 @@ http_interactions:
       Content-Type:
       - application/json
       Authorization:
-      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
       Content-Length:
-      - '44'
+      - '263'
       Host:
-      - 127.0.0.1:1234
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -29,20 +32,20 @@ http_interactions:
       Content-Type:
       - application/json; charset=utf-8
       Etag:
-      - W/"8951250ecf4500dcd93390871f2f2b0c"
+      - W/"05c6a72aff70ec9f895a768b2ad90c91"
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - c6dee383-8feb-4df1-adc4-663334dcc488
+      - 67a3fb55-2435-41ec-adbd-6332f0244501
       X-Runtime:
-      - '0.012718'
+      - '0.014353'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
-      string: '{"email":"mike_morib@gmail.com","id":3,"name":"Michael Moribsu","address":"123
-        Anywhere St.","city":"Onetown","state":"MN","zip":"55081","phone":"5551239045","preferredContact":"phone","emergencyContactName":"Katie
-        Moribsu","emergencyContactPhone":"76519281234","rank":"white","joinDate":"2017-10-15T00:00:00.000Z","lastAdvancementDate":"2017-10-15T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-15T16:58:18.092Z","updated_at":"2017-10-15T17:00:42.906Z"}'
-    http_version:
-  recorded_at: Sun, 15 Oct 2017 17:00:42 GMT
+      string: '{"name":"Michael Moribsu","address":"123 Anywhere St.","city":"Onetown","state":"MN","zip":"55081","phone":"(555)
+        123-9045","email":"michael.moribs@mikesmail-moribss.com","emergencyContactName":"Katie
+        Moribsu","emergencyContactPhone":"(765) 192-8123","id":4,"preferredContact":"text","rank":"white","joinDate":"2019-04-28T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T23:53:18.013Z","updated_at":"2019-04-29T00:04:03.436Z","active":true}'
+    http_version: 
+  recorded_at: Mon, 29 Apr 2019 00:04:03 GMT
 recorded_with: VCR 3.0.3

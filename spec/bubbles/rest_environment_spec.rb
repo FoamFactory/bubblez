@@ -11,15 +11,19 @@ describe Bubbles::RestEnvironment do
             :location => :students,
             :authenticated => true,
             :api_key_required => false,
-            :name => :list_students,
-            :expect_json => true
+            :name => :list_students
           },
           {
             :method => :post,
             :location => :login,
             :authenticated => false,
-            :api_key_required => true,
-            :expect_json => true
+            :api_key_required => true
+          },
+          {
+            :method => :get,
+            :location => :version,
+            :authenticated => false,
+            :api_key_required => false
           }
         ]
 

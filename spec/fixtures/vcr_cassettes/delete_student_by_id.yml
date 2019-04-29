@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: delete
-    uri: http://127.0.0.1:1234/students/2
+    uri: http://127.0.0.1:9002/students/2
     body:
       encoding: US-ASCII
       string: ''
@@ -12,13 +12,13 @@ http_interactions:
       Accept-Encoding:
       - gzip, deflate
       User-Agent:
-        - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
-      Authorization:
-      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
+      - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
       Content-Type:
       - application/json
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
       Host:
-      - 127.0.0.1:1234
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -31,14 +31,14 @@ http_interactions:
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - a7ce6141-9122-464a-b451-ac4db75d1a19
+      - d764c8b7-2e88-4d8d-826a-1e38e86b8996
       X-Runtime:
-      - '0.021692'
+      - '0.008852'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
       string: '{"success":true}'
-    http_version:
-  recorded_at: Sun, 15 Oct 2017 16:55:11 GMT
+    http_version: 
+  recorded_at: Sun, 28 Apr 2019 23:43:39 GMT
 recorded_with: VCR 3.0.3

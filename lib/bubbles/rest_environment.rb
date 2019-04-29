@@ -1,5 +1,3 @@
-require 'addressable/template'
-
 module Bubbles
   class RestEnvironment
     attr_accessor :scheme, :host, :port, :api_key

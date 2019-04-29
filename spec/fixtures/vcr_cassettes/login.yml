@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: post
-    uri: http://127.0.0.1:1234/login
+    uri: http://127.0.0.1:9002/login
     body:
       encoding: UTF-8
       string: "{}"
@@ -14,15 +14,15 @@ http_interactions:
       User-Agent:
       - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
       X-Api-Key:
-      - e4150c01953cd24ac18084b1cb0ddcb3766de03a
+      - e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6
       Authorization:
       - Basic c2NvdHRqOjEyM3F3ZTQ1Ng==
+      Content-Type:
+      - application/json
       Content-Length:
       - '2'
       Host:
-      - 127.0.0.1:1234
-      Content-Type:
-      - application/json
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -31,19 +31,18 @@ http_interactions:
       Content-Type:
       - application/json; charset=utf-8
       Etag:
-      - W/"2481df7fd23680ff70923d72ffb09525"
+      - W/"e46a1461e99dc9c2db75d7c5827f285e"
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - 541a3a2d-0e71-40e2-ab6a-ebcc2a423282
+      - aac15e83-cc16-42b6-afa2-ddd1c78cec94
       X-Runtime:
-      - '13.770480'
+      - '0.149320'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
-      string: '{"auth_token":"eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wMS0yNFQxMDoyMToyMi0wNjowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDItMjNUMTA6MjE6MjItMDY6MDAiLCJ1c2VyX2lkIjoxfQ.9YEfarAqOIqojRfX__7JyDodzGufDvRJJufmy6aIaGc","id":1,"username":"scottj","email":"scottj@sinkingmoon.com","role":"admin","email_validated":true,"one_time_login_hash":null,"name":"Scott
-        Johnson","validation_hash":null,"validation_expire_date":null,"created_at":"2018-07-05T00:06:09.706Z","updated_at":"2019-01-24T16:21:22.628Z","one_time_login_hash_expire_date":null}'
+      string: '{"id":1,"name":"Scott Johnson","username":"scottj","email":"scottj@sinkingmoon.com","validation_hash":null,"validation_expire_date":null,"email_validated":true,"created_at":"2019-04-28T15:30:59.105Z","updated_at":"2019-04-28T15:44:41.909Z","role":"admin","auth_token":"eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE","one_time_login_hash":null,"one_time_login_hash_expire_date":null}'
     http_version: 
-  recorded_at: Thu, 24 Jan 2019 16:21:22 GMT
+  recorded_at: Sun, 28 Apr 2019 23:01:49 GMT
 recorded_with: VCR 3.0.3

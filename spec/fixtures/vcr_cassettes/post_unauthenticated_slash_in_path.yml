@@ -1,11 +1,11 @@
 ---
 http_interactions:
 - request:
-    method: delete
-    uri: http://127.0.0.1:9002/students/2
+    method: post
+    uri: http://127.0.0.1:9002/password/forgot
     body:
-      encoding: US-ASCII
-      string: ''
+      encoding: UTF-8
+      string: '{"email":"eat@example.com"}'
     headers:
       Accept:
       - application/json
@@ -13,10 +13,12 @@ http_interactions:
       - gzip, deflate
       User-Agent:
       - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
+      X-Api-Key:
+      - e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6
       Content-Type:
       - application/json
-      Authorization:
-      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
+      Content-Length:
+      - '27'
       Host:
       - 127.0.0.1:9002
   response:
@@ -31,14 +33,14 @@ http_interactions:
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - d764c8b7-2e88-4d8d-826a-1e38e86b8996
+      - 2f3b5b4d-f93b-4e71-9cbc-79f2f2069a98
       X-Runtime:
-      - '0.008852'
+      - '1.533144'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
       string: '{"success":true}'
     http_version: 
-  recorded_at: Sun, 28 Apr 2019 23:43:39 GMT
+  recorded_at: Sun, 28 Apr 2019 22:51:57 GMT
 recorded_with: VCR 3.0.3

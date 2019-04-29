@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = Bubbles::VersionInformation.package_name
   spec.version       = Bubbles::VersionInformation.version_name
   spec.date        = Date.today.strftime("%Y-%m-%d")
-  spec.summary     = 'FoamFactory REST Client'
+  spec.summary     = 'Bubbles REST Client'
   spec.homepage    = 'https://github.com/FoamFactory/bubbles'
   spec.authors     = ['Scott Johnson']
   spec.email       = 'jaywir3@gmail.com'
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.14"
+  spec.add_development_dependency "bundler", "~> 2.0.0"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "minitest-reporters", "~> 1.1"

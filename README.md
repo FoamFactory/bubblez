@@ -32,7 +32,6 @@ Currently, bubbles has a number of limitations that make it likely not suitable 
   - Some request methods (`PATCH`, `PUT`, `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (#9)
   - Only three types of environment are currently allowed. Only `local`, `staging` and `production` are recognized as possible environments to connect to for the purposes of using bubbles. You can add any scheme, host, and port to any of these, but the names are currently hardcoded, as is the number of possible hosts. (#4)
   - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (#12)
-  - Usage of the `expect_json` configuration parameter is not intuitive. You should think of this as more of a "I want an object back from the API", rather than how it's worded. (#11)
 
 If you're interested in working on any of the issues above, please feel free to submit a pull request and a member of our team will review that pull request within a couple of days.
 
@@ -164,7 +163,7 @@ Each _endpoint_ object can have the following attributes:
 | `name` | The name to give the method created to make this REST call. | No | The value of the `location` parameter, with slashes (`/`) replaced with underscores (`_`). |
 | `authorization` | Whether or not this endpoint requires authentication prior to executing the call. If true, then an `authorization_token` will be added to the method as a parameter to be passed when the method is called. This parameter will be placed in an `Authorization` header when the REST call is executed. | No | `false` |
 | `api_key_required` | Whether or not an API key is required. If `true`, a parameter will be added to the method created to execute the REST API call named `api_key`. The value of this parameter will be set as the value of the `X-Api-Key` header when making the REST API call. | No | `false` |
-| `expect_json` | Whether or not JSON is expected as the format of the `body` of both the Request and Response. Additionally, specifying `true` for this option will cause methods executing REST requests to return `OpenStruct` objects representing the fully-parsed JSON response (on success). See note under "Limitations", above, on using this parameter. | No | `false` |
+| `return_type` | Must be one of: `[full_response, body_as_object, body_as_string]`. This specifies what type of response is expected from the `Endpoint`. A value of `full_response` will return the full `RestClient::Response` object to the client. A value of `body_as_string` will return the `RestClient::Response.body` value as a `String`. A value of `body_as_object` will take the `RestClient::Response.body` parameter and parse it as an `OpenStruct` object, and return the result of this parsing operation. | No | `body_as_string` |
 | `encode_authorization` | Whether the `data` passed as part of the request should be re-encoded as an `Authorization: Basic` header (and Base64 encoded). Typically, this is only used for initial username/password authentication. | No | `false` |
 
 ### Examples

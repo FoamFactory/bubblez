@@ -3,16 +3,8 @@ require 'bubbles/rest_environment'
 
 module Bubbles
   class RestClientResources
-    def local_environment
-      Bubbles.configuration.local_environment
-    end
-
-    def staging_environment
-      Bubbles.configuration.staging_environment
-    end
-
-    def production_environment
-      Bubbles.configuration.production_environment
+    def environment
+      Bubbles.configuration.environment
     end
 
     ##
@@ -256,16 +248,16 @@ module Bubbles
     #
     # @return [RestEnvironment] The {RestEnvironment} corresponding to the given {Symbol}.
     #
-    def get_environment(environment)
-      if !environment || environment == :production
-        return self.production_environment
-      elsif environment == :staging
-        return self.staging_environment
-      end
-
-
-      self.local_environment
-    end
+    # def get_environment(environment)
+    #   if !environment || environment == :production
+    #     return self.production_environment
+    #   elsif environment == :staging
+    #     return self.staging_environment
+    #   end
+    #
+    #
+    #   self.local_environment
+    # end
 
     private
 
@@ -311,20 +303,20 @@ module Bubbles
           headers[:authorization] = 'Bearer ' + auth_token
         end
 
-        if endpoint.expect_json
-          headers[:accept] = :json
-        end
+        headers[:accept] = :json
 
         response = block.call(env, url, data, headers)
       rescue Errno::ECONNREFUSED
         response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
       end
 
-      unless endpoint.expect_json or endpoint.method != :head
-        return response
+      if endpoint.return_type == :body_as_object and endpoint.method != :head
+          return JSON.parse(response, object_class: OpenStruct)
+      elsif endpoint.return_type == :body_as_string and endpoint.method != :head
+        return response.body
       end
 
-      JSON.parse(response, object_class: OpenStruct)
+      response
     end
   end
 end

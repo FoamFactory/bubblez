@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://127.0.0.1:1234/students
+    uri: http://127.0.0.1:9002/students
     body:
       encoding: US-ASCII
       string: ''
@@ -13,12 +13,12 @@ http_interactions:
       - gzip, deflate
       User-Agent:
       - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
-      Authorization:
-      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
       Content-Type:
       - application/json
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
       Host:
-      - 127.0.0.1:1234
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -27,20 +27,23 @@ http_interactions:
       Content-Type:
       - application/json; charset=utf-8
       Etag:
-      - W/"9d4b7d98d38caa096dee4e7844662cf6"
+      - W/"d381cb693738a92209b07b5907d00c84"
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - de8e2f1a-4eb7-44a5-9129-84df77d3b938
+      - 6f0cf74b-4649-46dd-88e1-a906cf95eddb
       X-Runtime:
-      - '0.014508'
+      - '0.129410'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
       string: '{"students":[{"id":1,"name":"Joe Blow","address":"2234 Bubble Gum Ave.
         #127","city":"Sometown","state":"CA","zip":"90263","phone":"5558764566","email":"bubblegumbanshee987@bazooka.org","emergencyContactName":"Some
-        Guy","emergencyContactPhone":"5554339182","joinDate":"2017-10-14T00:00:00.000Z","lastAdvancementDate":"2017-10-14T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-14T21:46:42.826Z","updated_at":"2017-10-14T21:46:42.826Z","preferredContact":"phone","rank":"green"}]}'
-    http_version:
-  recorded_at: Sun, 15 Oct 2017 16:51:12 GMT
+        Guy","emergencyContactPhone":"5554339182","joinDate":"2018-10-10T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T15:30:59.186Z","updated_at":"2019-04-28T21:48:25.851Z","preferredContact":"phone","rank":"green","active":true,"advancements":[{"id":1,"date":"2018-10-30","rank":"white","student_id":1,"created_at":"2019-04-28T15:30:59.211Z","updated_at":"2019-04-28T15:30:59.211Z"},{"id":2,"date":"2019-01-28","rank":"orange","student_id":1,"created_at":"2019-04-28T15:30:59.215Z","updated_at":"2019-04-28T15:30:59.215Z"},{"id":3,"date":"2019-03-29","rank":"yellow","student_id":1,"created_at":"2019-04-28T15:30:59.218Z","updated_at":"2019-04-28T15:30:59.218Z"},{"id":9,"date":"2019-04-06","rank":"green","student_id":1,"created_at":"2019-04-28T21:49:04.551Z","updated_at":"2019-04-28T21:49:04.551Z"}]},{"id":2,"name":"Scott
+        Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
+        761-8172","email":"scotty.kleiny@gmail.com","emergencyContactName":"Nancy
+        Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2019-04-28T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T23:07:50.447Z","updated_at":"2019-04-28T23:07:50.447Z","preferredContact":"text","rank":"white","active":true,"advancements":[{"id":10,"date":"2019-04-28","rank":"white","student_id":2,"created_at":"2019-04-28T23:07:50.500Z","updated_at":"2019-04-28T23:07:50.500Z"}]}]}'
+    http_version: 
+  recorded_at: Sun, 28 Apr 2019 23:27:47 GMT
 recorded_with: VCR 3.0.3

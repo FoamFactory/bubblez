@@ -2,12 +2,12 @@
 http_interactions:
 - request:
     method: post
-    uri: http://127.0.0.1:1234/students
+    uri: http://127.0.0.1:9002/students
     body:
       encoding: UTF-8
       string: '{"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
         761-8172","email":"scotty.kleiny@gmail.com","preferredContact":"text","emergencyContactName":"Nancy
-        Klein","emergencyContactPhone":"(701) 762-5442","rank":"white","joinDate":"2019-01-24","lastAdvancementDate":"2019-01-24","waiverSigned":true}'
+        Klein","emergencyContactPhone":"(701) 762-5442","rank":"white","joinDate":"2019-04-28","lastAdvancementDate":"2019-04-28","waiverSigned":true}'
     headers:
       Accept:
       - application/json
@@ -18,11 +18,11 @@ http_interactions:
       Content-Type:
       - application/json
       Authorization:
-      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wMS0yNFQxMDoyMToyMi0wNjowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDItMjNUMTA6MjE6MjItMDY6MDAiLCJ1c2VyX2lkIjoxfQ.9YEfarAqOIqojRfX__7JyDodzGufDvRJJufmy6aIaGc
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
       Content-Length:
       - '361'
       Host:
-      - 127.0.0.1:1234
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -31,20 +31,20 @@ http_interactions:
       Content-Type:
       - application/json; charset=utf-8
       Etag:
-      - W/"1f52ad09f4b8ffd0606896af8821398e"
+      - W/"470d891ac2d88a2846815580f172ca7a"
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - 51dabb7e-0763-4d31-9539-3b00b741f639
+      - 7175571d-e721-4885-bc10-92615ff6d752
       X-Runtime:
-      - '0.010549'
+      - '0.432589'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
-      string: '{"id":5,"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
+      string: '{"id":4,"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
         761-8172","email":"scotty.kleiny@gmail.com","emergencyContactName":"Nancy
-        Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2019-01-24T00:00:00.000Z","waiverSigned":true,"created_at":"2019-01-24T20:59:52.413Z","updated_at":"2019-01-24T20:59:52.413Z","preferredContact":"text","rank":"white","active":true}'
+        Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2019-04-28T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T23:53:18.013Z","updated_at":"2019-04-28T23:53:18.013Z","preferredContact":"text","rank":"white","active":true}'
     http_version: 
-  recorded_at: Thu, 24 Jan 2019 20:59:52 GMT
+  recorded_at: Sun, 28 Apr 2019 23:53:18 GMT
 recorded_with: VCR 3.0.3

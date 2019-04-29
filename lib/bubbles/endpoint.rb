@@ -11,7 +11,8 @@ module Bubbles
   class Endpoint
     ##
     # Controls the method used to access the endpoint. Must be one of {Endpoint::Methods}.
-    # @return [Symbol] the method used to access the endpoint. Will always be one of the symbols defined in {Endpoint::METHODS}.
+    # @return [Symbol] the method used to access the endpoint. Will always be one of the symbols defined in
+    #         {Endpoint::METHODS}.
     attr_accessor :method
 
     ##
@@ -30,9 +31,10 @@ module Bubbles
     attr_accessor :api_key_required
 
     ##
-    # Controls whether JSON is the expected form of output from this +Endpoint+.
-    # @return [Boolean] true, if JSON is the expected form of output from this +Endpoint+; false, otherwise.
-    attr_accessor :expect_json
+    # Controls what type of object will be returned from the REST API call on success. Must be one of the symbols
+    # defined in {Endpoint::RETURN_TYPES}.
+    #
+    attr_accessor :return_type
 
     ##
     # Controls which data values should be encoded as part of an Authorization header. They will be separated with a
@@ -51,14 +53,17 @@ module Bubbles
     ## A template for specifying the complete URL for endpoints, with a port attached to the host.
     API_URL_WITH_PORT = ::Addressable::Template.new("{scheme}://{host}:{port}/{endpoint}")
 
-
     ## The HTTP methods supported by a rest client utilizing Bubbles.
     METHODS = %w[get post patch put delete head].freeze
+
+    ## The possible return types for successful REST calls. Defaults to :body_as_string.
+    RETURN_TYPES = %w[full_response body_as_string body_as_object].freeze
 
     ##
     # Construct a new instance of an Endpoint.
     #
-    # @param [Symbol] method The type of the new Endpoint to create. Must be one of the methods in {Endpoint::METHODS}.
+    # @param [Symbol] method The type of the new Endpoint to create. Must be one of the methods in
+    #        {Endpoint::METHODS}.
     # @param [String] location The location, relative to the root of the host, at which the endpoint resides.
     # @param [Boolean] auth_required If true, then authorization/authentication is required to access this endpoint.
     #        Defaults to +false+.
@@ -66,16 +71,23 @@ module Bubbles
     #        +false+.
     # @param [String] name An optional name which will be given to the method that will execute this {Endpoint} within
     #        the context of a {RestClientResources} object.
-    # @param [Boolean] expect_json Whether or not to expect a JSON response from this +Endpoint+. Defaults to +false+.
+    # @param [Array<Symbol>] encode_authorization Parameters that should be treated as authorization parameters and
+    #        encoded using a Base64 encoding.
     #
-    def initialize(method, location, auth_required = false, api_key_required = false, name = nil, expect_json = false, encode_authorization = {})
+    def initialize(method, location, auth_required = false, api_key_required = false, name = nil, return_type = :body_as_string, encode_authorization = {})
       @method = method
       @location = location
       @auth_required = auth_required
       @api_key_required = api_key_required
       @name = name
-      @expect_json = expect_json
       @encode_authorization = encode_authorization
+
+      unless Endpoint::RETURN_TYPES.include? return_type.to_s
+        return_type = :body_as_string
+      end
+
+      @return_type = return_type
+
       @uri_params = []
 
       # Strip the leading slash from the endpoint location, if it's there
@@ -233,7 +245,24 @@ module Bubbles
     #         Authorization header; false, otherwise.
     #
     def encode_authorization_header?
-      @encode_authorization.length > 0
+      !@encode_authorization.nil? and @encode_authorization.length > 0
+    end
+
+    ##
+    # Retrieve the return type of this REST endpoint.
+    #
+    # This will always be one of:
+    #
+    # - +full_response+ : Indicates that the full +Response+ object should be returned so that headers and
+    #   return code can be used.
+    # - +body_as_object+ : Indicates that the body of the +Response+ should be parsed as a full +OpenStruct+
+    #   object and returned.
+    # - +body_as_string+ : Indicates that only the body of the +Response+ object should be returned, as a +String+.
+    #
+    # By default, if this is not specified, it will be +body_as+string+.
+    #
+    def return_type
+      @return_type
     end
 
     def has_uri_params?

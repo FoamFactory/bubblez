@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://127.0.0.1:1234/students/2
+    uri: http://127.0.0.1:9002/students/4
     body:
       encoding: US-ASCII
       string: ''
@@ -13,12 +13,12 @@ http_interactions:
       - gzip, deflate
       User-Agent:
       - rest-client/2.0.2 (darwin18.5.0 x86_64) ruby/2.4.1p111
-      Authorization:
-      - Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxNy0xMC0xNVQxMToyNjozMS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTctMTEtMTRUMTE6MjY6MzEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.dyCWwE4wk7aTfjnGncsqp_jq5QyICKYQPkBh5nLQwFU
       Content-Type:
       - application/json
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE
       Host:
-      - 127.0.0.1:1234
+      - 127.0.0.1:9002
   response:
     status:
       code: 200
@@ -27,20 +27,20 @@ http_interactions:
       Content-Type:
       - application/json; charset=utf-8
       Etag:
-      - W/"e48ee1fad23d76eaedc412d4b26f551e"
+      - W/"58467cd6f305d4d220fe0cb80910289c"
       Cache-Control:
       - max-age=0, private, must-revalidate
       X-Request-Id:
-      - c4f9b216-e29a-46ce-8520-da3c72b27721
+      - c232a22d-1649-49d2-960e-470ffa57fbe2
       X-Runtime:
-      - '0.016163'
+      - '0.024073'
       Transfer-Encoding:
       - chunked
     body:
       encoding: UTF-8
-      string: '{"id":2,"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
+      string: '{"id":4,"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612)
         761-8172","email":"scotty.kleiny@gmail.com","emergencyContactName":"Nancy
-        Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2017-10-15T00:00:00.000Z","lastAdvancementDate":"2017-10-15T00:00:00.000Z","waiverSigned":true,"created_at":"2017-10-15T16:52:38.425Z","updated_at":"2017-10-15T16:52:38.425Z","preferredContact":"text","rank":"white"}'
-    http_version:
-  recorded_at: Sun, 15 Oct 2017 16:54:32 GMT
+        Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2019-04-28T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T23:53:18.013Z","updated_at":"2019-04-28T23:53:18.013Z","preferredContact":"text","rank":"white","active":true,"advancements":[{"id":12,"date":"2019-04-28","rank":"white","student_id":4,"created_at":"2019-04-28T23:53:18.035Z","updated_at":"2019-04-28T23:53:18.035Z"}]}'
+    http_version: 
+  recorded_at: Sun, 28 Apr 2019 23:54:56 GMT
 recorded_with: VCR 3.0.3

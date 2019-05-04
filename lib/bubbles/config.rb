@@ -218,17 +218,24 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
-                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, nil, data
+                  # TODO: Nothing tests this case. We need something to test this case or we run the risk of
+                  #       it having bugs (uri_params was nil previously!)
+                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, {}, data
                 end
               end
             end
           else
-            raise 'Unauthenticated PATCH requests are not implemented'
-            # Bubbles::RestEnvironment.class_exec do
-            # define_method(endpoint_name_as_sym) do
-            #   RestClientResources.execute_delete_unauthenticated self, endpoint
-            # end
-            # end
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |uri_params, data|
+                  RestClientResources.execute_patch_unauthenticated self, endpoint, uri_params, data
+                end
+              else
+                define_method(endpoint_name_as_sym) do |data|
+                  RestClientResources.execute_patch_unauthenticated self, endpoint, {}, data
+                end
+              end
+            end
           end
         elsif endpoint.method == :put
           if endpoint.authenticated?
@@ -239,17 +246,25 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
-                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, nil, data
+                  # TODO: Nothing tests this case. We need something to test this case or we run the risk of
+                  #       it having bugs (uri_params was nil previously!)
+                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, {}, data
                 end
               end
             end
           else
-            raise 'Unauthenticated PUT requests are not implemented'
-            # Bubbles::RestEnvironment.class_exec do
-            # define_method(endpoint_name_as_sym) do
-            #   RestClientResources.execute_delete_unauthenticated self, endpoint
-            # end
-            # end
+            # raise 'Unauthenticated PUT requests are not implemented'
+            Bubbles::RestEnvironment.class_exec do
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |uri_params, data|
+                  RestClientResources.execute_put_unauthenticated self, endpoint, uri_params, data
+                end
+              else
+                define_method(endpoint_name_as_sym) do |data|
+                  RestClientResources.execute_put_unauthenticated self, endpoint, {}, data
+                end
+              end
+            end
           end
         elsif endpoint.method == :head
           if endpoint.authenticated?

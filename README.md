@@ -29,8 +29,7 @@ _bubbles_ is a Gem that seeks to provide this same behavior.
 Currently, bubbles has a number of limitations that make it likely not suitable for use in a production environment. Each of these is tracked by an issue on our [issues page](https://github.com/FoamFactory/bubbles/issues).
 
   - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (#10).
-  - Some request methods (`PATCH`, `PUT`, `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (#9)
-  - Only three types of environment are currently allowed. Only `local`, `staging` and `production` are recognized as possible environments to connect to for the purposes of using bubbles. You can add any scheme, host, and port to any of these, but the names are currently hardcoded, as is the number of possible hosts. (#4)
+  - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (#16)
   - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (#12)
 
 If you're interested in working on any of the issues above, please feel free to submit a pull request and a member of our team will review that pull request within a couple of days.

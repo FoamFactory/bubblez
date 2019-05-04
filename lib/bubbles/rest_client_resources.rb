@@ -195,6 +195,27 @@ module Bubbles
     end
 
     ##
+    # Execute a PATCH request without authentication.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
+    #
+    def self.execute_patch_unauthenticated(env, endpoint, uri_params, data)
+      return execute_rest_call(env, endpoint, data, nil, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .patch(data.to_json, headers)
+        else
+          next RestClient.patch(url.to_s, data.to_json, headers)
+        end
+      end
+    end
+
+    ##
     # Execute a PUT request with authentication in the form of an authorization token.
     #
     # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
@@ -212,6 +233,27 @@ module Bubbles
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .put(data.to_json, headers)
 
+        else
+          next RestClient.put(url.to_s, data.to_json, headers)
+        end
+      end
+    end
+
+    ##
+    # Execute a PUT request without authentication.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
+    #
+    def self.execute_put_unauthenticated(env, endpoint, uri_params, data)
+      return execute_rest_call(env, endpoint, data, nil, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .put(data.to_json, headers)
         else
           next RestClient.put(url.to_s, data.to_json, headers)
         end

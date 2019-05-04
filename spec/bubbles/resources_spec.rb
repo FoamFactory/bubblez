@@ -600,6 +600,92 @@ describe Bubbles::Resources do
             end
           end
         end
+
+        context 'for an endpoint that does not require authentication' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                {
+                  :method => :patch,
+                  :location => 'password/change',
+                  :authenticated => false,
+                  :name => 'change_forgotten_password',
+                  :return_type => :body_as_object
+                }
+              ]
+
+              @resources = Bubbles::Resources.new
+              @environment = @resources.environment
+            end
+          end
+
+          context 'with a valid identification parameter and body' do
+            before do
+              @hash = 'xX3UQ9WYuMGOQ9SQt7DtSR2EOWnPCdMk'
+              @new_password = '789rty123'
+            end
+
+            it 'should allow the successful execution of the request' do
+              VCR.use_cassette('patch_change_password_unauthenticated') do
+                data = {
+                  :one_time_login_hash => @hash,
+                  :new_password => @new_password,
+                  :password_confirmation => @new_password
+                }
+
+                response = @environment.change_forgotten_password data
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
+          end
+        end
+      end
+
+      context 'when using a return type of full_response' do
+        context 'for an endpoint that does not require authorization' do
+          context 'with an invalid identification parameter' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :patch,
+                    :location => 'password/change',
+                    :authenticated => false,
+                    :name => 'change_forgotten_password',
+                    :return_type => :full_response
+                  }
+                ]
+              end
+
+              @resources = Bubbles::Resources.new
+              @environment = @resources.environment
+
+              @hash = '0xdeadbeef'
+              @new_password = 'habsgafat1'
+            end
+
+            it 'should respond with a RestClient error indicating a 404 exception was encountered' do
+              VCR.use_cassette('patch_change_password_unauthenticated_bad_hash') do
+                data = {
+                  :one_time_login_hash => @hash,
+                  :new_password => @new_password,
+                  :password_confirmation => @new_password
+                }
+
+                saw_error = false
+                begin
+                  response = @environment.change_forgotten_password data
+                rescue RestClient::NotFound => e
+                  saw_error = true
+                end
+
+                expect(saw_error).to be_truthy
+              end
+            end
+          end
+        end
       end
     end
 
@@ -669,6 +755,92 @@ describe Bubbles::Resources do
                 expect(response.phone).to eq('(555) 123-9045')
                 expect(response.emergencyContactPhone).to eq('(765) 192-8123')
                 expect(response.emergencyContactName).to eq('Katie Moribsu')
+              end
+            end
+          end
+        end
+
+        context 'for an endpoint that does not require authentication' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                {
+                  :method => :put,
+                  :location => 'password/change',
+                  :authenticated => false,
+                  :name => 'change_forgotten_password_put',
+                  :return_type => :body_as_object
+                }
+              ]
+
+              @resources = Bubbles::Resources.new
+              @environment = @resources.environment
+            end
+          end
+
+          context 'with a valid identification parameter and body' do
+            before do
+              @hash = 'F85QnV7Dus2xt1bAAQ72X2WbcNAqCREU'
+              @new_password = '789rty123'
+            end
+
+            it 'should allow the successful execution of the request' do
+              VCR.use_cassette('put_change_password_unauthenticated') do
+                data = {
+                  :one_time_login_hash => @hash,
+                  :new_password => @new_password,
+                  :password_confirmation => @new_password
+                }
+
+                response = @environment.change_forgotten_password_put data
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
+          end
+        end
+      end
+
+      context 'when using a return type of full_response' do
+        context 'for an endpoint that does not require authorization' do
+          context 'with an invalid identification parameter' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  {
+                    :method => :put,
+                    :location => 'password/change',
+                    :authenticated => false,
+                    :name => 'change_forgotten_password_put',
+                    :return_type => :full_response
+                  }
+                ]
+              end
+
+              @resources = Bubbles::Resources.new
+              @environment = @resources.environment
+
+              @hash = '0xdeadbeef'
+              @new_password = 'habsgafat1'
+            end
+
+            it 'should respond with a RestClient error indicating a 404 exception was encountered' do
+              VCR.use_cassette('put_change_password_unauthenticated_bad_hash') do
+                data = {
+                  :one_time_login_hash => @hash,
+                  :new_password => @new_password,
+                  :password_confirmation => @new_password
+                }
+
+                saw_error = false
+                begin
+                  response = @environment.change_forgotten_password_put data
+                rescue RestClient::NotFound => e
+                  saw_error = true
+                end
+
+                expect(saw_error).to be_truthy
               end
             end
           end

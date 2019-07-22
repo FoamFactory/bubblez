@@ -38,8 +38,8 @@ describe Bubbles::Resources do
         end
 
         it 'should fail gracefully' do
-          # NOTE: The following cassette file should NOT exist.
-          VCR.use_cassette('create_student_unable_to_connect') do
+          # NOTE: We don't want to use a cassette for this next test.
+          VCR.eject_cassette do
             data = {
               :name => 'Scott Klein',
               :address => '871 Anywhere St. #109',

@@ -148,6 +148,10 @@ module Bubbles
     # @return [String] A +String+ containing the full URL to access this +Endpoint+ on the given {RestEnvironment}.
     #
     def get_expanded_url(env, uri_params = {})
+      unless uri_params
+        uri_params = {}
+      end
+
       url = get_base_url env
 
       if is_complex?

@@ -1,0 +1,38 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://127.0.0.1:1234/validate/blah123
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (linux-gnu x86_64) ruby/2.6.1p33
+      Content-Type:
+      - application/json
+      Host:
+      - 127.0.0.1:1234
+  response:
+    status:
+      code: 401
+      message: Unauthorized
+    headers:
+      Content-Type:
+      - text/plain; charset=utf-8
+      Cache-Control:
+      - no-cache
+      X-Request-Id:
+      - 6ed228cc-1c65-4607-ae7b-0993324da61c
+      X-Runtime:
+      - '0.195836'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Mon, 22 Jul 2019 16:12:45 GMT
+recorded_with: VCR 3.0.3

@@ -101,10 +101,42 @@ module Bubbles
     # @param [String] auth_token The authorization token to use for authentication.
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     #
-    # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
     #
     def self.execute_head_authenticated(env, endpoint, auth_token, uri_params)
       execute_rest_call(env, endpoint, nil, auth_token, nil, uri_params) do |env, url, data, headers|
+        if env.scheme == 'https'
+          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
+            .head(headers)
+        else
+          next RestClient.head(url.to_s, headers)
+        end
+      end
+    end
+
+    ##
+    # Execute a HEAD request without authentication but with some parameters encoded in the URI string.
+    #
+    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
+    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
+    # @param [String] api_key The API key to use to validate the client.
+    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
+    # @param [Hash] headers An optional +Hash+ of additional headers to pass with the request.
+    #
+    # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
+    #
+    def self.execute_head_unauthenticated_with_uri_params(env, endpoint, api_key, uri_params, headers=nil)
+      additional_headers = {
+          'X-Api-Key' => api_key
+      }
+
+      unless headers.nil?
+        headers.each { |nextHeader|
+          additional_headers[nextHeader[0]] = nextHeader[1]
+        }
+      end
+
+      execute_rest_call(env, endpoint, nil, nil, additional_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .head(headers)

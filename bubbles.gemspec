@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "minitest-reporters", "~> 1.1"
   spec.add_development_dependency "simplecov", "~> 0.16"
-  spec.add_development_dependency "webmock", "~> 3.0"
+  spec.add_development_dependency "webmock", "~> 3.5"
   spec.add_development_dependency "vcr", "~> 3.0"
   spec.add_development_dependency "rspec", "~> 3.8"
   spec.add_dependency "addressable", "~> 2.5"

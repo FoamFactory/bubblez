@@ -1,0 +1,38 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://127.0.0.1:1234/validate/87162aslkjabsa
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (linux-gnu x86_64) ruby/2.6.1p33
+      X-Api-Key:
+      - bf414e8accf8155d650fb48500b48c569dc305e8
+      Content-Type:
+      - application/json
+      Host:
+      - 127.0.0.1:1234
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Cache-Control:
+      - no-cache
+      X-Request-Id:
+      - db1fabb3-c6c1-4dde-974b-e9dbf89e15f4
+      X-Runtime:
+      - '0.003946'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Mon, 22 Jul 2019 16:10:01 GMT
+recorded_with: VCR 3.0.3

@@ -855,41 +855,155 @@ describe Bubbles::Resources do
             config.environment = {
               :scheme => 'http',
               :host => '127.0.0.1',
-              :port => '1234'
+              :port => '1234',
+              :api_key => 'bf414e8accf8155d650fb48500b48c569dc305e8'
             }
           end
         end
 
-        context 'after redefining the environment to use Google' do
-          # NOTE - this is required so we know that we can redefine environments without issues
-          before do
-            Bubbles.configure do |config|
-              config.environment = {
-                :scheme => 'http',
-                :host => 'www.google.com',
-                :port => '80'
-              }
+        context 'for an endpoint that does not require an API key' do
+          context 'when at least one url parameter is expected' do
+            before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => 'http',
+                      :host => '127.0.0.1',
+                      :port => '1234'
+                  }
 
-              config.endpoints = [
-                {
-                  :method => :head,
-                  :location => '/',
-                  :authenticated => false,
-                  :name => 'head_google',
-                  :return_type => :full_response
-                }
-              ]
+                  config.endpoints = [
+                    :method => :head,
+                    :name => 'validate_login_hash',
+                    :location => '/validate/{hash}',
+                    :authenticated => false,
+                    :return_type => :full_response
+                ]
+              end
+
+              @resources = Bubbles::Resources.new
             end
 
-            @resources = Bubbles::Resources.new
+            context 'and that url parameter is specified on the url path and is not valid' do
+              before do
+                @login_hash = 'blah123'
+              end
+
+              it 'should return a 401 unauthorized' do
+                VCR.use_cassette('head_validate_login_hash_with_invalid_hash') do
+                  saw_error = false
+                  begin
+                    response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                  rescue RestClient::Unauthorized
+                    saw_error = true
+                  end
+
+                  expect(saw_error)
+                end
+              end
+            end
+
+            context 'and that url parameter is specified on the url path and is valid' do
+              before do
+                @login_hash = '87162aslkjabsa'
+              end
+              it 'should return a 204 no_content' do
+                VCR.use_cassette('head_validate_login_hash_with_valid_hash') do
+                  response = @resources.environment.validate_login_hash({:hash => @login_hash})
+
+                  expect(response).to_not be_nil
+                  expect(response.code).to eq(204)
+                end
+              end
+            end
           end
+        end
 
-          it 'should return a 200 Ok response' do
-            VCR.use_cassette('head_google') do
-              response = @resources.environment.head_google
+        context 'for an endpoint that requires an API key' do
+          context 'when at least one url parameter is expected' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                  :method => :head,
+                  :name => 'validate_login_hash',
+                  :location => '/validate/{hash}',
+                  :authenticated => false,
+                  :api_key_required => true,
+                  :return_type => :full_response
+                ]
+              end
 
-              expect(response).to_not be_nil
-              expect(response.code).to eq(200)
+              @resources = Bubbles::Resources.new
+            end
+
+            context 'and that url parameter is specified on the url path and is not valid' do
+              before do
+                @login_hash = 'blah123'
+              end
+
+              it 'should return a 401 unauthorized' do
+                VCR.use_cassette('head_api_key_validate_login_hash_with_invalid_hash') do
+                  saw_error = false
+                  begin
+                    response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                  rescue RestClient::Unauthorized
+                    saw_error = true
+                  end
+
+                  expect(saw_error)
+                end
+              end
+            end
+
+            context 'and that url parameter is specified on the url path and is valid' do
+              before do
+                @login_hash = '87162aslkjabsa'
+              end
+              it 'should return a 204 no_content' do
+                VCR.use_cassette('head_api_key_validate_login_hash_with_valid_hash') do
+                  response = @resources.environment.validate_login_hash({:hash => @login_hash})
+
+                  expect(response).to_not be_nil
+                  expect(response.code).to eq(204)
+                end
+              end
+            end
+          end
+        end
+
+        context 'for an endpoint that does not require an API key' do
+          context 'for an endpoint that does not take any URL parameters' do
+            context 'after redefining the environment to use Google' do
+              # NOTE - this is required so we know that we can redefine environments without issues
+              before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => 'http',
+                      :host => 'www.google.com',
+                      :port => '80'
+                  }
+
+                  config.endpoints = [
+                      {
+                          :method => :head,
+                          :location => '/',
+                          :authenticated => false,
+                          :name => 'head_google',
+                          :return_type => :full_response
+                      }
+                  ]
+                end
+
+                @resources = Bubbles::Resources.new
+              end
+
+              it 'should return a 200 Ok response' do
+                VCR.use_cassette('head_google') do
+                  response = @resources.environment.head_google
+
+                  expect(response).to_not be_nil
+                  expect(response.code).to eq(200)
+                end
+              end
             end
           end
         end

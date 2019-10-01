@@ -972,7 +972,45 @@ describe Bubbles::Resources do
 
         context 'for an endpoint that does not require an API key' do
           context 'for an endpoint that does not take any URL parameters' do
-            context 'after redefining the environment to use Google' do
+            context 'after redefining the environment to use Google with additional headers' do
+              before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => 'http',
+                      :host => 'www.google.com',
+                      :port => '80'
+                  }
+
+                  config.endpoints = [
+                      {
+                          :method => :head,
+                          :location => '/',
+                          :authenticated => false,
+                          :name => 'head_google',
+                          :return_type => :full_response,
+                          :headers => {
+                              :'X-Something' => 'anything'
+                          }
+                      }
+                  ]
+                end
+
+                @resources = Bubbles::Resources.new
+              end
+
+              it 'should add the header to the request' do
+                VCR.use_cassette('head_google_with_headers') do
+                  response = @resources.environment.head_google
+                  request = response.request
+
+                  expect(request).to_not be_nil
+                  expect(request.headers).to_not be_nil
+                  expect(request.headers).to have_key(:'X-Something')
+                end
+              end
+            end
+
+            context 'after redefining the environment to use Google without any additional headers' do
               # NOTE - this is required so we know that we can redefine environments without issues
               before do
                 Bubbles.configure do |config|

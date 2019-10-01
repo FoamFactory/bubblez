@@ -103,7 +103,7 @@ module Bubbles
     def endpoints=(endpoints)
       new_endpoints = Hash.new
       endpoints.each do |ep|
-        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:return_type], ep[:encode_authorization]
+        endpoint_object = Endpoint.new ep[:method], ep[:location].to_s, ep[:authenticated], ep[:api_key_required], ep[:name], ep[:return_type], ep[:encode_authorization], ep[:headers]
 
         new_endpoints[endpoint_object.get_key_string] = endpoint_object
       end
@@ -129,18 +129,18 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
-                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, uri_params
+                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token|
-                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, {}
+                  RestClientResources.execute_get_authenticated self, endpoint, auth_token,{}, endpoint.additional_headers
                 end
               end
             end
           else
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do
-                RestClientResources.execute_get_unauthenticated self, endpoint
+                RestClientResources.execute_get_unauthenticated self, endpoint, endpoint.additional_headers
               end
             end
           end
@@ -148,14 +148,14 @@ module Bubbles
           if endpoint.authenticated?
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |auth_token, data|
-                RestClientResources.execute_post_authenticated self, endpoint, auth_token, data
+                RestClientResources.execute_post_authenticated self, endpoint, auth_token, data, endpoint.additional_headers
               end
             end
           else
             if endpoint.api_key_required?
               Bubbles::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |data|
-                  additional_headers = {}
+                  additional_headers = endpoint.additional_headers
                   if endpoint.encode_authorization_header?
                     count = 0
                     auth_value = ''
@@ -188,7 +188,7 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
-                  RestClientResources.execute_delete_authenticated self, endpoint, auth_token, uri_params
+                  RestClientResources.execute_delete_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers
                 end
               else
                 # NOTE: While MDN states that DELETE requests with a body are allowed, it seems that a number of
@@ -214,13 +214,13 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
-                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, uri_params, data
+                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, uri_params, data, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
                   # TODO: Nothing tests this case. We need something to test this case or we run the risk of
                   #       it having bugs (uri_params was nil previously!)
-                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, {}, data
+                  RestClientResources.execute_patch_authenticated self, endpoint, auth_token, {}, data, endpoint.additional_headers
                 end
               end
             end
@@ -228,11 +228,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params, data|
-                  RestClientResources.execute_patch_unauthenticated self, endpoint, uri_params, data
+                  RestClientResources.execute_patch_unauthenticated self, endpoint, uri_params, data, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |data|
-                  RestClientResources.execute_patch_unauthenticated self, endpoint, {}, data
+                  RestClientResources.execute_patch_unauthenticated self, endpoint, {}, data, endpoint.additional_headers
                 end
               end
             end
@@ -242,13 +242,13 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
-                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, uri_params, data
+                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, uri_params, data, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
                   # TODO: Nothing tests this case. We need something to test this case or we run the risk of
                   #       it having bugs (uri_params was nil previously!)
-                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, {}, data
+                  RestClientResources.execute_put_authenticated self, endpoint, auth_token, {}, data, endpoint.additional_headers
                 end
               end
             end
@@ -257,11 +257,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params, data|
-                  RestClientResources.execute_put_unauthenticated self, endpoint, uri_params, data
+                  RestClientResources.execute_put_unauthenticated self, endpoint, uri_params, data, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |data|
-                  RestClientResources.execute_put_unauthenticated self, endpoint, {}, data
+                  RestClientResources.execute_put_unauthenticated self, endpoint, {}, data, endpoint.additional_headers
                 end
               end
             end
@@ -271,11 +271,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
-                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token|
-                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, {}
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, {}, endpoint.additional_headers
                 end
               end
             end
@@ -283,11 +283,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params|
-                  RestClientResources.execute_head_unauthenticated_with_uri_params self, endpoint, self.api_key, uri_params
+                  RestClientResources.execute_head_unauthenticated_with_uri_params self, endpoint, self.api_key, uri_params, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do
-                  RestClientResources.execute_head_unauthenticated self, endpoint, self.api_key, nil
+                  RestClientResources.execute_head_unauthenticated self, endpoint, self.api_key, endpoint.additional_headers
                 end
               end
             end
@@ -295,11 +295,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params|
-                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, {}
+                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, endpoint.additional_headers
                 end
               else
                 define_method(endpoint_name_as_sym) do
-                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, {}
+                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, endpoint.additional_headers
                 end
               end
             end

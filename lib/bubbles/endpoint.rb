@@ -74,13 +74,14 @@ module Bubbles
     # @param [Array<Symbol>] encode_authorization Parameters that should be treated as authorization parameters and
     #        encoded using a Base64 encoding.
     #
-    def initialize(method, location, auth_required = false, api_key_required = false, name = nil, return_type = :body_as_string, encode_authorization = {})
+    def initialize(method, location, auth_required = false, api_key_required = false, name = nil, return_type = :body_as_string, encode_authorization = {}, headers = {})
       @method = method
       @location = location
       @auth_required = auth_required
       @api_key_required = api_key_required
       @name = name
       @encode_authorization = encode_authorization
+      @additional_headers = headers
 
       unless Endpoint::RETURN_TYPES.include? return_type.to_s
         return_type = :body_as_string
@@ -271,6 +272,18 @@ module Bubbles
 
     def has_uri_params?
       !@uri_params.empty?
+    end
+
+    def additional_headers
+      unless @additional_headers
+        @additional_headers = {}
+      end
+
+      @additional_headers
+    end
+
+    def has_additional_headers?
+      not additional_headers.empty?
     end
   end
 end

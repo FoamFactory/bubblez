@@ -1,0 +1,57 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://www.google.com/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (linux-gnu x86_64) ruby/2.6.1p33
+      X-Something:
+      - anything
+      Content-Type:
+      - application/json
+      Host:
+      - www.google.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 01 Oct 2019 15:18:46 GMT
+      Expires:
+      - "-1"
+      Cache-Control:
+      - private, max-age=0
+      Content-Type:
+      - text/html; charset=ISO-8859-1
+      P3p:
+      - CP="This is not a P3P policy! See g.co/p3phelp for more info."
+      Content-Encoding:
+      - gzip
+      Server:
+      - gws
+      Content-Length:
+      - '5615'
+      X-Xss-Protection:
+      - '0'
+      X-Frame-Options:
+      - SAMEORIGIN
+      Set-Cookie:
+      - 1P_JAR=2019-10-01-15; expires=Thu, 31-Oct-2019 15:18:46 GMT; path=/; domain=.google.com;
+        SameSite=none
+      - NID=188=d25RcH2Qh6oEsegMFE_v0Kbx1eXrVy2P_TM6j9GW3YYRCcX8Pm1yL5-Dsi91dHW1ikvgWhN7WfAfq9PjVwn9fdgo8Bp2u_CWTlGjeiaFzRLcRI6EM3MrdZIO5CcSI6hWl36VG1vcavbvJhGJtLO_ROkdOhOwNLW3ubDfncOpHI0;
+        expires=Wed, 01-Apr-2020 15:18:46 GMT; path=/; domain=.google.com; HttpOnly
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 01 Oct 2019 15:18:46 GMT
+recorded_with: VCR 3.0.3

@@ -104,6 +104,7 @@ Environments are configured as part of the _bubbles configuration block_ and can
   - `host`: A domain name or IP address for the remote host to access for the environment.  Defaults to `127.0.0.1`.
   - `port`: The port to use to access the remote host. Defaults to `1234`.
   - `api_key`: The API key to send along with requests for a given environment, if an API key is required. This is optional, and defaults to `nil`.
+  - `headers`: A `Hash` of key-value pairs that contain additional headers to pass to every call to this endpoint. Defaults to `{}`.
 
 You can configure all three environments at once in the _bubbles configuration block_:
 ```ruby
@@ -168,6 +169,7 @@ Each _endpoint_ object can have the following attributes:
 
 ### Examples
 #### GET the version of the software (unauthenticated, no API key required)
+
 
 #### GET a specific user by id (authentication required)
 

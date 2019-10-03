@@ -28,9 +28,9 @@ _bubbles_ is a Gem that seeks to provide this same behavior.
 
 Currently, bubbles has a number of limitations that make it likely not suitable for use in a production environment. Each of these is tracked by an issue on our [issues page](https://github.com/FoamFactory/bubbles/issues).
 
-  - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (#10).
-  - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (#16)
-  - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (#12)
+  - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (FoamFactory/bubbles#10).
+  - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (FoamFactory/bubbles#16)
+  - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (FoamFactory/bubbles#12)
 
 If you're interested in working on any of the issues above, please feel free to submit a pull request and a member of our team will review that pull request within a couple of days.
 
@@ -52,7 +52,7 @@ Bubbles.configure do |config|
     }
   ]
 
-  config.local_environment = {
+  config.environment = {
     :scheme => 'http',
     :host => '0.0.0.0',
     :port => '1234'
@@ -60,7 +60,7 @@ Bubbles.configure do |config|
 end
 ```
 
-The `config.endpoints` section is where you configure which endpoints you want to support. The `config.local_environment` defines an environment, or remote configuration, for accessing the endpoint on a specific remote destination.
+The `config.endpoints` section is where you configure which endpoints you want to support. The `config.environment` defines an environment, or remote configuration, for accessing the endpoint on a specific remote destination.
 
 Now, you can use this endpoint with:
 ```ruby
@@ -73,7 +73,7 @@ def version
 
   # The following will make a GET request to
   # http://0.0.0.0:1234/version and return the result.
-  result = resources.local_environment.version
+  result = resources.environment.version
 
   puts(result)
 end
@@ -90,6 +90,8 @@ end
 This configuration block can be run at any time, but is typically set up in the initializer section of an app's startup. If desired, configuration can happen separately. That is, you can initialize environments within your initializer file and then initialize endpoints within another section of the application. Just note that when endpoints are defined, it overwrites _all_ endpoints of a configuration, not just the ones you choose to change.
 
 ### Environments
+> :construction: Environment names used to be hardcoded into Bubbles. You can now access the current environment using `Bubbles::Resources.new.environment`. This section is left in the documentation for future reference, as we will eventually be adding back named environments (see FoamFactory/bubbles#23 for tracking information).
+
 Three environments are currently available to be set up within bubbles. These are:
   - `local_environment` : Designed to be used for a local API for development testing.
   - `staging_environment` : Designed to be used for a remote API for second-stage testing or production-like deployment.
@@ -109,23 +111,25 @@ Environments are configured as part of the _bubbles configuration block_ and can
 You can configure all three environments at once in the _bubbles configuration block_:
 ```ruby
 Bubbles.configure do |config|
-  config.local_environment = {
+  config.environment = {
     :scheme => 'http',
     :host => '0.0.0.0',
     :port => '1234'
   }
 
-  config.staging_environment = {
-    :scheme => 'http',
-    :host => 'stage.api.foamfactory.com',
-    :port => '80'
-  }
+  # Note: This is deprecated for the time being. See (FoamFactory/bubbles/#23).
+  # config.staging_environment = {
+  #   :scheme => 'http',
+  #   :host => 'stage.api.foamfactory.com',
+  #   :port => '80'
+  # }
 
-  config.production_environment = {
-    :scheme => 'https',
-    :host => 'api.foamfactory.com',
-    :port => '443'
-  }
+  # Note: This is deprecated for the time being. See (FoamFactory/bubbles/#23).
+  # config.production_environment = {
+  #   :scheme => 'https',
+  #   :host => 'api.foamfactory.com',
+  #   :port => '443'
+  # }
 end
 ```
 

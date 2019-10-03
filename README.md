@@ -168,13 +168,175 @@ Each _endpoint_ object can have the following attributes:
 | `headers` | A `Hash` of key-value pairs specifying additional headers (the `key` specifies the name of the header, and the `value` specifies the value) that should be passed with each call to this `Endpoint`. Defaults to `{}`.
 
 ### Examples
-#### GET the version of the software (unauthenticated, no API key required)
+These examples are taken almost directly from our [test suite](https://github.com/FoamFactory/bubbles/blob/master/spec/bubbles/resources_spec.rb). For more detailed examples, please refer to our specifications located in the `/spec` directory.
 
+#### GET the version of the software (unauthenticated, no API key required)
+**Configuration**:
+
+```ruby
+require 'bubbles'
+
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :get,
+      :location => :version,
+      :authenticated => false,
+      :api_key_required => false,
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '0.0.0.0',
+    :port => '1234'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return an object containing the version information from the API' do
+  resources = Bubbles::Resources.new
+  environment = resources.environment
+
+  response = environment.version
+  expect(response).to_not be_nil
+  expect(response.name).to eq('My Sweet API')
+  expect(response.versionName).to eq('0.0.1')
+end
+```
 
 #### GET a specific user by id (authentication required)
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :get,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => :get_user,
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return an object containing a user with id = 4' do
+  environment = Bubbles::Resources.new.environment
+  user = environment.get_user(@auth_token, {:id => 4})
+  expect(user).to_not be_nil
+
+  expect(user.id).to eq(4)
+end
+```
 
 #### POST a login (i.e. retrieve an authorization token)
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :post,
+      :location => :login,
+      :authenticated => false,
+      :api_key_required => true,
+      :encode_authorization => [:username, :password],
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002',
+    :api_key => 'someapikey'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return a user data structure with a valid authorization token' do
+  environment = Bubbles::Resources.new.environment
+
+  data = { :username => 'myusername', :password => 'mypassword' }
+  login_object = environment.login data
+
+  auth_token = login_object.auth_token
+
+  expect(auth_token).to_not be_nil
+end
+```
 
 #### DELETE a user by id
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :delete,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => 'delete_user_by_id',
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+```
+
+**Usage**:
+```ruby
+it 'should successfully delete the given user' do
+  environment = Bubbles::Resources.new.environment
+  response = environment.delete_user_by_id @auth_token, {:id => 2}
+  expect(response.success).to eq(true)
+end
+```
 
 #### PATCH a user's information by providing a body containing information to update
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :patch,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => 'update_user',
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+```
+
+**Usage**:
+```ruby
+it 'should update information for the specified user' do
+  environment = Bubbles::Resources.new.environment
+  response = environment.update_user @auth_token, {:id => 4}, {:user => {:email => 'kleinhammer@somewhere.com' } }
+
+  expect(response.id).to eq(4)
+  expect(response.email).to eq('kleinhammer@somewhere.com')
+end
+```

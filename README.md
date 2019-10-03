@@ -28,9 +28,9 @@ _bubbles_ is a Gem that seeks to provide this same behavior.
 
 Currently, bubbles has a number of limitations that make it likely not suitable for use in a production environment. Each of these is tracked by an issue on our [issues page](https://github.com/FoamFactory/bubbles/issues).
 
-  - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (#10).
-  - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (#16)
-  - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (#12)
+  - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (FoamFactory/bubbles#10).
+  - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (FoamFactory/bubbles#16)
+  - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (FoamFactory/bubbles#12)
 
 If you're interested in working on any of the issues above, please feel free to submit a pull request and a member of our team will review that pull request within a couple of days.
 
@@ -52,7 +52,7 @@ Bubbles.configure do |config|
     }
   ]
 
-  config.local_environment = {
+  config.environment = {
     :scheme => 'http',
     :host => '0.0.0.0',
     :port => '1234'
@@ -60,7 +60,7 @@ Bubbles.configure do |config|
 end
 ```
 
-The `config.endpoints` section is where you configure which endpoints you want to support. The `config.local_environment` defines an environment, or remote configuration, for accessing the endpoint on a specific remote destination.
+The `config.endpoints` section is where you configure which endpoints you want to support. The `config.environment` defines an environment, or remote configuration, for accessing the endpoint on a specific remote destination.
 
 Now, you can use this endpoint with:
 ```ruby
@@ -73,7 +73,7 @@ def version
 
   # The following will make a GET request to
   # http://0.0.0.0:1234/version and return the result.
-  result = resources.local_environment.version
+  result = resources.environment.version
 
   puts(result)
 end
@@ -90,6 +90,8 @@ end
 This configuration block can be run at any time, but is typically set up in the initializer section of an app's startup. If desired, configuration can happen separately. That is, you can initialize environments within your initializer file and then initialize endpoints within another section of the application. Just note that when endpoints are defined, it overwrites _all_ endpoints of a configuration, not just the ones you choose to change.
 
 ### Environments
+> :construction: Environment names used to be hardcoded into Bubbles. You can now access the current environment using `Bubbles::Resources.new.environment`. This section is left in the documentation for future reference, as we will eventually be adding back named environments (see FoamFactory/bubbles#23 for tracking information).
+
 Three environments are currently available to be set up within bubbles. These are:
   - `local_environment` : Designed to be used for a local API for development testing.
   - `staging_environment` : Designed to be used for a remote API for second-stage testing or production-like deployment.
@@ -104,27 +106,30 @@ Environments are configured as part of the _bubbles configuration block_ and can
   - `host`: A domain name or IP address for the remote host to access for the environment.  Defaults to `127.0.0.1`.
   - `port`: The port to use to access the remote host. Defaults to `1234`.
   - `api_key`: The API key to send along with requests for a given environment, if an API key is required. This is optional, and defaults to `nil`.
+  - `headers`: A `Hash` of key-value pairs that contain additional headers to pass to every call to this endpoint. Defaults to `{}`.
 
 You can configure all three environments at once in the _bubbles configuration block_:
 ```ruby
 Bubbles.configure do |config|
-  config.local_environment = {
+  config.environment = {
     :scheme => 'http',
     :host => '0.0.0.0',
     :port => '1234'
   }
 
-  config.staging_environment = {
-    :scheme => 'http',
-    :host => 'stage.api.foamfactory.com',
-    :port => '80'
-  }
+  # Note: This is deprecated for the time being. See (FoamFactory/bubbles/#23).
+  # config.staging_environment = {
+  #   :scheme => 'http',
+  #   :host => 'stage.api.foamfactory.com',
+  #   :port => '80'
+  # }
 
-  config.production_environment = {
-    :scheme => 'https',
-    :host => 'api.foamfactory.com',
-    :port => '443'
-  }
+  # Note: This is deprecated for the time being. See (FoamFactory/bubbles/#23).
+  # config.production_environment = {
+  #   :scheme => 'https',
+  #   :host => 'api.foamfactory.com',
+  #   :port => '443'
+  # }
 end
 ```
 
@@ -167,12 +172,175 @@ Each _endpoint_ object can have the following attributes:
 | `headers` | A `Hash` of key-value pairs specifying additional headers (the `key` specifies the name of the header, and the `value` specifies the value) that should be passed with each call to this `Endpoint`. Defaults to `{}`.
 
 ### Examples
+These examples are taken almost directly from our [test suite](https://github.com/FoamFactory/bubbles/blob/master/spec/bubbles/resources_spec.rb). For more detailed examples, please refer to our specifications located in the `/spec` directory.
+
 #### GET the version of the software (unauthenticated, no API key required)
+**Configuration**:
+
+```ruby
+require 'bubbles'
+
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :get,
+      :location => :version,
+      :authenticated => false,
+      :api_key_required => false,
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '0.0.0.0',
+    :port => '1234'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return an object containing the version information from the API' do
+  resources = Bubbles::Resources.new
+  environment = resources.environment
+
+  response = environment.version
+  expect(response).to_not be_nil
+  expect(response.name).to eq('My Sweet API')
+  expect(response.versionName).to eq('0.0.1')
+end
+```
 
 #### GET a specific user by id (authentication required)
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :get,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => :get_user,
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return an object containing a user with id = 4' do
+  environment = Bubbles::Resources.new.environment
+  user = environment.get_user(@auth_token, {:id => 4})
+  expect(user).to_not be_nil
+
+  expect(user.id).to eq(4)
+end
+```
 
 #### POST a login (i.e. retrieve an authorization token)
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :post,
+      :location => :login,
+      :authenticated => false,
+      :api_key_required => true,
+      :encode_authorization => [:username, :password],
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002',
+    :api_key => 'someapikey'
+  }
+end
+```
+
+**Usage**:
+```ruby
+it 'should return a user data structure with a valid authorization token' do
+  environment = Bubbles::Resources.new.environment
+
+  data = { :username => 'myusername', :password => 'mypassword' }
+  login_object = environment.login data
+
+  auth_token = login_object.auth_token
+
+  expect(auth_token).to_not be_nil
+end
+```
 
 #### DELETE a user by id
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :delete,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => 'delete_user_by_id',
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+```
+
+**Usage**:
+```ruby
+it 'should successfully delete the given user' do
+  environment = Bubbles::Resources.new.environment
+  response = environment.delete_user_by_id @auth_token, {:id => 2}
+  expect(response.success).to eq(true)
+end
+```
 
 #### PATCH a user's information by providing a body containing information to update
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :patch,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :name => 'update_user',
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environment = {
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }
+```
+
+**Usage**:
+```ruby
+it 'should update information for the specified user' do
+  environment = Bubbles::Resources.new.environment
+  response = environment.update_user @auth_token, {:id => 4}, {:user => {:email => 'kleinhammer@somewhere.com' } }
+
+  expect(response.id).to eq(4)
+  expect(response.email).to eq('kleinhammer@somewhere.com')
+end
+```

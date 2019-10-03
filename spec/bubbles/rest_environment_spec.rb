@@ -1,5 +1,5 @@
-require 'bubbles'
 require 'spec_helper'
+require 'bubbles'
 
 describe Bubbles::RestEnvironment do
   describe 'Bubbles::Configure' do

@@ -1,5 +1,5 @@
-require 'bubbles'
 require 'spec_helper'
+require 'bubbles'
 
 describe Bubbles::Resources do
   context 'when using the local environment or a previously recorded call' do

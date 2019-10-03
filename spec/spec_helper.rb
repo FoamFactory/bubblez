@@ -1,4 +1,10 @@
 require 'vcr'
+require 'simplecov'
+
+SimpleCov.start do
+  # add_filter '/spec/'
+  track_files '{lib}/**/*.rb'
+end if ENV["COVERAGE"]
 
 VCR.configure do |config|
   config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'

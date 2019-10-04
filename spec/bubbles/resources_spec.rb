@@ -2,6 +2,53 @@ require 'spec_helper'
 require 'bubbles'
 
 describe Bubbles::Resources do
+  context 'when using the dummy reqres API' do
+    context 'accessed using https' do
+      before do
+        Bubbles.configure do |config|
+          config.environment = {
+            :scheme => 'https',
+            :host => 'reqres.in'
+          }
+        end
+      end
+
+      context 'when accessing the users endpoint without authentication' do
+        before do
+          Bubbles.configure do |config|
+            config.endpoints = [
+              {
+                :method => :get,
+                :location => 'api/users/{id}',
+                :name => 'get_user_by_id',
+                :return_type => :body_as_object,
+                :authenticated => false,
+                :api_key_required => false
+              }
+            ]
+
+            @resources = Bubbles::Resources.new
+          end
+        end
+
+        it 'should return a single user with id=1' do
+          require 'openssl'
+          VCR.use_cassette('reqres_get_user_by_id') do
+            environment = @resources.environment
+
+            data = {:id => 1}
+            response = environment.get_user_by_id data
+
+            expect(response).to_not be_nil
+            expect(response.data).to_not be_nil
+            expect(response.data.id).to be(1)
+            expect(response.data.first_name).to eq('George')
+          end
+        end
+      end
+    end
+  end
+
   context 'when using the local environment or a previously recorded call' do
     before do
       Bubbles.configure do |config|

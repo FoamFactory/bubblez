@@ -11,11 +11,12 @@ module Bubbles
     # Create a new instance of +RestClientResources+.
     #
     # @param env The +RestEnvironment+ that should be used for this set of resources.
-    # @param [String] api_key The API key to use to send to the host for unauthenticated requests.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
     # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
     #        +"X-API-Key"+.
     #
-    def initialize(env, api_key, api_key_name='X-API-Key')
+    def initialize(env, api_key = nil, api_key_name='X-API-Key')
       unless env
         env = :local
       end
@@ -24,7 +25,6 @@ module Bubbles
         api_key = ''
       end
 
-      @environment = get_environment env
       @api_key = api_key
       @auth_token = nil
       @api_key_name = api_key_name
@@ -480,7 +480,6 @@ module Bubbles
     #
     #   self.local_environment
     # end
-
     ##
     # Build a set of headers from two existing sets.
     #

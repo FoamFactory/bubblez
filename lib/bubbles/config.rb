@@ -142,14 +142,20 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token|
-                  RestClientResources.execute_get_authenticated self, endpoint, auth_token,{}, endpoint.additional_headers, self.api_key, self.api_key_name
+                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, {}, endpoint.additional_headers, self.api_key, self.api_key_name
                 end
               end
             end
           else
             Bubbles::RestEnvironment.class_exec do
-              define_method(endpoint_name_as_sym) do
-                RestClientResources.execute_get_unauthenticated self, endpoint, endpoint.additional_headers, self.api_key, self.api_key_name
+              if endpoint.has_uri_params?
+                define_method(endpoint_name_as_sym) do |uri_params|
+                  RestClientResources.execute_get_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, self.api_key, self.api_key_name
+                end
+              else
+                define_method(endpoint_name_as_sym) do
+                  RestClientResources.execute_get_unauthenticated self, endpoint, {}, endpoint.additional_headers, self.api_key, self.api_key_name
+                end
               end
             end
           end
@@ -165,7 +171,6 @@ module Bubbles
               Bubbles::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |data|
                   composite_headers = endpoint.additional_headers
-
                   if endpoint.encode_authorization_header?
                     auth_value = RestClientResources.get_encoded_authorization(endpoint, data)
                     composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {

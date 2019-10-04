@@ -37,14 +37,10 @@ module Bubbles
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
-    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
-    #        to +nil+.
-    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
-    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_unauthenticated(env, endpoint, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
+    def self.execute_get_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
       if api_key and endpoint.api_key_required?
         composite_headers = RestClientResources.build_composite_headers(additional_headers, {
             api_key_name.to_s => api_key
@@ -53,7 +49,7 @@ module Bubbles
         composite_headers = additional_headers
       end
 
-      execute_rest_call(env, endpoint, nil, nil, composite_headers) do |env, url, data, headers|
+      execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get(headers)
@@ -480,6 +476,7 @@ module Bubbles
     #
     #   self.local_environment
     # end
+
     ##
     # Build a set of headers from two existing sets.
     #

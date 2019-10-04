@@ -1,5 +1,6 @@
 require 'rspec/core/rake_task'
 require 'simplecov'
+require 'os'
 
 namespace :spec do
   desc "Create rspec coverage"
@@ -11,7 +12,11 @@ namespace :spec do
   namespace :coverage do
     desc 'View coverage information'
     task :view => [:coverage] do
-      `open coverage/index.html` # This only works if running OS X.
+      if OS.mac?
+        `open coverage/index.html`
+      elsif OS.posix?
+        `sensible-browser coverage/index.html`
+      end
     end
   end
 end

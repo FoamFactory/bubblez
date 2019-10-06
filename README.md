@@ -1,4 +1,6 @@
 # bubbles
+[![Build Status](https://travis-ci.org/FoamFactory/bubbles.svg?branch=master)](https://travis-ci.org/FoamFactory/bubbles)
+
 A gem for easily defining client REST interfaces in ruby
 
 ## Project Goals

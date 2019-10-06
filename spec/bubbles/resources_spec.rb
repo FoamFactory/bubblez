@@ -14,7 +14,52 @@ describe Bubbles::Resources do
       end
     end
 
-    context 'when accessed with a POST request' do
+    context 'when accessed with a GET request' do
+      context 'to the joke API' do
+        before do
+          @host = 'jokeapi.p.rapidapi.com'
+        end
+
+        context 'with a valid API key in the header X-RapidAPI-Key' do
+          before do
+            @api_key = 'f950bc6c01msh14699dc76e5c505p1299d6jsncc2bf32a60af'
+
+            Bubbles.configure do |config|
+              config.endpoints = [
+                  {
+                      :method => :get,
+                      :location => 'categories',
+                      :name => 'get_categories',
+                      :return_type => :body_as_object,
+                      :authenticated => false,
+                      :api_key_required => true,
+                      :headers => {
+                          :'X-RapidAPI-Host' => @host
+                      }
+                  }
+              ]
+              config.environment = {
+                  :scheme => 'https',
+                  :host => @host,
+                  :api_key => @api_key,
+                  :api_key_name => 'X-RapidAPI-Key'
+              }
+            end
+          end
+
+          it 'should return four categories for jokes that can be retrieved' do
+            VCR.use_cassette('get_jokeapi_categories') do
+              resources = Bubbles::Resources.new
+              environment = resources.environment
+              response = environment.get_categories
+
+              expect(response).to_not be_nil
+              expect(response.categories.length).to eq(4)
+            end
+          end
+        end
+      end
+
       context 'when the host is unavailable' do
         before do
           Bubbles.configure do |config|

@@ -2,14 +2,31 @@ require 'vcr'
 require 'simplecov'
 
 SimpleCov.start do
-  # add_filter '/spec/'
   track_files '{lib}/**/*.rb'
 end if ENV["COVERAGE"]
 
 VCR.configure do |config|
   config.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   config.hook_into :webmock
-  config.default_cassette_options = { :record => :once, :match_requests_on => [:method, :uri] }
+  config.register_request_matcher :authorization_header do |r1, r2|
+    if r1.headers.has_key? "Authorization"
+      r1.headers["Authorization"] == r2.headers["Authorization"]
+    else
+      not r2.headers.has_key? "Authorization"
+    end
+  end
+
+  config.register_request_matcher :x_api_key_header do |r1, r2|
+    if r1.headers.has_key? "X-API-Key"
+      r1.headers["X-API-Key"] == r2.headers["X-API-Key"]
+    elsif r1.headers.has_key? "X-Api-Key"
+      r1.headers["X-Api-Key"] == r2.headers["X-Api-Key"]
+    else
+      not (r2.headers.has_key? "X-Api-Key" and r2.headers.has_key? "X-API-Key")
+    end
+  end
+
+  config.default_cassette_options = { :record => :once, :match_requests_on => [:method, :uri, :authorization_header, :x_api_key_header] }
 end
 
 RSpec.configure do |config|

@@ -11,9 +11,11 @@ module Bubbles
     # Create a new instance of +RestClientResources+.
     #
     # @param env The +RestEnvironment+ that should be used for this set of resources.
-    # @param api_key The API key to use to send to the host for unauthenticated requests.
+    # @param [String] api_key The API key to use to send to the host for unauthenticated requests.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
-    def initialize(env, api_key)
+    def initialize(env, api_key, api_key_name='X-API-Key')
       unless env
         env = :local
       end
@@ -25,6 +27,7 @@ module Bubbles
       @environment = get_environment env
       @api_key = api_key
       @auth_token = nil
+      @api_key_name = api_key_name
     end
 
     ##
@@ -34,11 +37,23 @@ module Bubbles
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_unauthenticated(env, endpoint, additional_headers = {})
-      execute_rest_call(env, endpoint, nil, nil, additional_headers) do |env, url, data, headers|
+    def self.execute_get_unauthenticated(env, endpoint, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      execute_rest_call(env, endpoint, nil, nil, composite_headers) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get(headers)
@@ -59,11 +74,23 @@ module Bubbles
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {})
-      execute_rest_call(env, endpoint, nil, auth_token, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_get_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get(headers)
@@ -83,11 +110,23 @@ module Bubbles
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_head_unauthenticated(env, endpoint, uri_params, additional_headers = {})
-      execute_rest_call(env, endpoint, nil, nil, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_head_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .head(headers)
@@ -109,11 +148,23 @@ module Bubbles
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
     #
-    def self.execute_head_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {})
-      execute_rest_call(env, endpoint, nil, auth_token, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_head_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .head(headers)
@@ -128,22 +179,23 @@ module Bubbles
     #
     # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
-    # @param [String] api_key The API key to use to validate the client.
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
     #
-    def self.execute_head_unauthenticated_with_uri_params(env, endpoint, api_key, uri_params, additional_headers = {})
-      composite_headers = {
-          'X-Api-Key' => api_key
-      }
-
-      unless additional_headers.empty?
-        additional_headers.each { |nextHeader|
-          composite_headers[nextHeader[0]] = nextHeader[1]
-        }
+    def self.execute_head_unauthenticated_with_uri_params(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
       end
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
@@ -165,18 +217,20 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
-    def self.execute_post_with_api_key(env, endpoint, api_key, data, additional_headers = {})
-      composite_headers = {
-        'X-Api-Key' => api_key
-      }
-
-      unless additional_headers.nil?
-        additional_headers.each { |nextHeader|
-          composite_headers[nextHeader[0]] = nextHeader[1]
-        }
+    def self.execute_post_unauthenticated(env, endpoint, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
       end
 
       execute_rest_call(env, endpoint, data, nil, composite_headers) do |env, url, data, headers|
@@ -199,11 +253,23 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
-    def self.execute_post_authenticated(env, endpoint, auth_token, data, additional_headers = {})
-      return execute_rest_call(env, endpoint, data, auth_token, additional_headers) do |env, url, data, headers|
+    def self.execute_post_authenticated(env, endpoint, auth_token, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      return execute_rest_call(env, endpoint, data, auth_token, composite_headers) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .post(data.to_json, headers)
@@ -225,11 +291,23 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
     #
-    def self.execute_patch_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {})
-      return execute_rest_call(env, endpoint, data, auth_token, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_patch_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .patch(data.to_json, headers)
@@ -249,11 +327,23 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
     #
-    def self.execute_patch_unauthenticated(env, endpoint, uri_params, data, additional_headers = {})
-      return execute_rest_call(env, endpoint, data, nil, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_patch_unauthenticated(env, endpoint, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .patch(data.to_json, headers)
@@ -274,11 +364,23 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
     #
-    def self.execute_put_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {})
-      return execute_rest_call(env, endpoint, data, auth_token, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_put_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .put(data.to_json, headers)
@@ -298,11 +400,23 @@ module Bubbles
     # @param [Hash] data A +Hash+ of key-value pairs that will be sent in the body of the http request.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
     #
-    def self.execute_put_unauthenticated(env, endpoint, uri_params, data, additional_headers = {})
-      return execute_rest_call(env, endpoint, data, nil, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_put_unauthenticated(env, endpoint, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .put(data.to_json, headers)
@@ -322,11 +436,23 @@ module Bubbles
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
+    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
+    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the DELETE call.
     #
-    def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {})
-      execute_rest_call(env, endpoint, nil, auth_token, additional_headers, uri_params) do |env, url, data, headers|
+    def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key
+        })
+      else
+        composite_headers = additional_headers
+      end
+
+      execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .delete(headers)
@@ -354,6 +480,62 @@ module Bubbles
     #
     #   self.local_environment
     # end
+
+    ##
+    # Build a set of headers from two existing sets.
+    #
+    # This takes two sets of headers, as +Hash+es and merges them to create a single +Hash+ with all of the members of
+    # the previous two.
+    #
+    # @param [Hash] headers A set of existing headers.
+    # @param [Hash] additional_headers Another set of headers
+    #
+    # @return A +Hash+ containing all of the members of the input parameters. Key conflicts will be resolved to the
+    #         benefit of +additional_headers+, meaning that whatever is in the value of the key within the
+    #         +additional_headers+ +Hash+ will be used.
+    #
+    def self.build_composite_headers(headers, additional_headers)
+      composite_headers = headers
+
+      unless additional_headers.empty?
+        additional_headers.each { |nextHeader|
+          composite_headers[nextHeader[0]] = nextHeader[1]
+        }
+      end
+
+      composite_headers
+    end
+
+    ##
+    # Retrieve an encoded authorization (username and password) for a given
+    # +Endpoint+ and data set.
+    #
+    # @param endpoint The +Endpoint+ that this authorization will be used for.
+    # @param data A set of elements (typically username and password) that
+    #        should be encoded.
+    #
+    # @return A +String+ containing an encoding of the values passed in as
+    #         +data+, concatenated with a colon.
+    #
+    def self.get_encoded_authorization(endpoint, data)
+      count = 0
+      auth_value = ''
+      endpoint.encode_authorization.each { |auth_key|
+        if data[auth_key]
+          if count > 0
+            auth_value = auth_value + ':' + data[auth_key]
+          else
+            auth_value = data[auth_key]
+          end
+
+          count = count + 1
+
+          data.delete(auth_key)
+        end
+      }
+
+      auth_value
+    end
 
     private
 

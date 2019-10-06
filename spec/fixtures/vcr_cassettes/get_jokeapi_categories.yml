@@ -1,0 +1,71 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://jokeapi.p.rapidapi.com/categories
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - rest-client/2.1.0 (linux-gnu x86_64) ruby/2.6.1p33
+      X-Rapidapi-Host:
+      - jokeapi.p.rapidapi.com
+      X-Rapidapi-Key:
+      - f950bc6c01msh14699dc76e5c505p1299d6jsncc2bf32a60af
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Host:
+      - jokeapi.p.rapidapi.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Access-Control-Allow-Headers:
+      - "*"
+      Access-Control-Allow-Methods:
+      - GET, PUT, OPTIONS
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Request-Method:
+      - GET
+      Allow:
+      - GET, PUT, OPTIONS
+      Alt-Svc:
+      - h3-23=":443"; ma=86400
+      Cf-Cache-Status:
+      - DYNAMIC
+      Cf-Ray:
+      - 5212d5963f84e11e-IAD
+      Content-Type:
+      - application/json; utf-8
+      Date:
+      - Sat, 05 Oct 2019 22:29:26 GMT
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Server:
+      - RapidAPI-1.0.32
+      Set-Cookie:
+      - __cfduid=d23f359393de0bde08c08873ed4230fd61570314566; expires=Sun, 04-Oct-20
+        22:29:26 GMT; path=/; domain=.sv443.net; HttpOnly; Secure
+      Vary:
+      - Accept-Encoding
+      X-Rapidapi-Region:
+      - AWS - us-east-1
+      X-Rapidapi-Version:
+      - 1.0.32
+      Content-Length:
+      - '85'
+      Connection:
+      - keep-alive
+    body:
+      encoding: ASCII-8BIT
+      string: '{"categories":["Programming","Miscellaneous","Dark","Any"]}'
+    http_version: 
+  recorded_at: Sat, 05 Oct 2019 22:29:26 GMT
+recorded_with: VCR 3.0.3

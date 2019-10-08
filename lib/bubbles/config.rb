@@ -289,7 +289,7 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do
-                  RestClientResources.execute_head_unauthenticated self, endpoint, endpoint.additional_headers, self.api_key, self.api_key_name
+                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, endpoint.additional_headers, self.api_key, self.api_key_name
                 end
               end
             end

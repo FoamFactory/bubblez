@@ -2,6 +2,40 @@ require 'spec_helper'
 require 'bubbles'
 
 describe Bubbles::RestEnvironment do
+  describe '#initialize' do
+    context 'for an environment that specifies a scheme of http and a default port' do
+      before do
+        Bubbles.configure do |config|
+          config.environment = {
+              :scheme => 'http',
+              :host => 'somewhere.something.net',
+          }
+        end
+      end
+
+      it 'should actually set the port to 80' do
+        env = Bubbles::Resources.new.environment
+        expect(env.port).to eq(80)
+      end
+    end
+
+    context 'for an environment that specifies a scheme of https and a default port' do
+      before do
+        Bubbles.configure do |config|
+          config.environment = {
+              :scheme => 'https',
+              :host => 'somewhere.something.net',
+          }
+        end
+      end
+
+      it 'should actually set the port to 443' do
+        env = Bubbles::Resources.new.environment
+        expect(env.port).to eq(443)
+      end
+    end
+  end
+
   describe 'Bubbles::Configure' do
     before do
       Bubbles.configure do |config|
@@ -67,6 +101,45 @@ describe Bubbles::RestEnvironment do
       expect(environment.scheme).to eq('https')
       expect(environment.host).to eq('127.0.1.1')
       expect(environment.port).to eq('2222')
+    end
+  end
+
+  describe '#api_key_name' do
+    context 'for an environment that has an API key name specified' do
+      before do
+        Bubbles.configure do |config|
+          config.environment = {
+              :scheme => 'https',
+              :host => '127.0.1.1',
+              :port => '2222',
+              :api_key_name => 'X-Something-Key',
+              :api_key => 'blahblahblah'
+          }
+        end
+      end
+
+      it 'should return the name of the API key' do
+        env = Bubbles::Resources.new.environment
+        expect(env.api_key_name).to eq('X-Something-Key')
+      end
+    end
+
+    context 'for an environment that does not have an API key name specified' do
+      before do
+        Bubbles.configure do |config|
+          config.environment = {
+              :scheme => 'https',
+              :host => '127.0.1.1',
+              :port => '2222',
+              :api_key => 'blahblahblah'
+          }
+        end
+      end
+
+      it 'should return "X-API-Key"' do
+        env = Bubbles::Resources.new.environment
+        expect(env.api_key_name).to eq('X-API-Key')
+      end
     end
   end
 

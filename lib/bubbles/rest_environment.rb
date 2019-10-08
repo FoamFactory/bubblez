@@ -15,8 +15,10 @@ module Bubbles
       @scheme = scheme
       @port = port
 
-      if @scheme == 'http' && @port == 443
+      if @scheme == 'http' && @port == nil
         @port = 80
+      elsif @scheme == 'https' && @port == nil
+        @port = 443
       end
 
       @host = host
@@ -24,11 +26,14 @@ module Bubbles
       @api_key_name = api_key_name
     end
 
+    ##
+    # Retrieve the name of the API key to be used.
+    #
+    # This will be the "key" portion of the key-value of the API key header.
+    #
+    # @return [String] The API key name, if set; "X-API-Key", otherwise.
+    #
     def api_key_name
-      unless @api_key_name
-        @api_key_name = 'X-API-Key'
-      end
-
       @api_key_name
     end
   end

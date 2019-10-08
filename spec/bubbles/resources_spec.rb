@@ -49,7 +49,170 @@ describe Bubbles::Resources do
     end
   end
 
-  context 'when using the local environment or a previously recorded call' do
+  context 'when using the joke API' do
+    before do
+      @host = 'jokeapi.p.rapidapi.com'
+    end
+
+    context 'when accessed with a GET request' do
+      context 'with a valid API key in the header X-RapidAPI-Key' do
+        before do
+          @api_key = 'f950bc6c01msh14699dc76e5c505p1299d6jsncc2bf32a60af'
+
+          Bubbles.configure do |config|
+            config.endpoints = [
+                {
+                    :method => :get,
+                    :location => 'categories',
+                    :name => 'get_categories',
+                    :return_type => :body_as_object,
+                    :authenticated => false,
+                    :api_key_required => true,
+                    :headers => {
+                        :'X-RapidAPI-Host' => @host
+                    }
+                }
+            ]
+
+            config.environment = {
+                :scheme => 'https',
+                :host => @host,
+                :api_key => @api_key,
+                :api_key_name => 'X-RapidAPI-Key'
+            }
+          end
+        end
+
+        it 'should return four categories for jokes that can be retrieved' do
+          VCR.use_cassette('get_jokeapi_categories') do
+            resources = Bubbles::Resources.new
+            environment = resources.environment
+            response = environment.get_categories
+
+            expect(response).to_not be_nil
+            expect(response.categories.length).to eq(4)
+          end
+        end
+      end
+    end
+  end
+
+  context 'when using the FoamFactory API, accessed remotely' do
+    before do
+      Bubbles.configure do |config|
+        config.environment = {
+            :scheme => 'https',
+            :host => 'api.foamfactory.io',
+            :api_key => '0c4e97c2f7af608117e519d941f1d2fbc25fe46a'
+        }
+      end
+    end
+
+    context 'when accessed with a GET request' do
+      context 'listing users' do
+        context 'with an authenticated API requiring an API key' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                  {
+                      :location => :login,
+                      :method => :post,
+                      :encode_authorization => [:username, :password],
+                      :api_key_required => true,
+                      :return_type => :body_as_object
+                  },
+                  {
+                      :location => :users,
+                      :method => :get,
+                      :authenticated => true,
+                      :api_key_required => true,
+                      :return_type => :body_as_object
+                  }
+              ]
+            end
+          end
+
+          it 'should successfully list all users in the system' do
+            VCR.use_cassette('get_all_users_foamfactory_remote') do
+              env = Bubbles::Resources.new.environment
+              data = {
+                  :username => 'scottj',
+                  :password => '123qwe456'
+              }
+
+              authenticated_user = env.login data
+              expect(authenticated_user).to_not be_nil
+              expect(authenticated_user.auth_token).to_not be_nil
+
+              users = env.users authenticated_user.auth_token
+              expect(users).to_not be_nil
+              expect(users.users.length).to eq(2)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  context 'when using the FoamFactory API, accessed locally' do
+    before do
+      Bubbles.configure do |config|
+        config.environment = {
+          :scheme => 'http',
+          :host => 'localhost',
+          :port => 1234,
+          :api_key => 'fc411dc1b9bcc75f113951e574e243cca92fbddc'
+        }
+      end
+    end
+
+    context 'when accessed with a GET request' do
+      context 'listing users' do
+        context 'with an authenticated API requiring an API key' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                  {
+                      :location => :login,
+                      :method => :post,
+                      :encode_authorization => [:username, :password],
+                      :api_key_required => true,
+                      :return_type => :body_as_object
+                  },
+                  {
+                      :location => :users,
+                      :method => :get,
+                      :authenticated => true,
+                      :api_key_required => true,
+                      :return_type => :body_as_object
+                  }
+              ]
+            end
+          end
+
+          it 'should successfully list all users in the system' do
+            VCR.use_cassette('get_all_users_foamfactory_local') do
+              env = Bubbles::Resources.new.environment
+              data = {
+                  :username => 'scottj',
+                  :password => '123qwe456'
+              }
+
+              authenticated_user = env.login data
+              expect(authenticated_user).to_not be_nil
+              expect(authenticated_user.auth_token).to_not be_nil
+
+              users = env.users authenticated_user.auth_token
+              expect(users).to_not be_nil
+              expect(users.users.length).to eq(9)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  context 'when using the SinkingMoon API' do
     before do
       Bubbles.configure do |config|
         config.environment = {
@@ -61,70 +224,25 @@ describe Bubbles::Resources do
       end
     end
 
-    context 'when accessed with a GET request' do
-      context 'to the joke API' do
-        before do
-          @host = 'jokeapi.p.rapidapi.com'
-        end
-
-        context 'with a valid API key in the header X-RapidAPI-Key' do
-          before do
-            @api_key = 'f950bc6c01msh14699dc76e5c505p1299d6jsncc2bf32a60af'
-
-            Bubbles.configure do |config|
-              config.endpoints = [
-                  {
-                      :method => :get,
-                      :location => 'categories',
-                      :name => 'get_categories',
-                      :return_type => :body_as_object,
-                      :authenticated => false,
-                      :api_key_required => true,
-                      :headers => {
-                          :'X-RapidAPI-Host' => @host
-                      }
-                  }
-              ]
-              config.environment = {
-                  :scheme => 'https',
-                  :host => @host,
-                  :api_key => @api_key,
-                  :api_key_name => 'X-RapidAPI-Key'
-              }
-            end
-          end
-
-          it 'should return four categories for jokes that can be retrieved' do
-            VCR.use_cassette('get_jokeapi_categories') do
-              resources = Bubbles::Resources.new
-              environment = resources.environment
-              response = environment.get_categories
-
-              expect(response).to_not be_nil
-              expect(response.categories.length).to eq(4)
-            end
-          end
-        end
-      end
-
+    context 'when accessed with a POST request' do
       context 'when the host is unavailable' do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-              {
-                :method => :post,
-                :location => :students,
-                :authenticated => true,
-                :name => 'create_student',
-                :return_type => :body_as_object
-              }
+                {
+                    :method => :post,
+                    :location => :students,
+                    :authenticated => true,
+                    :name => 'create_student',
+                    :return_type => :body_as_object
+                }
             ]
 
             config.environment = {
-              :scheme => 'https',
-              :host => '127.0.0.1',
-              :port => '1234',
-              :api_key => 'blah'
+                :scheme => 'https',
+                :host => '127.0.0.1',
+                :port => '1234',
+                :api_key => 'blah'
             }
           end
         end
@@ -133,20 +251,20 @@ describe Bubbles::Resources do
           # NOTE: We don't want to use a cassette for this next test.
           VCR.eject_cassette do
             data = {
-              :name => 'Scott Klein',
-              :address => '871 Anywhere St. #109',
-              :city => 'Minneapolis',
-              :state => 'MN',
-              :zip => '55412',
-              :phone => '(612) 761-8172',
-              :email => 'scotty.kleiny@gmail.com',
-              :preferredContact => 'text',
-              :emergencyContactName => 'Nancy Klein',
-              :emergencyContactPhone => '(701) 762-5442',
-              :rank => 'white',
-              :joinDate => Date.today,
-              :lastAdvancementDate => Date.today,
-              :waiverSigned => true
+                :name => 'Scott Klein',
+                :address => '871 Anywhere St. #109',
+                :city => 'Minneapolis',
+                :state => 'MN',
+                :zip => '55412',
+                :phone => '(612) 761-8172',
+                :email => 'scotty.kleiny@gmail.com',
+                :preferredContact => 'text',
+                :emergencyContactName => 'Nancy Klein',
+                :emergencyContactPhone => '(701) 762-5442',
+                :rank => 'white',
+                :joinDate => Date.today,
+                :lastAdvancementDate => Date.today,
+                :waiverSigned => true
             }
 
             resources = Bubbles::Resources.new
@@ -163,14 +281,14 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-              {
-                :method => :post,
-                :location => 'password/forgot',
-                :name => :forgot_password,
-                :authenticated => false,
-                :api_key_required => true,
-                :return_type => :body_as_object
-              }
+                {
+                    :method => :post,
+                    :location => 'password/forgot',
+                    :name => :forgot_password,
+                    :authenticated => false,
+                    :api_key_required => true,
+                    :return_type => :body_as_object
+                }
             ]
           end
         end
@@ -193,14 +311,14 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-              {
-                :method => :post,
-                :location => :login,
-                :authenticated => false,
-                :api_key_required => true,
-                :encode_authorization => [:username, :password],
-                :return_type => :body_as_object
-              }
+                {
+                    :method => :post,
+                    :location => :login,
+                    :authenticated => false,
+                    :api_key_required => true,
+                    :encode_authorization => [:username, :password],
+                    :return_type => :body_as_object
+                }
             ]
           end
         end
@@ -226,21 +344,21 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-              {
-                :method => :post,
-                :location => :students,
-                :authenticated => true,
-                :name => 'create_student',
-                :return_type => :body_as_object
-              },
-              {
-                :method => :post,
-                :location => :login,
-                :authenticated => false,
-                :api_key_required => true,
-                :encode_authorization => [:username, :password],
-                :return_type => :body_as_object
-              }
+                {
+                    :method => :post,
+                    :location => :students,
+                    :authenticated => true,
+                    :name => 'create_student',
+                    :return_type => :body_as_object
+                },
+                {
+                    :method => :post,
+                    :location => :login,
+                    :authenticated => false,
+                    :api_key_required => true,
+                    :encode_authorization => [:username, :password],
+                    :return_type => :body_as_object
+                }
             ]
           end
         end
@@ -261,20 +379,20 @@ describe Bubbles::Resources do
           it 'should correctly add a record using a POST request' do
             VCR.use_cassette('post_student_authenticated') do
               data = {
-                :name => 'Scott Klein',
-                :address => '871 Anywhere St. #109',
-                :city => 'Minneapolis',
-                :state => 'MN',
-                :zip => '55412',
-                :phone => '(612) 761-8172',
-                :email => 'scotty.kleiny@gmail.com',
-                :preferredContact => 'text',
-                :emergencyContactName => 'Nancy Klein',
-                :emergencyContactPhone => '(701) 762-5442',
-                :rank => 'white',
-                :joinDate => Date.today,
-                :lastAdvancementDate => Date.today,
-                :waiverSigned => true
+                  :name => 'Scott Klein',
+                  :address => '871 Anywhere St. #109',
+                  :city => 'Minneapolis',
+                  :state => 'MN',
+                  :zip => '55412',
+                  :phone => '(612) 761-8172',
+                  :email => 'scotty.kleiny@gmail.com',
+                  :preferredContact => 'text',
+                  :emergencyContactName => 'Nancy Klein',
+                  :emergencyContactPhone => '(701) 762-5442',
+                  :rank => 'white',
+                  :joinDate => Date.today,
+                  :lastAdvancementDate => Date.today,
+                  :waiverSigned => true
               }
 
               student = @environment.create_student @auth_token, data
@@ -290,34 +408,36 @@ describe Bubbles::Resources do
     context 'when accessed with a GET request' do
       context 'when using a return type of body_as_object' do
         context 'for an endpoint that requires no authentication' do
-          before do
-            Bubbles.configure do |config|
-              config.endpoints = [
-                {
-                  :method => :get,
-                  :location => :version,
-                  :authenticated => false,
-                  :api_key_required => false,
-                  :return_type => :body_as_object
-                }
-              ]
+          context 'for an endpoint that does not require an api key' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :get,
+                        :location => :version,
+                        :authenticated => false,
+                        :api_key_required => false,
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
             end
-          end
 
-          it 'should be able to retrieve a response from the API' do
-            VCR.use_cassette('get_version_unauthenticated') do
-              resources = Bubbles::Resources.new
-              environment = resources.environment
+            it 'should be able to retrieve a response from the API' do
+              VCR.use_cassette('get_version_unauthenticated') do
+                resources = Bubbles::Resources.new
+                environment = resources.environment
 
-              response = environment.version
-              expect(response).to_not be_nil
-              expect(response.name).to eq('Sinking Moon API')
-              expect(response.versionName).to eq('4.1.0')
+                response = environment.version
+                expect(response).to_not be_nil
+                expect(response.name).to eq('Sinking Moon API')
+                expect(response.versionName).to eq('4.1.0')
 
-              deploy_date = Date.parse(response.deployDate)
-              expect(deploy_date.year).to eq(2019)
-              expect(deploy_date.month).to eq(4)
-              expect(deploy_date.day).to eq(28)
+                deploy_date = Date.parse(response.deployDate)
+                expect(deploy_date.year).to eq(2019)
+                expect(deploy_date.month).to eq(4)
+                expect(deploy_date.day).to eq(28)
+              end
             end
           end
         end

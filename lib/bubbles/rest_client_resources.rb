@@ -17,10 +17,6 @@ module Bubbles
     #        +"X-API-Key"+.
     #
     def initialize(env, api_key = nil, api_key_name='X-API-Key')
-      unless env
-        env = :local
-      end
-
       unless api_key
         api_key = ''
       end

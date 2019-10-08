@@ -2,6 +2,76 @@ require 'spec_helper'
 require 'bubbles'
 
 describe Bubbles::Resources do
+  context 'when using a dummy manufactured API' do
+    context 'when accessed using https' do
+      context 'when accessed using a HEAD request' do
+        before do
+          Bubbles.configure do |config|
+            config.environment = {
+                :scheme => 'https',
+                :host => 'www.somewhere.com',
+                :api_key => 'somemadeupkey2'
+            }
+
+            config.endpoints = [
+                {
+                    :location => '/',
+                    :method => :head,
+                    :api_key_required => true,
+                    :authenticated => false,
+                    :name => :head_somewhere
+                }
+            ]
+          end
+        end
+
+        context 'when an API key is required' do
+          it 'should return a 200 ok' do
+            VCR.use_cassette 'head_madeup_api_key_https' do
+              env = Bubbles::Resources.new.environment
+              response = env.head_somewhere
+              expect(response).to_not be_nil
+            end
+          end
+        end
+      end
+    end
+
+    context 'when accessed using http' do
+      context 'when accessed using a HEAD request' do
+        before do
+          Bubbles.configure do |config|
+            config.environment = {
+                :scheme => 'http',
+                :host => 'www.somewhere.com',
+                :api_key => 'somemadeupkey'
+            }
+
+            config.endpoints = [
+                {
+                    :location => '/',
+                    :method => :head,
+                    :api_key_required => true,
+                    :authenticated => false,
+                    :name => :head_somewhere
+                }
+            ]
+          end
+        end
+
+        context 'when an API key is required' do
+          it 'should return a 200 ok' do
+            VCR.use_cassette 'head_madeup_api_key' do
+              env = Bubbles::Resources.new.environment
+              response = env.head_somewhere
+              expect(response).to_not be_nil
+            end
+          end
+        end
+      end
+    end
+  end
+
   context 'when using the dummy reqres API' do
     context 'accessed using https' do
       before do

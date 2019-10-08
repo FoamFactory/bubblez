@@ -273,23 +273,11 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
-                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers, api_key, self.api_key_name
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token|
-                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, {}, endpoint.additional_headers
-                end
-              end
-            end
-          elsif endpoint.api_key_required?
-            Bubbles::RestEnvironment.class_exec do
-              if endpoint.has_uri_params?
-                define_method(endpoint_name_as_sym) do |uri_params|
-                  RestClientResources.execute_head_unauthenticated_with_uri_params self, endpoint, uri_params, endpoint.additional_headers, self.api_key, self.api_key_name
-                end
-              else
-                define_method(endpoint_name_as_sym) do
-                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, endpoint.additional_headers, self.api_key, self.api_key_name
+                  RestClientResources.execute_head_authenticated self, endpoint, auth_token, {}, endpoint.additional_headers, api_key, self.api_key_name
                 end
               end
             end
@@ -297,14 +285,15 @@ module Bubbles
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params|
-                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, endpoint.additional_headers
+                  RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, api_key, self.api_key_name
                 end
               else
                 define_method(endpoint_name_as_sym) do
-                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, endpoint.additional_headers
+                  RestClientResources.execute_head_unauthenticated self, endpoint, {}, endpoint.additional_headers, api_key, self.api_key_name
                 end
               end
             end
+
           end
         end
       end

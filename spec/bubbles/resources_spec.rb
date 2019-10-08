@@ -12,25 +12,61 @@ describe Bubbles::Resources do
                 :host => 'www.somewhere.com',
                 :api_key => 'somemadeupkey2'
             }
-
-            config.endpoints = [
-                {
-                    :location => '/',
-                    :method => :head,
-                    :api_key_required => true,
-                    :authenticated => false,
-                    :name => :head_somewhere
-                }
-            ]
           end
         end
 
-        context 'when an API key is required' do
-          it 'should return a 200 ok' do
-            VCR.use_cassette 'head_madeup_api_key_https' do
-              env = Bubbles::Resources.new.environment
-              response = env.head_somewhere
-              expect(response).to_not be_nil
+        context 'when using an authorization token' do
+          before do
+            @auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
+          end
+
+          context 'when an api key is required' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :location => '/',
+                        :method => :head,
+                        :api_key_required => true,
+                        :authenticated => true,
+                        :name => :head_somewhere
+                    }
+                ]
+              end
+            end
+
+            it 'should return a 200 ok' do
+              VCR.use_cassette 'head_madeup_api_key_authenticated_https' do
+                env = Bubbles::Resources.new.environment
+                response = env.head_somewhere @auth_token
+                expect(response).to_not be_nil
+              end
+            end
+          end
+        end
+
+        context 'when authentication is not necessary' do
+          context 'when an API key is required' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :location => '/',
+                        :method => :head,
+                        :api_key_required => true,
+                        :authenticated => false,
+                        :name => :head_somewhere
+                    }
+                ]
+              end
+            end
+
+            it 'should return a 200 ok' do
+              VCR.use_cassette 'head_madeup_api_key_https' do
+                env = Bubbles::Resources.new.environment
+                response = env.head_somewhere
+                expect(response).to_not be_nil
+              end
             end
           end
         end
@@ -46,25 +82,61 @@ describe Bubbles::Resources do
                 :host => 'www.somewhere.com',
                 :api_key => 'somemadeupkey'
             }
-
-            config.endpoints = [
-                {
-                    :location => '/',
-                    :method => :head,
-                    :api_key_required => true,
-                    :authenticated => false,
-                    :name => :head_somewhere
-                }
-            ]
           end
         end
 
-        context 'when an API key is required' do
-          it 'should return a 200 ok' do
-            VCR.use_cassette 'head_madeup_api_key' do
-              env = Bubbles::Resources.new.environment
-              response = env.head_somewhere
-              expect(response).to_not be_nil
+        context 'when authentication is not necessary' do
+          context 'when an API key is required' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :location => '/',
+                        :method => :head,
+                        :api_key_required => true,
+                        :authenticated => false,
+                        :name => :head_somewhere
+                    }
+                ]
+              end
+            end
+
+            it 'should return a 200 ok' do
+              VCR.use_cassette 'head_madeup_api_key' do
+                env = Bubbles::Resources.new.environment
+                response = env.head_somewhere
+                expect(response).to_not be_nil
+              end
+            end
+          end
+        end
+
+        context 'when using an authorization token' do
+          before do
+            @auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
+          end
+
+          context 'when an api key is required' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :location => '/',
+                        :method => :head,
+                        :api_key_required => true,
+                        :authenticated => true,
+                        :name => :head_somewhere
+                    }
+                ]
+              end
+            end
+
+            it 'should return a 200 ok' do
+              VCR.use_cassette 'head_madeup_api_key_authenticated' do
+                env = Bubbles::Resources.new.environment
+                response = env.head_somewhere @auth_token
+                expect(response).to_not be_nil
+              end
             end
           end
         end
@@ -1337,7 +1409,8 @@ describe Bubbles::Resources do
                 :method => :head,
                 :location => '/students',
                 :authenticated => true,
-                :name => 'head_students'
+                :name => 'head_students',
+                :api_key_required => false
               },
               {
                 :method => :post,

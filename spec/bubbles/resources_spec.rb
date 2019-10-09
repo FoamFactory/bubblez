@@ -593,6 +593,112 @@ describe Bubbles::Resources do
               expect(student.waiverSigned).to be_truthy
             end
           end
+
+          context 'and an API key is required in the header X-Something-Key' do
+            before do
+              Bubbles.configure do |config|
+                config.environment = {
+                    :scheme => 'http',
+                    :host => '127.0.0.1',
+                    :port => '9002',
+                    :api_key_name => 'X-Something-Key',
+                    :api_key => 'blahblahblah'
+                }
+
+                config.endpoints = [
+                  {
+                    :method => :post,
+                    :location => :students,
+                    :authenticated => true,
+                    :name => 'create_student',
+                    :return_type => :body_as_object,
+                    :api_key_required => true
+                  }
+                ]
+              end
+            end
+
+            it 'should correctly add a record using a POST request' do
+              VCR.use_cassette('post_student_authenticated_api_key') do
+                env = Bubbles::Resources.new.environment
+
+                data = {
+                    :name => 'Scott Klein',
+                    :address => '871 Anywhere St. #109',
+                    :city => 'Minneapolis',
+                    :state => 'MN',
+                    :zip => '55412',
+                    :phone => '(612) 761-8172',
+                    :email => 'scotty.kleiny@gmail.com',
+                    :preferredContact => 'text',
+                    :emergencyContactName => 'Nancy Klein',
+                    :emergencyContactPhone => '(701) 762-5442',
+                    :rank => 'white',
+                    :joinDate => Date.today,
+                    :lastAdvancementDate => Date.today,
+                    :waiverSigned => true
+                }
+
+                student = env.create_student @auth_token, data
+                expect(student.name).to eq('Scott Klein')
+                expect(student.address).to eq('871 Anywhere St. #109')
+                expect(student.waiverSigned).to be_truthy
+              end
+            end
+          end
+
+          context 'when using https' do
+            before do
+              Bubbles.configure do |config|
+                config.environment = {
+                    :scheme => 'https',
+                    :host => '127.0.0.1',
+                    :port => '9002',
+                    :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                }
+
+                config.endpoints = [
+                    {
+                        :method => :post,
+                        :location => :students,
+                        :authenticated => true,
+                        :name => 'create_student_https',
+                        :return_type => :body_as_object
+                    }
+                ]
+
+                @auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
+              end
+            end
+
+            it 'should correctly add a record using a POST request' do
+              VCR.use_cassette('post_student_authenticated_https') do
+                env = Bubbles::Resources.new.environment
+
+                data = {
+                    :name => 'Scott Klein',
+                    :address => '871 Anywhere St. #109',
+                    :city => 'Minneapolis',
+                    :state => 'MN',
+                    :zip => '55412',
+                    :phone => '(612) 761-8172',
+                    :email => 'scotty.kleiny@gmail.com',
+                    :preferredContact => 'text',
+                    :emergencyContactName => 'Nancy Klein',
+                    :emergencyContactPhone => '(701) 762-5442',
+                    :rank => 'white',
+                    :joinDate => Date.today,
+                    :lastAdvancementDate => Date.today,
+                    :waiverSigned => true
+                }
+
+                student = env.create_student_https @auth_token, data
+                expect(student.name).to eq('Scott Klein')
+                expect(student.address).to eq('871 Anywhere St. #109')
+                expect(student.waiverSigned).to be_truthy
+              end
+            end
+          end
         end
       end
     end

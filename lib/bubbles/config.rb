@@ -182,7 +182,19 @@ module Bubbles
                 end
               end
             else
-              raise 'Unauthenticated POST requests without an API key are not allowed'
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |data|
+                  composite_headers = endpoint.additional_headers
+                  if endpoint.encode_authorization_header?
+                    auth_value = RestClientResources.get_encoded_authorization(endpoint, data)
+                    composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
+                        :Authorization => 'Basic ' + Base64.strict_encode64(auth_value)
+                    })
+                  end
+
+                  RestClientResources.execute_post_unauthenticated self, endpoint, data, composite_headers
+                end
+              end
             end
           end
         elsif endpoint.method == :delete

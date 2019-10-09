@@ -74,6 +74,47 @@ describe Bubbles::Resources do
     end
 
     context 'when accessed using http' do
+      context 'when accessed using a POST request' do
+        before do
+          Bubbles.configure do |config|
+            config.environment = {
+                :scheme => 'https',
+                :host => '127.0.0.1',
+                :port => '9002'
+            }
+          end
+        end
+
+        context 'when authentication is not required' do
+          context 'when an api key is not required' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :location => :blah,
+                        :api_key_required => false,
+                        :authenticated => false,
+                        :method => :post
+                    }
+                ]
+              end
+            end
+
+            it 'should respond with 200 ok' do
+              VCR.use_cassette('post_unauthenticated_no_api_key') do
+                env = Bubbles::Resources.new.environment
+                data = {
+                    :email => 'eat@example.com'
+                }
+
+                response = env.blah data
+                puts(response)
+              end
+            end
+          end
+        end
+      end
+
       context 'when accessed using a HEAD request' do
         before do
           Bubbles.configure do |config|
@@ -420,31 +461,40 @@ describe Bubbles::Resources do
       end
 
       context 'when one of the endpoints has a slash in its path' do
-        before do
-          Bubbles.configure do |config|
-            config.endpoints = [
-                {
-                    :method => :post,
-                    :location => 'password/forgot',
-                    :name => :forgot_password,
-                    :authenticated => false,
-                    :api_key_required => true,
-                    :return_type => :body_as_object
-                }
-            ]
+        context 'and accessed using https' do
+          before do
+            Bubbles.configure do |config|
+              config.endpoints = [
+                  {
+                      :method => :post,
+                      :location => 'password/forgot',
+                      :name => :forgot_password,
+                      :authenticated => false,
+                      :api_key_required => true,
+                      :return_type => :body_as_object
+                  }
+              ]
+
+              config.environment = {
+                  :scheme => 'https',
+                  :host => '127.0.0.1',
+                  :port => '9002',
+                  :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+              }
+            end
           end
-        end
 
-        it 'should successfully send a request to the server at the correct location' do
-          VCR.use_cassette('post_unauthenticated_slash_in_path') do
-            resources = Bubbles::Resources.new
-            environment = resources.environment
+          it 'should successfully send a request to the server at the correct location' do
+            VCR.use_cassette('post_unauthenticated_slash_in_path_https') do
+              resources = Bubbles::Resources.new
+              environment = resources.environment
 
-            data = { :email => 'eat@example.com' }
-            response = environment.forgot_password data
+              data = { :email => 'eat@example.com' }
+              response = environment.forgot_password data
 
-            expect(response).to_not be_nil
-            expect(response.success).to be_truthy
+              expect(response).to_not be_nil
+              expect(response.success).to be_truthy
+            end
           end
         end
       end

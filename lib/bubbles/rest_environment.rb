@@ -1,6 +1,6 @@
 module Bubbles
   class RestEnvironment
-    attr_accessor :scheme, :host, :port, :api_key, :api_key_name
+    attr_accessor :host, :port, :api_key, :api_key_name
 
     ##
     # Construct a new instance of +RestEnvironment+.
@@ -53,6 +53,15 @@ module Bubbles
       else
         nil
       end
+    end
+
+    ##
+    # Retrieve the scheme of the current +RestEnvironment+, as a +Symbol+.
+    #
+    # @return [Symbol] The scheme of the current +RestEnvironment+, as a +Symbol+.
+    #
+    def scheme
+      @scheme.to_s
     end
   end
 end

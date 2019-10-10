@@ -1175,6 +1175,44 @@ describe Bubbles::Resources do
               @new_password = '789rty123'
             end
 
+            context 'when using https and passing an API key' do
+              before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => :https,
+                      :host => 'api.something.com',
+                      :api_key => 'blahblahblahblah'
+                  }
+
+                  config.endpoints = [
+                      {
+                          :method => :patch,
+                          :authenticated => false,
+                          :api_key_required => true,
+                          :location => 'password/change',
+                          :name => 'change_forgotten_password',
+                          :return_type => :body_as_object
+                      }
+                  ]
+                end
+              end
+              it 'should allow the successful execution of the request' do
+                VCR.use_cassette('patch_change_password_unauthenticated_https') do
+                  data = {
+                      :one_time_login_hash => @hash,
+                      :new_password => @new_password,
+                      :password_confirmation => @new_password
+                  }
+
+                  env = Bubbles::Resources.new.environment
+                  response = env.change_forgotten_password data
+
+                  expect(response).to_not be_nil
+                  expect(response.success).to be_truthy
+                end
+              end
+            end
+
             it 'should allow the successful execution of the request' do
               VCR.use_cassette('patch_change_password_unauthenticated') do
                 data = {

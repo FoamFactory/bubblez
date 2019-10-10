@@ -1093,6 +1093,46 @@ describe Bubbles::Resources do
               end
             end
 
+            context 'when using https and an api key is required' do
+              before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => 'https',
+                      :host => '127.0.0.1',
+                      :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                  }
+
+                  config.endpoints = [
+                      {
+                          :method => :patch,
+                          :location => 'students/{id}',
+                          :authenticated => true,
+                          :name => 'update_student',
+                          :return_type => :body_as_object,
+                          :api_key_required => true
+                      },
+                  ]
+                end
+              end
+
+              it 'should update part of a record' do
+                VCR.use_cassette('patch_update_student_https') do
+                  env = Bubbles::Resources.new.environment
+                  response = env.update_student @auth_token, {:id => 4}, {:student => {:email => 'kleinhammer@gmail.com' } }
+
+                  expect(response.id).to eq(4)
+                  expect(response.name).to eq('Scott Klein')
+                  expect(response.address).to eq('871 Anywhere St. #109')
+                  expect(response.city).to eq('Minneapolis')
+                  expect(response.state).to eq('MN')
+                  expect(response.zip).to eq('55412')
+                  expect(response.phone).to eq('(612) 761-8172')
+                  expect(response.emergencyContactPhone).to eq('(701) 762-5442')
+                  expect(response.emergencyContactName).to eq('Nancy Klein')
+                end
+              end
+            end
+
             it 'should update part of a record' do
               VCR.use_cassette('patch_update_student') do
                 response = @environment.update_student @auth_token, {:id => 4}, {:student => {:email => 'kleinhammer@gmail.com' } }

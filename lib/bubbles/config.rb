@@ -224,6 +224,12 @@ module Bubbles
             end
           else
             Bubbles::RestEnvironment.class_exec do
+              # TODO_jwir3: This should probably be in the accessor for api_key within RestEnvironment.
+              api_key = nil
+              if endpoint.api_key_required?
+                api_key = self.api_key
+              end
+
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params, data|
                   RestClientResources.execute_patch_unauthenticated self, endpoint, uri_params, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name

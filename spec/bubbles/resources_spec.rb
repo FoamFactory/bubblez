@@ -2,6 +2,28 @@ require 'spec_helper'
 require 'bubbles'
 
 describe Bubbles::Resources do
+  context 'internal plumbing' do
+    context '#execute_rest_call' do
+      context 'without a block' do
+        it 'should raise an exception' do
+          expect { Bubbles::RestClientResources.execute_rest_call(nil, nil, nil, nil, nil) }.to raise_error(an_instance_of(ArgumentError).and having_attributes(message: 'This method requires that a block is given'))
+        end
+      end
+
+      context 'with an invalid host' do
+        context 'without valid headers' do
+          before do
+            @environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
+          end
+
+          it 'throw an exception that contains the request that was executed' do
+            expect(@environment).to_not be_nil
+          end
+        end
+      end
+    end
+  end
+
   context 'when using a dummy manufactured API' do
     context 'when accessed using https' do
       context 'when accessed using a HEAD request' do

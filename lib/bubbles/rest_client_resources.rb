@@ -517,7 +517,7 @@ module Bubbles
     #
     def self.execute_rest_call(env, endpoint, data, auth_token, headers, uri_params = {}, &block)
       unless block
-        raise ArgumentError('This method requires that a block is given.')
+        raise ArgumentError.new('This method requires that a block is given')
       end
 
       url = endpoint.get_expanded_url env, uri_params

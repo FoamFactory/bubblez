@@ -1315,6 +1315,61 @@ describe Bubbles::Resources do
               end
             end
 
+            context 'when accessed using https and an api key' do
+              before do
+                Bubbles.configure do |config|
+                  config.endpoints = [
+                      {
+                          :method => :put,
+                          :location => 'students/{id}',
+                          :authenticated => true,
+                          :name => 'update_student',
+                          :return_type => :body_as_object,
+                          :api_key_required => true
+                      }
+                  ]
+
+                  config.environment = {
+                      :scheme => :https,
+                      :host => 'testbed.foamfactory.io',
+                      :api_key => 'blahblahblah'
+                  }
+                end
+              end
+
+              it 'should update the entire record' do
+                VCR.use_cassette('put_update_student_https') do
+                  data = {
+                      :student => {
+                          :email => 'michael.moribs@mikesmail-moribss.com',
+                          :name => 'Michael Moribsu',
+                          :address => '123 Anywhere St.',
+                          :city => 'Onetown',
+                          :state => 'MN',
+                          :zip => '55081',
+                          :phone => '(555) 123-9045',
+                          :emergencyContactName => 'Katie Moribsu',
+                          :emergencyContactPhone => '(765) 192-8123'
+                      }
+                  }
+
+                  env = Bubbles::Resources.new.environment
+                  response = env.update_student @auth_token, {:id => 4}, data
+
+                  expect(response.id).to eq(4)
+                  expect(response.email).to eq('michael.moribs@mikesmail-moribss.com')
+                  expect(response.name).to eq('Michael Moribsu')
+                  expect(response.address).to eq('123 Anywhere St.')
+                  expect(response.city).to eq('Onetown')
+                  expect(response.state).to eq('MN')
+                  expect(response.zip).to eq('55081')
+                  expect(response.phone).to eq('(555) 123-9045')
+                  expect(response.emergencyContactPhone).to eq('(765) 192-8123')
+                  expect(response.emergencyContactName).to eq('Katie Moribsu')
+                end
+              end
+            end
+
             it 'should update the entire record' do
               VCR.use_cassette('put_update_student') do
                 data = {
@@ -1370,6 +1425,45 @@ describe Bubbles::Resources do
             before do
               @hash = 'F85QnV7Dus2xt1bAAQ72X2WbcNAqCREU'
               @new_password = '789rty123'
+            end
+
+            context 'when accessed with https and an API key' do
+              before do
+                Bubbles.configure do |config|
+                  config.environment = {
+                      :scheme => :https,
+                      :host => 'testbed.foamfactory.io',
+                      :api_key => 'foamfactorybeermaker'
+                  }
+
+                  config.endpoints = [
+                      {
+                          :method => :put,
+                          :location => 'password/change',
+                          :authenticated => false,
+                          :api_key_required => true,
+                          :name => 'change_forgotten_password_put',
+                          :return_type => :body_as_object
+                      }
+                  ]
+                end
+              end
+              it 'should allow the successful execution of the request' do
+                VCR.use_cassette('put_change_password_unauthenticated_https') do
+                  data = {
+                      :one_time_login_hash => @hash,
+                      :new_password => @new_password,
+                      :password_confirmation => @new_password
+                  }
+
+                  env = Bubbles::Resources.new.environment
+                  response = env.change_forgotten_password_put data
+
+                  expect(response).to_not be_nil
+                  expect(response.success).to be_truthy
+                end
+              end
+
             end
 
             it 'should allow the successful execution of the request' do

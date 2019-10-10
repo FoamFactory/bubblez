@@ -36,5 +36,23 @@ module Bubbles
     def api_key_name
       @api_key_name
     end
+
+    ##
+    # Retrieve an API key from this +RestEnvironment+, but only if a specific +Endpoint+ requires it.
+    #
+    # If an +Endpoint+ has +api_key_required+ set to +true+, this method will return the API for the current
+    # +RestEnvironment+. If not, then it will return +nil+, rather than just blindly returning the API key for every
+    # possible retrieval, even if the +Endpoint+ doesn't require it.
+    #
+    # @return [String] The API key for this +RestEnvironment+, if the specified +Endpoint+ requires it; +nil+,
+    #         otherwise.
+    #
+    def get_api_key_if_needed(endpoint)
+      if endpoint.api_key_required?
+        @api_key
+      else
+        nil
+      end
+    end
   end
 end

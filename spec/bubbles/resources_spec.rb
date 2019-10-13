@@ -1036,19 +1036,89 @@ describe Bubbles::Resources do
     end
 
     context 'when accessed with a DELETE request' do
+      context 'that does not require uri parameters' do
+        it 'should raise an exception' do
+          expect {
+            Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :delete,
+                        :location => 'students',
+                        :authenticated => true,
+                        :name => 'delete_student_no_params',
+                        :return_type => :body_as_object
+                    }
+                ]
+            end
+          }.to raise_error('DELETE requests without URI parameters are not allowed')
+        end
+      end
+
       context 'when using a return type of body_as_object' do
+        context 'for an endpoint that does not require authorization' do
+          it 'should raise an exception stating that unauthenticated DELETE requests are not allowed' do
+            expect {
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :delete,
+                        :location => 'students/{id}',
+                        :authenticated => false,
+                        :name => 'delete_student_unauth',
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
+
+            }.to raise_error('Unauthenticated DELETE requests are not allowed')
+          end
+        end
+
         context 'for an endpoint that requires authorization' do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
-                {
-                  :method => :delete,
-                  :location => 'students/{id}',
-                  :authenticated => true,
-                  :name => 'delete_student',
-                  :return_type => :body_as_object
-                }
+                  {
+                      :method => :delete,
+                      :location => 'students/{id}',
+                      :authenticated => true,
+                      :name => 'delete_student',
+                      :return_type => :body_as_object
+                  }
               ]
+            end
+          end
+
+          context 'when accessing a host via HTTPS that requires an API key' do
+            before do
+              Bubbles.configure do |config|
+                config.environment = {
+                    :scheme => 'https',
+                    :host => 'testbed.foamfactory.io',
+                    :api_key => 'blahblahblah'
+                }
+
+                config.endpoints = [
+                    {
+                      :method => :delete,
+                      :location => 'students/{id}',
+                      :authenticated => true,
+                      :api_key_required => true,
+                      :name => 'delete_student_https',
+                      :return_type => :body_as_object
+                    }
+                ]
+              end
+            end
+
+            it 'should successfully delete the record' do
+              VCR.use_cassette('delete_student_by_id_api_key_https') do
+                auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
+                env = Bubbles::Resources.new.environment
+                response = env.delete_student_https auth_token, {:id => 2}
+
+                expect(response.success).to eq(true)
+              end
             end
           end
 

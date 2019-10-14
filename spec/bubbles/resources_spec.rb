@@ -3,6 +3,28 @@ require 'bubbles'
 
 describe Bubbles::Resources do
   context 'internal plumbing' do
+    context 'add_basic_headers' do
+      context 'with no headers passed in' do
+        it 'should return a set of headers including a content-type' do
+          headers = Bubbles::RestClientResources.add_basic_headers
+          expect(headers.length).to eq(1)
+          expect(headers).to have_key(:content_type)
+          expect(headers[:content_type]).to eq(:json)
+        end
+      end
+
+      context 'with an authorization header passed in' do
+        it 'should return a set of headers that preserves the existing headers and adds a content type' do
+          headers = Bubbles::RestClientResources.add_basic_headers({ :Authorization => 'blahblahblah' })
+          expect(headers.length).to eq(2)
+          expect(headers).to have_key(:content_type)
+          expect(headers[:content_type]).to eq(:json)
+          expect(headers).to have_key(:Authorization)
+          expect(headers[:Authorization]).to eq('blahblahblah')
+        end
+      end
+    end
+
     context '#execute_rest_call' do
       context 'without a block' do
         it 'should raise an exception' do
@@ -11,13 +33,19 @@ describe Bubbles::Resources do
       end
 
       context 'with an invalid host' do
-        context 'without valid headers' do
-          before do
-            @environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
-          end
+        it 'should return an error that the host is not accessible' do
+          VCR.turned_off do
+            WebMock.allow_net_connect!
+            environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
+            endpoint = Bubbles::Endpoint.new(:get, 'somewhere/over/the/rainbow', false, false, nil, :body_as_object)
 
-          it 'throw an exception that contains the request that was executed' do
-            expect(@environment).to_not be_nil
+            response = Bubbles::RestClientResources.execute_rest_call(environment, endpoint, nil, nil, nil) do |env, url, data, headers|
+              next RestClient.get(url.to_s, headers)
+            end
+
+            expect(response).to_not be_nil
+            expect(response.error).to eq('Unable to connect to host blorf:80')
+            WebMock.disable_net_connect!
           end
         end
       end
@@ -116,7 +144,8 @@ describe Bubbles::Resources do
                         :location => :blah,
                         :api_key_required => false,
                         :authenticated => false,
-                        :method => :post
+                        :method => :post,
+                        :return_type => :body_as_object
                     }
                 ]
               end
@@ -130,7 +159,8 @@ describe Bubbles::Resources do
                 }
 
                 response = env.blah data
-                puts(response)
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
               end
             end
           end
@@ -454,8 +484,9 @@ describe Bubbles::Resources do
 
         it 'should fail gracefully' do
           # NOTE: We don't want to use a cassette for this next test.
-          VCR.eject_cassette do
-            data = {
+          VCR.turned_off do
+              WebMock.allow_net_connect!
+              data = {
                 :name => 'Scott Klein',
                 :address => '871 Anywhere St. #109',
                 :city => 'Minneapolis',
@@ -478,6 +509,7 @@ describe Bubbles::Resources do
 
             expect(student).to_not be_nil
             expect(student.error).to eq('Unable to connect to host 127.0.0.1:1234')
+            WebMock.disable_net_connect!
           end
         end
       end

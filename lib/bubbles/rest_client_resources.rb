@@ -559,8 +559,14 @@ module Bubbles
         headers[:accept] = :json
 
         response = block.call(env, url, data, headers)
-      rescue Errno::ECONNREFUSED
+
+      rescue *[SocketError, Errno::ECONNREFUSED]
         response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
+        if endpoint.return_type == :body_as_object
+          response = JSON.parse(response, object_class: OpenStruct)
+        end
+
+        return response
       end
 
       if endpoint.return_type == :body_as_object and endpoint.method != :head

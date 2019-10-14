@@ -216,8 +216,6 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
-                  # TODO: Nothing tests this case. We need something to test this case or we run the risk of
-                  #       it having bugs (uri_params was nil previously!)
                   RestClientResources.execute_patch_authenticated self, endpoint, auth_token, {}, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
                 end
               end
@@ -244,8 +242,6 @@ module Bubbles
                 end
               else
                 define_method(endpoint_name_as_sym) do |auth_token, data|
-                  # TODO: Nothing tests this case. We need something to test this case or we run the risk of
-                  #       it having bugs (uri_params was nil previously!)
                   RestClientResources.execute_put_authenticated self, endpoint, auth_token, {}, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
                 end
               end

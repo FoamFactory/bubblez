@@ -1182,6 +1182,39 @@ describe Bubbles::Resources do
     context 'when accessed with a PATCH request' do
       context 'when using a return type of body_as_object' do
         context 'for an endpoint that requires authorization' do
+          context 'for an endpoint that does not have URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :patch,
+                        :location => 'password/change',
+                        :authenticated => true,
+                        :name => 'change_password_no_uri',
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
+
+              @new_password = '789rty123'
+            end
+
+            it 'should execute the request and return a 200 ok' do
+              VCR.use_cassette('patch_change_password_authenticated') do
+                data = {
+                    :new_password => @new_password,
+                    :password_confirmation => @new_password
+                }
+
+                env = Bubbles::Resources.new.environment
+                response = env.change_password_no_uri 'blahblahblah', data
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
+          end
+
           before do
             Bubbles.configure do |config|
               config.endpoints = [
@@ -1320,6 +1353,7 @@ describe Bubbles::Resources do
                   ]
                 end
               end
+
               it 'should allow the successful execution of the request' do
                 VCR.use_cassette('patch_change_password_unauthenticated_https') do
                   data = {
@@ -1349,6 +1383,48 @@ describe Bubbles::Resources do
 
                 expect(response).to_not be_nil
                 expect(response.success).to be_truthy
+              end
+            end
+          end
+
+          context 'for an endpoint that requires URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :patch,
+                        :location => 'password/change/{hash}',
+                        :authenticated => false,
+                        :name => 'change_forgotten_password_uri',
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
+            end
+
+            context 'with a valid identification parameter and body' do
+              before do
+                @hash = 'F85QnV7Dus2xt1bAAQ72X2WbcNAqCREU'
+                @new_password = '789rty123'
+              end
+
+              it 'should allow the successful execution of the request' do
+                VCR.use_cassette('patch_change_password_unauthenticated_uri_params') do
+                  uri_params = {
+                      :hash => @hash
+                  }
+
+                  data = {
+                      :new_password => @new_password,
+                      :password_confirmation => @new_password
+                  }
+
+                  env = Bubbles::Resources.new.environment
+                  response = env.change_forgotten_password_uri uri_params, data
+
+                  expect(response).to_not be_nil
+                  expect(response.success).to be_truthy
+                end
               end
             end
           end
@@ -1404,6 +1480,39 @@ describe Bubbles::Resources do
     context 'when accessed with a PUT request' do
       context 'when using a return type of body_as_object' do
         context 'for an endpoint that requires authorization' do
+          context 'for an endpoint that does not have URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :put,
+                        :location => 'password/change',
+                        :authenticated => true,
+                        :name => 'change_password_no_uri',
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
+
+              @new_password = '789rty123'
+            end
+
+            it 'should execute the request and return a 200 ok' do
+              VCR.use_cassette('put_change_password_authenticated') do
+                data = {
+                    :new_password => @new_password,
+                    :password_confirmation => @new_password
+                }
+
+                env = Bubbles::Resources.new.environment
+                response = env.change_password_no_uri 'blahblahblah', data
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
+          end
+
           before do
             Bubbles.configure do |config|
               config.endpoints = [
@@ -1587,7 +1696,6 @@ describe Bubbles::Resources do
                   expect(response.success).to be_truthy
                 end
               end
-
             end
 
             it 'should allow the successful execution of the request' do
@@ -1602,6 +1710,48 @@ describe Bubbles::Resources do
 
                 expect(response).to_not be_nil
                 expect(response.success).to be_truthy
+              end
+            end
+          end
+
+          context 'for an endpoint that requires URI parameters' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    {
+                        :method => :put,
+                        :location => 'password/change/{hash}',
+                        :authenticated => false,
+                        :name => 'change_forgotten_password_uri',
+                        :return_type => :body_as_object
+                    }
+                ]
+              end
+            end
+
+            context 'with a valid identification parameter and body' do
+              before do
+                @hash = 'F85QnV7Dus2xt1bAAQ72X2WbcNAqCREU'
+                @new_password = '789rty123'
+              end
+
+              it 'should allow the successful execution of the request' do
+                VCR.use_cassette('put_change_password_unauthenticated_uri_params') do
+                  uri_params = {
+                      :hash => @hash
+                  }
+
+                  data = {
+                      :new_password => @new_password,
+                      :password_confirmation => @new_password
+                  }
+
+                  env = Bubbles::Resources.new.environment
+                  response = env.change_forgotten_password_uri uri_params, data
+
+                  expect(response).to_not be_nil
+                  expect(response.success).to be_truthy
+                end
               end
             end
           end
@@ -1877,24 +2027,50 @@ describe Bubbles::Resources do
         end
 
         context 'with a valid authorization token' do
-          before do
-            @resources = Bubbles::Resources.new
-            @environment = @resources.environment
+          context 'having URI parameters specified' do
+            before do
+              Bubbles.configure do |config|
+                config.endpoints = [
+                    :method => :head,
+                    :authenticated => true,
+                    :api_key_required => false,
+                    :location => 'students/{id}',
+                    :name => 'head_student_by_id'
+                ]
+              end
+            end
 
-            VCR.use_cassette('login') do
-              data = { :username => 'scottj', :password => '123qwe456' }
-              login_object = @environment.login data
+            it 'should return a 200 ok response' do
+              VCR.use_cassette('head_students_authenticated_uri_params') do
+                env = Bubbles::Resources.new.environment
+                response = env.head_student_by_id 'blahblahblah', { :id => 32 }
 
-              @auth_token = login_object.auth_token
+                expect(response).to_not be_nil
+                expect(response.code).to eq(200)
+              end
             end
           end
 
-          it 'should return a 200 ok response' do
-            VCR.use_cassette('head_students_authenticated') do
-              response = @environment.head_students @auth_token
+          context 'with no URI parameters' do
+            before do
+              @resources = Bubbles::Resources.new
+              @environment = @resources.environment
 
-              expect(response).to_not be_nil
-              expect(response.code).to eq(200)
+              VCR.use_cassette('login') do
+                data = { :username => 'scottj', :password => '123qwe456' }
+                login_object = @environment.login data
+
+                @auth_token = login_object.auth_token
+              end
+            end
+
+            it 'should return a 200 ok response' do
+              VCR.use_cassette('head_students_authenticated') do
+                response = @environment.head_students @auth_token
+
+                expect(response).to_not be_nil
+                expect(response.code).to eq(200)
+              end
             end
           end
         end

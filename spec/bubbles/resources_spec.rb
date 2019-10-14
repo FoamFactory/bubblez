@@ -3,24 +3,39 @@ require 'bubbles'
 
 describe Bubbles::Resources do
   context 'internal plumbing' do
-    context 'add_basic_headers' do
-      context 'with no headers passed in' do
-        it 'should return a set of headers including a content-type' do
-          headers = Bubbles::RestClientResources.add_basic_headers
-          expect(headers.length).to eq(1)
-          expect(headers).to have_key(:content_type)
-          expect(headers[:content_type]).to eq(:json)
-        end
+    describe '#get_headers_with_api_key' do
+      before do
+        @environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
+        @endpoint = Bubbles::Endpoint.new(:get, 'somewhere/over/the/rainbow', false, false, nil, :body_as_object)
       end
+      context 'with no additional headers' do
+        context 'with no api key' do
+          it 'should return an empty hash' do
+            headers = Bubbles::RestClientResources.get_headers_with_api_key(@endpoint, nil, nil)
 
-      context 'with an authorization header passed in' do
-        it 'should return a set of headers that preserves the existing headers and adds a content type' do
-          headers = Bubbles::RestClientResources.add_basic_headers({ :Authorization => 'blahblahblah' })
-          expect(headers.length).to eq(2)
-          expect(headers).to have_key(:content_type)
-          expect(headers[:content_type]).to eq(:json)
-          expect(headers).to have_key(:Authorization)
-          expect(headers[:Authorization]).to eq('blahblahblah')
+            expect(headers).to_not be_nil
+            expect(headers.keys.length).to eq(2)
+            expect(headers[:content_type]).to eq(:json)
+            expect(headers[:accept]).to eq(:json)
+          end
+        end
+
+        context 'with an api key and api key name' do
+          before do
+            @endpoint = Bubbles::Endpoint.new(:get, 'somewhere/over/the/rainbow', false, true, nil, :body_as_object)
+            @api_key_name = 'X-Something-Wonderful'
+            @api_key = 'blahblahblah'
+          end
+
+          it 'should return a hash with an API key in it' do
+            headers = Bubbles::RestClientResources.get_headers_with_api_key(@endpoint, @api_key, @api_key_name)
+
+            expect(headers).to_not be_nil
+            expect(headers.keys.length).to eq(3)
+            expect(headers[@api_key_name]).to eq(@api_key)
+            expect(headers[:content_type]).to eq(:json)
+            expect(headers[:accept]).to eq(:json)
+          end
         end
       end
     end
@@ -28,7 +43,16 @@ describe Bubbles::Resources do
     context '#execute_rest_call' do
       context 'without a block' do
         it 'should raise an exception' do
-          expect { Bubbles::RestClientResources.execute_rest_call(nil, nil, nil, nil, nil) }.to raise_error(an_instance_of(ArgumentError).and having_attributes(message: 'This method requires that a block is given'))
+          expect { Bubbles::RestClientResources.execute_rest_call(nil, nil, nil, nil, {}) }.to raise_error(an_instance_of(ArgumentError).and having_attributes(message: 'This method requires that a block is given'))
+        end
+      end
+
+      context 'without headers' do
+        it 'should raise an exception' do
+          environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
+          endpoint = Bubbles::Endpoint.new(:get, 'somewhere/over/the/rainbow', false, false, nil, :body_as_object)
+
+          expect { Bubbles::RestClientResources.execute_rest_call(environment, endpoint, nil, nil, nil) }.to raise_error(an_instance_of(ArgumentError).and having_attributes(message: 'Expected headers to be non-nil'))
         end
       end
 
@@ -39,7 +63,7 @@ describe Bubbles::Resources do
             environment = Bubbles::RestEnvironment.new('http', 'blorf', 80, nil, 'X-API-Key')
             endpoint = Bubbles::Endpoint.new(:get, 'somewhere/over/the/rainbow', false, false, nil, :body_as_object)
 
-            response = Bubbles::RestClientResources.execute_rest_call(environment, endpoint, nil, nil, nil) do |env, url, data, headers|
+            response = Bubbles::RestClientResources.execute_rest_call(environment, endpoint, nil, nil, {}) do |env, url, data, headers|
               next RestClient.get(url.to_s, headers)
             end
 
@@ -1088,21 +1112,42 @@ describe Bubbles::Resources do
 
       context 'when using a return type of body_as_object' do
         context 'for an endpoint that does not require authorization' do
-          it 'should raise an exception stating that unauthenticated DELETE requests are not allowed' do
-            expect {
+          context 'with a valid api key' do
+            before do
               Bubbles.configure do |config|
+                config.environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => 9002,
+                  :api_key => 'blahblahblah'
+                }
+
                 config.endpoints = [
                     {
                         :method => :delete,
                         :location => 'students/{id}',
+                        :name => 'delete_student_no_auth',
                         :authenticated => false,
-                        :name => 'delete_student_unauth',
+                        :api_key_required => true,
                         :return_type => :body_as_object
                     }
                 ]
               end
+            end
 
-            }.to raise_error('Unauthenticated DELETE requests are not allowed')
+            it 'should successfully delete the record' do
+              VCR.use_cassette('delete_unauthenticated_student_by_id') do
+                uri_params = {
+                    :id => 2
+                }
+
+                env = Bubbles::Resources.new.environment
+                response = env.delete_student_no_auth uri_params
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
           end
         end
 

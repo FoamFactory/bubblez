@@ -182,30 +182,26 @@ module Bubbles
             end
           end
         elsif endpoint.method == :delete
-          if endpoint.authenticated?
-            Bubbles::RestEnvironment.class_exec do
-              if endpoint.has_uri_params?
+          if endpoint.has_uri_params?
+            if endpoint.authenticated?
+              Bubbles::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
                   RestClientResources.execute_delete_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
                 end
-              else
-                # NOTE: While MDN states that DELETE requests with a body are allowed, it seems that a number of
-                # documentation sites discourage its use. Thus, it's possible that, depending on the server API
-                # framework, the DELETE request could be rejected. As such, we're disallowing it here, BUT if we
-                # get feedback from users that it should be supported, we can add support for it.
-                raise 'DELETE requests without URI parameters are not allowed'
-              #   define_method(endpoint_name_as_sym) do |auth_token|
-              #     RestClientResources.execute_delete_authenticated self, endpoint, auth_token, {}
-              #   end
+              end
+            else
+              Bubbles::RestEnvironment.class_exec do
+                define_method(endpoint_name_as_sym) do |uri_params|
+                  RestClientResources.execute_delete_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                end
               end
             end
           else
-            raise 'Unauthenticated DELETE requests are not allowed'
-            # Bubbles::RestEnvironment.class_exec do
-              # define_method(endpoint_name_as_sym) do
-              #   RestClientResources.execute_delete_unauthenticated self, endpoint
-              # end
-            # end
+            # XXX_jwir3: While MDN states that DELETE requests with a body are allowed, it seems that a number of
+            # documentation sites discourage its use. Thus, it's possible that, depending on the server API
+            # framework, the DELETE request could be rejected. In addition, RestClient doesn't seem to support DELETE
+            # requests with a body, so we're a bit stuck on this one, even if we wanted to support it.
+            raise 'DELETE requests without URI parameters are not allowed'
           end
         elsif endpoint.method == :patch
           if endpoint.authenticated?

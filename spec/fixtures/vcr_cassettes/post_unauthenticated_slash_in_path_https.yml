@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: post
-    uri: http://127.0.0.1:9002/password/forgot
+    uri: https://127.0.0.1:9002/password/forgot
     body:
       encoding: UTF-8
       string: '{"email":"eat@example.com"}'

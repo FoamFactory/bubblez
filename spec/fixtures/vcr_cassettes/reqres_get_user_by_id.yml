@@ -1,0 +1,65 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://reqres.in/api/users/1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - rest-client/2.1.0 (darwin18.6.0 x86_64) ruby/2.6.1p33
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Host:
+      - reqres.in
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Fri, 04 Oct 2019 15:27:08 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Set-Cookie:
+      - __cfduid=d4ce1f9aa249620b7ce4e2d23876403731570202828; expires=Sat, 03-Oct-20
+        15:27:08 GMT; path=/; domain=.reqres.in; HttpOnly; Secure
+      X-Powered-By:
+      - Express
+      Access-Control-Allow-Origin:
+      - "*"
+      Etag:
+      - W/"a9-UwHd951rLzNqzqItB0vTQAVbJ+k"
+      Via:
+      - 1.1 vegur
+      Cf-Cache-Status:
+      - HIT
+      Age:
+      - '149'
+      Expires:
+      - Fri, 04 Oct 2019 19:27:08 GMT
+      Cache-Control:
+      - public, max-age=14400
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Vary:
+      - Accept-Encoding
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 52082da0e8e3c657-MSP
+    body:
+      encoding: ASCII-8BIT
+      string: '{"data":{"id":1,"email":"george.bluth@reqres.in","first_name":"George","last_name":"Bluth","avatar":"https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg"}}'
+    http_version: 
+  recorded_at: Fri, 04 Oct 2019 15:27:08 GMT
+recorded_with: VCR 3.0.3

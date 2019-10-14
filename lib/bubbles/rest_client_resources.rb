@@ -11,20 +11,16 @@ module Bubbles
     # Create a new instance of +RestClientResources+.
     #
     # @param env The +RestEnvironment+ that should be used for this set of resources.
-    # @param [String] api_key The API key to use to send to the host for unauthenticated requests.
+    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
+    #        to +nil+.
     # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
     #        +"X-API-Key"+.
     #
-    def initialize(env, api_key, api_key_name='X-API-Key')
-      unless env
-        env = :local
-      end
-
+    def initialize(env, api_key = nil, api_key_name='X-API-Key')
       unless api_key
         api_key = ''
       end
 
-      @environment = get_environment env
       @api_key = api_key
       @auth_token = nil
       @api_key_name = api_key_name
@@ -37,14 +33,10 @@ module Bubbles
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
-    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
-    #        to +nil+.
-    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
-    #        +"X-API-Key"+.
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_unauthenticated(env, endpoint, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
+    def self.execute_get_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
       if api_key and endpoint.api_key_required?
         composite_headers = RestClientResources.build_composite_headers(additional_headers, {
             api_key_name.to_s => api_key
@@ -53,7 +45,7 @@ module Bubbles
         composite_headers = additional_headers
       end
 
-      execute_rest_call(env, endpoint, nil, nil, composite_headers) do |env, url, data, headers|
+      execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .get(headers)
@@ -118,7 +110,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_head_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key
+      if api_key and endpoint.api_key_required?
         composite_headers = RestClientResources.build_composite_headers(additional_headers, {
             api_key_name.to_s => api_key
         })
@@ -156,7 +148,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
     #
     def self.execute_head_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key
+      if api_key and endpoint.api_key_required?
         composite_headers = RestClientResources.build_composite_headers(additional_headers, {
             api_key_name.to_s => api_key
         })
@@ -165,40 +157,6 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .head(headers)
-        else
-          next RestClient.head(url.to_s, headers)
-        end
-      end
-    end
-
-    ##
-    # Execute a HEAD request without authentication but with some parameters encoded in the URI string.
-    #
-    # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
-    # @param [Endpoint] endpoint The +Endpoint+ which should be requested
-    # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
-    # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
-    #        call. Defaults to an empty +Hash+.
-    # @param [String] api_key (Optional) The API key to use to send to the host for unauthenticated requests. Defaults
-    #        to +nil+.
-    # @param [String] api_key_name (Optional) The name of the header in which to send the API key. Defaults to
-    #        +"X-API-Key"+.
-    #
-    # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
-    #
-    def self.execute_head_unauthenticated_with_uri_params(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
-
-      execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         if env.scheme == 'https'
           next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
             .head(headers)
@@ -225,7 +183,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
     def self.execute_post_unauthenticated(env, endpoint, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key
+      if api_key and endpoint.api_key_required?
         composite_headers = RestClientResources.build_composite_headers(additional_headers, {
             api_key_name.to_s => api_key
         })
@@ -540,6 +498,29 @@ module Bubbles
     private
 
     ##
+    # Add a set of basic, boilerplate headers to a request.
+    #
+    # This adds a set of boilerplate headers that are used for every request to the headers for the request. Note that
+    # this specifically sets the "Content-Type" to "application/json". This may not be desirable for all applications,
+    # and, as such, we may need to adjust this in the future.
+    #
+    # @param [Hash] headers A set of key-value pairs indicating the headers already added to the request in question.
+    #
+    # @return [Hash] A set of key-value pairs containing the headers originally passed in, with boilerplate defaults
+    #         set.
+    #
+    def self.add_basic_headers(headers = nil)
+      if headers == nil
+        headers = {
+            :content_type => :json
+        }
+      else
+        headers[:content_type] = :json
+      end
+
+      headers
+    end
+    ##
     # Execute a REST call to the API.
     #
     # This is the workhorse of the +RestClientResources+ class. It performs the necessary setup of headers and the HTTP
@@ -559,7 +540,7 @@ module Bubbles
     #
     def self.execute_rest_call(env, endpoint, data, auth_token, headers, uri_params = {}, &block)
       unless block
-        raise ArgumentError('This method requires that a block is given.')
+        raise ArgumentError.new('This method requires that a block is given')
       end
 
       url = endpoint.get_expanded_url env, uri_params
@@ -569,13 +550,7 @@ module Bubbles
           data = {}
         end
 
-        if headers == nil
-          headers = {
-            :content_type => :json
-          }
-        else
-          headers[:content_type] = :json
-        end
+        headers = self.add_basic_headers(headers)
 
         unless auth_token == nil
           headers[:authorization] = 'Bearer ' + auth_token
@@ -584,8 +559,14 @@ module Bubbles
         headers[:accept] = :json
 
         response = block.call(env, url, data, headers)
-      rescue Errno::ECONNREFUSED
+
+      rescue *[SocketError, Errno::ECONNREFUSED]
         response = { :error => 'Unable to connect to host ' + env.host.to_s + ':' + env.port.to_s }.to_json
+        if endpoint.return_type == :body_as_object
+          response = JSON.parse(response, object_class: OpenStruct)
+        end
+
+        return response
       end
 
       if endpoint.return_type == :body_as_object and endpoint.method != :head

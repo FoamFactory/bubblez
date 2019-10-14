@@ -146,13 +146,10 @@ module Bubbles
     #
     # @param [RestEnvironment] env The +RestEnvironment+ to use to access this +Endpoint+.
     #
-    # @return [String] A +String+ containing the full URL to access this +Endpoint+ on the given {RestEnvironment}.
+    # @return [Addressable::URI] An +Addressable::URI+ containing the full URL to access this +Endpoint+ on the given
+    #         +RestEnvironment+.
     #
     def get_expanded_url(env, uri_params = {})
-      unless uri_params
-        uri_params = {}
-      end
-
       url = get_base_url env
 
       if is_complex?
@@ -240,7 +237,7 @@ module Bubbles
     #         for the +Endpoint+, to be defined on {RestClientResources}; false, otherwise.
     #
     def name?
-      @name == nil
+      @name != nil
     end
 
     ##

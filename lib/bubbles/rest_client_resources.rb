@@ -37,13 +37,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_get_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name='X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).get(headers)
@@ -69,13 +63,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_get_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).get(headers)
@@ -100,13 +88,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
     def self.execute_head_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).head(headers)
@@ -133,13 +115,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the HEAD call.
     #
     def self.execute_head_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).head(headers)
@@ -163,13 +139,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
     def self.execute_post_unauthenticated(env, endpoint, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, data, nil, composite_headers) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).post(data.to_json, headers)
@@ -194,13 +164,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
     def self.execute_post_authenticated(env, endpoint, auth_token, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).post(data.to_json, headers)
@@ -226,13 +190,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
     #
     def self.execute_patch_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).patch(data.to_json, headers)
@@ -256,13 +214,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PATCH call.
     #
     def self.execute_patch_unauthenticated(env, endpoint, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).patch(data.to_json, headers)
@@ -288,13 +240,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
     #
     def self.execute_put_authenticated(env, endpoint, auth_token, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).put(data.to_json, headers)
@@ -318,13 +264,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the PUT call.
     #
     def self.execute_put_unauthenticated(env, endpoint, uri_params, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).put(data.to_json, headers)
@@ -349,13 +289,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the DELETE call.
     #
     def self.execute_delete_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).delete(headers)
@@ -378,13 +312,7 @@ module Bubbles
     # @return [RestClient::Response] The +Response+ resulting from the execution of the DELETE call.
     #
     def self.execute_delete_unauthenticated(env, endpoint, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-Api-Key')
-      if api_key and endpoint.api_key_required?
-        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
-            api_key_name.to_s => api_key
-        })
-      else
-        composite_headers = additional_headers
-      end
+      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).delete(headers)
@@ -468,29 +396,23 @@ module Bubbles
 
     private
 
-    ##
-    # Add a set of basic, boilerplate headers to a request.
-    #
-    # This adds a set of boilerplate headers that are used for every request to the headers for the request. Note that
-    # this specifically sets the "Content-Type" to "application/json". This may not be desirable for all applications,
-    # and, as such, we may need to adjust this in the future.
-    #
-    # @param [Hash] headers A set of key-value pairs indicating the headers already added to the request in question.
-    #
-    # @return [Hash] A set of key-value pairs containing the headers originally passed in, with boilerplate defaults
-    #         set.
-    #
-    def self.add_basic_headers(headers = nil)
-      if headers == nil
-        headers = {
-            :content_type => :json
-        }
+    def self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers = {})
+      if api_key and endpoint.api_key_required?
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            api_key_name.to_s => api_key,
+            :content_type => :json,
+            :accept => :json
+        })
       else
-        headers[:content_type] = :json
+        composite_headers = RestClientResources.build_composite_headers(additional_headers, {
+            :content_type => :json,
+            :accept => :json
+        })
       end
 
-      headers
+      composite_headers
     end
+
     ##
     # Execute a REST call to the API.
     #
@@ -510,6 +432,10 @@ module Bubbles
     #         will return an +OpenStruct+; otherwise, the +Response+ will be returned.
     #
     def self.execute_rest_call(env, endpoint, data, auth_token, headers, uri_params = {}, &block)
+      unless headers
+        raise ArgumentError.new('Expected headers to be non-nil')
+      end
+
       unless block
         raise ArgumentError.new('This method requires that a block is given')
       end
@@ -521,13 +447,9 @@ module Bubbles
           data = {}
         end
 
-        headers = self.add_basic_headers(headers)
-
         unless auth_token == nil
           headers[:authorization] = 'Bearer ' + auth_token
         end
-
-        headers[:accept] = :json
 
         response = block.call(env, url, data, headers)
 

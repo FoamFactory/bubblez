@@ -1088,21 +1088,42 @@ describe Bubbles::Resources do
 
       context 'when using a return type of body_as_object' do
         context 'for an endpoint that does not require authorization' do
-          it 'should raise an exception stating that unauthenticated DELETE requests are not allowed' do
-            expect {
+          context 'with a valid api key' do
+            before do
               Bubbles.configure do |config|
+                config.environment = {
+                  :scheme => 'http',
+                  :host => '127.0.0.1',
+                  :port => 9002,
+                  :api_key => 'blahblahblah'
+                }
+
                 config.endpoints = [
                     {
                         :method => :delete,
                         :location => 'students/{id}',
+                        :name => 'delete_student_no_auth',
                         :authenticated => false,
-                        :name => 'delete_student_unauth',
+                        :api_key_required => true,
                         :return_type => :body_as_object
                     }
                 ]
               end
+            end
 
-            }.to raise_error('Unauthenticated DELETE requests are not allowed')
+            it 'should successfully delete the record' do
+              VCR.use_cassette('delete_unauthenticated_student_by_id') do
+                uri_params = {
+                    :id => 2
+                }
+
+                env = Bubbles::Resources.new.environment
+                response = env.delete_student_no_auth uri_params
+
+                expect(response).to_not be_nil
+                expect(response.success).to be_truthy
+              end
+            end
           end
         end
 

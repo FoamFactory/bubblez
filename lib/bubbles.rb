@@ -10,11 +10,9 @@ require 'json'
 
 module Bubbles
   class Resources < RestClientResources
-    def initialize
-    # def initialize(env, api_key)
-      # @environment = get_environment env
-      # @api_key = api_key
-      # @auth_token = nil
+    def initialize(api_key='')
+      super
+
       @packageName = Bubbles::VersionInformation.package_name
       @versionName = Bubbles::VersionInformation.version_name
       @versionCode = Bubbles::VersionInformation.version_code
@@ -29,4 +27,3 @@ module Bubbles
     end
   end
 end
-

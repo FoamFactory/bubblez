@@ -1,0 +1,99 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:1234/login
+    body:
+      encoding: UTF-8
+      string: "{}"
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - rest-client/2.1.0 (linux-gnu x86_64) ruby/2.6.1p33
+      Authorization:
+      - Basic c2NvdHRqOjEyM3F3ZTQ1Ng==
+      X-Api-Key:
+      - fc411dc1b9bcc75f113951e574e243cca92fbddc
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '2'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Host:
+      - localhost:1234
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Etag:
+      - W/"72611da6fcd302140074cc06ea810c8e"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - daf9aef9-34a5-4648-a993-0f772168acd2
+      X-Runtime:
+      - '0.080585'
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"id":1,"name":"Scott Johnson","username":"scottj","email":"scottj@sinkingmoon.com","validation_hash":null,"validation_expire_date":null,"email_validated":true,"created_at":"2019-07-29T14:46:37.193Z","updated_at":"2019-09-15T15:54:25.006Z","role":"admin","one_time_login_hash":null,"one_time_login_hash_expire_date":null,"auth_token":"eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wOS0xNVQxMDo1NDoyNC0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMTAtMTVUMTA6NTQ6MjQtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.Po9EKys8Tjcntwy1_AASzcnZ2OAQO_Tj16ygvzB18As"}'
+    http_version: 
+  recorded_at: Tue, 08 Oct 2019 21:42:20 GMT
+- request:
+    method: get
+    uri: http://localhost:1234/users
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - rest-client/2.1.0 (linux-gnu x86_64) ruby/2.6.1p33
+      X-Api-Key:
+      - fc411dc1b9bcc75f113951e574e243cca92fbddc
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wOS0xNVQxMDo1NDoyNC0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMTAtMTVUMTA6NTQ6MjQtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.Po9EKys8Tjcntwy1_AASzcnZ2OAQO_Tj16ygvzB18As
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Host:
+      - localhost:1234
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Etag:
+      - W/"b40ae36dd6cee3e41031623eb7517679"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - b022faef-e8b1-49d2-8bf9-3a2d53ec7b5e
+      X-Runtime:
+      - '0.007113'
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"users":[{"id":1,"name":"Scott Johnson","username":"scottj","email":"scottj@sinkingmoon.com","validation_expire_date":null,"email_validated":true,"created_at":"2019-07-29T14:46:37.193Z","updated_at":"2019-09-15T15:54:25.006Z","role":"admin"},{"id":2,"name":"Pooh
+        Bear","username":"poohb","email":"pooh@hundredacre.net","validation_expire_date":"2019-08-05T14:46:37.289Z","email_validated":null,"created_at":"2019-07-29T14:46:37.289Z","updated_at":"2019-07-29T14:46:37.289Z","role":"user"},{"id":3,"name":"Doctor
+        Who","username":"thedoctor","email":"thedoctor@timelords.net","validation_expire_date":"2019-08-05T14:46:37.310Z","email_validated":true,"created_at":"2019-07-29T14:46:37.383Z","updated_at":"2019-07-29T14:46:37.383Z","role":"admin"},{"id":4,"name":"Jebidiah
+        Motley","username":"jmotley","email":"jmotley@someemail.somewhere.net","validation_expire_date":null,"email_validated":true,"created_at":"2019-08-24T23:15:33.755Z","updated_at":"2019-08-24T23:17:36.825Z","role":"user"},{"id":5,"name":"Scott
+        Johnson","username":"jwir3","email":"sjohnson198@someemail.com","validation_expire_date":"2019-08-31T23:18:55.024Z","email_validated":null,"created_at":"2019-08-24T23:18:55.024Z","updated_at":"2019-08-24T23:18:55.024Z","role":"user"},{"id":6,"name":"Sammi
+        Johansen","username":"sammi","email":"google123@sammi.com","validation_expire_date":"2019-10-06T22:51:04.268Z","email_validated":null,"created_at":"2019-09-29T22:51:04.268Z","updated_at":"2019-09-29T22:51:04.268Z","role":"user"},{"id":7,"name":"Sammi
+        Swanson","username":"sammi2","email":"mark2@someemail.com","validation_expire_date":"2019-10-06T23:33:45.135Z","email_validated":null,"created_at":"2019-09-29T23:33:45.135Z","updated_at":"2019-09-29T23:33:45.135Z","role":"user"},{"id":8,"name":"Amy
+        Johnson","username":"amyj","email":"amy123@amysworld.com","validation_expire_date":"2019-10-06T23:56:06.815Z","email_validated":null,"created_at":"2019-09-29T23:56:06.817Z","updated_at":"2019-09-29T23:56:06.817Z","role":"user"},{"id":9,"name":"Paul
+        Ough","username":"ceough","email":"someough@ough.com","validation_expire_date":null,"email_validated":true,"created_at":"2019-10-01T13:42:28.534Z","updated_at":"2019-10-01T13:43:00.400Z","role":"user"}]}'
+    http_version: 
+  recorded_at: Tue, 08 Oct 2019 21:42:20 GMT
+recorded_with: VCR 5.0.0

@@ -46,12 +46,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .get(headers)
-        else
-          next RestClient.get(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).get(headers)
       end
     end
 
@@ -83,12 +78,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .get(headers)
-        else
-          next RestClient.get(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).get(headers)
       end
     end
 
@@ -119,12 +109,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .head(headers)
-        else
-          next RestClient.head(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).head(headers)
       end
     end
 
@@ -157,12 +142,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .head(headers)
-        else
-          next RestClient.head(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).head(headers)
       end
     end
 
@@ -192,12 +172,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, data, nil, composite_headers) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .post(data.to_json, headers)
-        else
-          next RestClient.post url.to_s, data.to_json, headers
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).post(data.to_json, headers)
       end
     end
 
@@ -228,13 +203,7 @@ module Bubbles
       end
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .post(data.to_json, headers)
-
-        else
-          next RestClient.post(url.to_s, data.to_json, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).post(data.to_json, headers)
       end
     end
 
@@ -266,13 +235,7 @@ module Bubbles
       end
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .patch(data.to_json, headers)
-
-        else
-          next RestClient.patch(url.to_s, data.to_json, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).patch(data.to_json, headers)
       end
     end
 
@@ -302,12 +265,7 @@ module Bubbles
       end
 
       return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .patch(data.to_json, headers)
-        else
-          next RestClient.patch(url.to_s, data.to_json, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).patch(data.to_json, headers)
       end
     end
 
@@ -339,13 +297,7 @@ module Bubbles
       end
 
       return execute_rest_call(env, endpoint, data, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .put(data.to_json, headers)
-
-        else
-          next RestClient.put(url.to_s, data.to_json, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).put(data.to_json, headers)
       end
     end
 
@@ -375,12 +327,7 @@ module Bubbles
       end
 
       return execute_rest_call(env, endpoint, data, nil, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .put(data.to_json, headers)
-        else
-          next RestClient.put(url.to_s, data.to_json, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).put(data.to_json, headers)
       end
     end
 
@@ -411,12 +358,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-            .delete(headers)
-        else
-          next RestClient.delete(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).delete(headers)
       end
     end
 
@@ -445,12 +387,7 @@ module Bubbles
       end
 
       execute_rest_call(env, endpoint, nil, nil, composite_headers, uri_params) do |env, url, data, headers|
-        if env.scheme == 'https'
-          next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE)
-                   .delete(headers)
-        else
-          next RestClient.delete(url.to_s, headers)
-        end
+        next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).delete(headers)
       end
     end
 

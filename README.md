@@ -30,9 +30,7 @@ _bubbles_ is a Gem that seeks to provide this same behavior.
 
 Currently, bubbles has a number of limitations that make it likely not suitable for use in a production environment. Each of these is tracked by an issue on our [issues page](https://github.com/FoamFactory/bubbles/issues).
 
-  - Passing an API key with a request is restricted to using `X-Api-Key` as a header key (FoamFactory/bubbles#10).
   - Some request methods (specifically `DELETE`) do not currently allow unauthenticated access. In other words, it is not possible to perform a `DELETE` request on your API without passing an authorization token. (FoamFactory/bubbles#16)
-  - Not all possible combinations of `has_uri_params`, `authenticated`, and `api_key_required` are tested. In some cases, such as with `GET` requests, there aren't any tests for possible configuration cases that might cause issues when combined. (FoamFactory/bubbles#12)
 
 If you're interested in working on any of the issues above, please feel free to submit a pull request and a member of our team will review that pull request within a couple of days.
 
@@ -67,7 +65,6 @@ The `config.endpoints` section is where you configure which endpoints you want t
 Now, you can use this endpoint with:
 ```ruby
 require 'bubbles'
-
 ...
 
 def version
@@ -85,7 +82,7 @@ end
 There are currently two parts to a bubbles configuration: the _environments_ and the _endpoints_. Bubbles is configured in a _bubbles configuration block_:
 ```ruby
 Bubbles.configure do |config|
-...
+  # You can add configuration for Bubbles here using config.endpoints and config.environment
 end
 ```
 

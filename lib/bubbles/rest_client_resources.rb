@@ -498,6 +498,29 @@ module Bubbles
     private
 
     ##
+    # Add a set of basic, boilerplate headers to a request.
+    #
+    # This adds a set of boilerplate headers that are used for every request to the headers for the request. Note that
+    # this specifically sets the "Content-Type" to "application/json". This may not be desirable for all applications,
+    # and, as such, we may need to adjust this in the future.
+    #
+    # @param [Hash] headers A set of key-value pairs indicating the headers already added to the request in question.
+    #
+    # @return [Hash] A set of key-value pairs containing the headers originally passed in, with boilerplate defaults
+    #         set.
+    #
+    def self.add_basic_headers(headers = nil)
+      if headers == nil
+        headers = {
+            :content_type => :json
+        }
+      else
+        headers[:content_type] = :json
+      end
+
+      headers
+    end
+    ##
     # Execute a REST call to the API.
     #
     # This is the workhorse of the +RestClientResources+ class. It performs the necessary setup of headers and the HTTP
@@ -527,13 +550,7 @@ module Bubbles
           data = {}
         end
 
-        if headers == nil
-          headers = {
-            :content_type => :json
-          }
-        else
-          headers[:content_type] = :json
-        end
+        headers = self.add_basic_headers(headers)
 
         unless auth_token == nil
           headers[:authorization] = 'Bearer ' + auth_token

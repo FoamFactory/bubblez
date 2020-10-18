@@ -10,7 +10,7 @@ module Bubbles
   ##
   # Configure the Bubbles instance.
   #
-  # Use this method if you want to configure the Bubbles instance, typically during intialization of your Gem or
+  # Use this method if you want to configure the Bubbles instance, typically during initialization of your Gem or
   # application.
   #
   # @example In app/config/initializers/bubbles.rb
@@ -39,50 +39,84 @@ module Bubbles
   #
   class Configuration
     def initialize
-      @environment_scheme = 'http'
-      @environment_host = '127.0.0.1'
-      @environment_port = '1234'
-      @environment_api_key = nil
-      @environment_api_key_name = 'X-API-Key'
-
+      @environments = Hash.new
       @endpoints = Hash.new
     end
 
     ##
-    # Retrieve the {RestEnvironment} object defined as part of this Configuration.
+    # Retrieve the {RestEnvironment} object defined as part of this Configuration having a specified name.
     #
-    # Note that this constructs a new +RestEnvironment+ and returns it, rather than returning an existing object.
+    # @param [String] environment_name The name of the {RestEnvironment} to retrieve.
     #
-    def environment
-      RestEnvironment.new(@environment_scheme, @environment_host, @environment_port, @environment_api_key,
-                          @environment_api_key_name)
+    # The +environment_name+ is +nil+ by default, which will return the default configuration, if only one exists.
+    #
+    # @return [RestEnvironment] A new +RestEnvironment+ having the configuration that was created with key
+    #         +environment_name+. Note that +RestEnvironment+s are essentially immutable once they are created, so
+    #         an existing object will _never_ be returned.
+    #
+    def environment(environment_name = nil)
+      if environment_name.nil?
+        if @environments.length > 1
+          raise 'You must specify an environment_name parameter because more than one environment is defined'
+        end
+
+        env_hash = @environments[nil]
+      else
+        env_hash = @environments[environment_name]
+      end
+
+      if env_hash.nil?
+        if environment_name.nil?
+          raise 'No default environment specified'
+        end
+
+        raise 'No environment specified having name {}', environment_name
+      end
+
+      RestEnvironment.new(env_hash[:scheme], env_hash[:host], env_hash[:port], env_hash[:api_key],
+                          env_hash[:api_key_name])
     end
 
     ##
-    # Set the current environment.
+    # Set the environments that can be used.
     #
-    # @param [Object] env The environment, as a generic Ruby Object.
+    # @param [Array] environments The environments, as an array with each entry a +Hash+.
+    #
+    # One or more environments may be specified, but if more than one environment is specified, it is required that each
+    # environment have a +:environment_name:+ parameter to differentiate it from other environments.
     #
     # @example In app/config/environments/staging.rb:
     #    Bubbles.configure do |config|
-    #      config.environment = {
+    #      config.environments = [{
     #         :scheme => 'https',
     #         :host => 'stage.api.somehost.com',
     #         :port => '443',
     #         :api_key => 'something',
     #         :api_key_name => 'X-API-Key' # Optional
-    #      }
+    #      }]
     #    end
     #
-    def environment=(env)
-      @environment_scheme = env[:scheme]
-      @environment_host = env[:host]
-      @environment_port = env[:port]
-      @environment_api_key = env[:api_key]
-      if env.has_key? :api_key_name
-        @environment_api_key_name = env[:api_key_name]
-      else
-        @environment_api_key_name = 'X-API-Key'
+    def environments=(environments)
+      default = nil
+      environments.each do |environment|
+        if environments.length > 1 && environment[:environment_name].nil?
+          message = 'More than one environment was specified and at least one of the environments does not have an ' \
+                    ':environment_name field. Verify all environments have an :environment_name.'
+
+          raise message
+        end
+
+        @environments = {}
+        env_api_key = 'X-API-Key'
+        env_api_key = environment[:api_key_name] if environment.key? :api_key_name
+
+        @environments[environment[:environment_name]] = {
+          scheme: environment[:scheme],
+          host: environment[:host],
+          port: environment[:port],
+          api_key: environment[:api_key],
+          api_key_name: env_api_key
+        }
       end
     end
 
@@ -173,8 +207,8 @@ module Bubbles
                 if endpoint.encode_authorization_header?
                   auth_value = RestClientResources.get_encoded_authorization(endpoint, data)
                   composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
-                    :Authorization => 'Basic ' + Base64.strict_encode64(auth_value)
-                  })
+                                                                                    Authorization: 'Basic ' + Base64.strict_encode64(auth_value)
+                                                                                  })
                 end
 
                 RestClientResources.execute_post_unauthenticated self, endpoint, data, composite_headers, self.get_api_key_if_needed(endpoint), self.api_key_name

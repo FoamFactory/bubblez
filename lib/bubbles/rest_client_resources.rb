@@ -3,8 +3,8 @@ require 'bubbles/rest_environment'
 
 module Bubbles
   class RestClientResources
-    def environment
-      Bubbles.configuration.environment
+    def environment(env_name = nil)
+      Bubbles.configuration.environment(env_name)
     end
 
     ##

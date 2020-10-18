@@ -6,10 +6,10 @@ describe Bubbles::RestEnvironment do
     context 'for an environment that specifies a scheme of http and a default port' do
       before do
         Bubbles.configure do |config|
-          config.environment = {
-              :scheme => 'http',
-              :host => 'somewhere.something.net',
-          }
+          config.environments = [{
+            scheme: 'http',
+            host: 'somewhere.something.net',
+          }]
         end
       end
 
@@ -22,10 +22,10 @@ describe Bubbles::RestEnvironment do
     context 'for an environment that specifies a scheme of https and a default port' do
       before do
         Bubbles.configure do |config|
-          config.environment = {
-              :scheme => 'https',
-              :host => 'somewhere.something.net',
-          }
+          config.environments = [{
+            scheme: 'https',
+            host: 'somewhere.something.net',
+          }]
         end
       end
 
@@ -41,31 +41,32 @@ describe Bubbles::RestEnvironment do
       Bubbles.configure do |config|
         config.endpoints = [
           {
-            :method => :get,
-            :location => :students,
-            :authenticated => true,
-            :api_key_required => false,
-            :name => :list_students
+            method: :get,
+            location: :students,
+            authenticated: true,
+            api_key_required: false,
+            name: :list_students
           },
           {
-            :method => :post,
-            :location => :login,
-            :authenticated => false,
-            :api_key_required => true
+            method: :post,
+            location: :login,
+            authenticated: false,
+            api_key_required: true
           },
           {
-            :method => :get,
-            :location => :version,
-            :authenticated => false,
-            :api_key_required => false
+            method: :get,
+            location: :version,
+            authenticated: false,
+            api_key_required: false
           }
         ]
 
-        config.environment = {
-          :scheme => 'http',
-          :host => '127.0.0.1',
-          :port => '1234'
-        }
+        config.environments = [{
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: '1234',
+          environment_name: 'local'
+        }]
       end
     end
 
@@ -82,20 +83,42 @@ describe Bubbles::RestEnvironment do
     end
   end
 
-  describe '#environment' do
+  describe '#environments' do
     before do
       Bubbles.configure do |config|
-        config.environment = {
-          :scheme => 'https',
-          :host => '127.0.1.1',
-          :port => '2222'
-        }
+        config.environments = [{
+          scheme: 'https',
+          host: '127.0.1.1',
+          port: '2222',
+          environment_name: 'local'
+        }]
+      end
+    end
+
+    describe 'with more than one environment specified where one or more do not have an environment name' do
+      it 'should raise an exception' do
+        expect {
+          Bubbles.configure do |config|
+            config.environments = [
+              {
+                scheme: 'https',
+                host: '127.0.1.1',
+                port: '2222',
+                environment_name: 'local'
+              },
+              {
+                scheme: 'https',
+                host: '127.0.1.2',
+                port: '2223',
+              }]
+          end
+        }.to raise_error(RuntimeError, 'More than one environment was specified and at least one of the environments does not have an :environment_name field. Verify all environments have an :environment_name.')
       end
     end
 
     it 'returns an address of https://127.0.1.1:2222' do
       resources = Bubbles::Resources.new
-      environment = resources.environment
+      environment = resources.environment 'local'
 
       expect(environment).to_not be_nil
       expect(environment.scheme).to eq('https')
@@ -108,13 +131,13 @@ describe Bubbles::RestEnvironment do
     context 'for an environment that has an API key name specified' do
       before do
         Bubbles.configure do |config|
-          config.environment = {
-              :scheme => 'https',
-              :host => '127.0.1.1',
-              :port => '2222',
-              :api_key_name => 'X-Something-Key',
-              :api_key => 'blahblahblah'
-          }
+          config.environments = [{
+            scheme: 'https',
+            host: '127.0.1.1',
+            port: '2222',
+            api_key_name: 'X-Something-Key',
+            api_key: 'blahblahblah'
+          }]
         end
       end
 
@@ -127,12 +150,12 @@ describe Bubbles::RestEnvironment do
     context 'for an environment that does not have an API key name specified' do
       before do
         Bubbles.configure do |config|
-          config.environment = {
-              :scheme => 'https',
-              :host => '127.0.1.1',
-              :port => '2222',
-              :api_key => 'blahblahblah'
-          }
+          config.environments = [{
+            scheme: 'https',
+            host: '127.0.1.1',
+            port: '2222',
+            api_key: 'blahblahblah'
+          }]
         end
       end
 

@@ -81,11 +81,11 @@ describe Bubbles::Resources do
       context 'when accessed using a HEAD request' do
         before do
           Bubbles.configure do |config|
-            config.environment = {
-                :scheme => 'https',
-                :host => 'www.somewhere.com',
-                :api_key => 'somemadeupkey2'
-            }
+            config.environments = [{
+              scheme: 'https',
+              host: 'www.somewhere.com',
+              api_key: 'somemadeupkey2'
+            }]
           end
         end
 
@@ -98,13 +98,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :location => '/',
-                        :method => :head,
-                        :api_key_required => true,
-                        :authenticated => true,
-                        :name => :head_somewhere
-                    }
+                  {
+                    location: '/',
+                    method: :head,
+                    api_key_required: true,
+                    authenticated: true,
+                    name: :head_somewhere
+                  }
                 ]
               end
             end
@@ -124,13 +124,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :location => '/',
-                        :method => :head,
-                        :api_key_required => true,
-                        :authenticated => false,
-                        :name => :head_somewhere
-                    }
+                  {
+                      location: '/',
+                      method: :head,
+                      api_key_required: true,
+                      authenticated: false,
+                      name: :head_somewhere
+                  }
                 ]
               end
             end
@@ -151,11 +151,11 @@ describe Bubbles::Resources do
       context 'when accessed using a POST request' do
         before do
           Bubbles.configure do |config|
-            config.environment = {
-                :scheme => 'https',
-                :host => '127.0.0.1',
-                :port => '9002'
-            }
+            config.environments = [{
+              scheme: 'https',
+              host: '127.0.0.1',
+              port: '9002'
+            }]
           end
         end
 
@@ -164,13 +164,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :location => :blah,
-                        :api_key_required => false,
-                        :authenticated => false,
-                        :method => :post,
-                        :return_type => :body_as_object
-                    }
+                  {
+                    location: :blah,
+                    api_key_required: false,
+                    authenticated: false,
+                    method: :post,
+                    return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -179,7 +179,7 @@ describe Bubbles::Resources do
               VCR.use_cassette('post_unauthenticated_no_api_key') do
                 env = Bubbles::Resources.new.environment
                 data = {
-                    :email => 'eat@example.com'
+                  email: 'eat@example.com'
                 }
 
                 response = env.blah data
@@ -194,11 +194,11 @@ describe Bubbles::Resources do
       context 'when accessed using a HEAD request' do
         before do
           Bubbles.configure do |config|
-            config.environment = {
-                :scheme => 'http',
-                :host => 'www.somewhere.com',
-                :api_key => 'somemadeupkey'
-            }
+            config.environments = [{
+              scheme: 'http',
+              host: 'www.somewhere.com',
+              api_key: 'somemadeupkey'
+            }]
           end
         end
 
@@ -207,13 +207,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :location => '/',
-                        :method => :head,
-                        :api_key_required => true,
-                        :authenticated => false,
-                        :name => :head_somewhere
-                    }
+                  {
+                    location: '/',
+                    method: :head,
+                    api_key_required: true,
+                    authenticated: false,
+                    name: :head_somewhere
+                  }
                 ]
               end
             end
@@ -237,13 +237,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :location => '/',
-                        :method => :head,
-                        :api_key_required => true,
-                        :authenticated => true,
-                        :name => :head_somewhere
-                    }
+                  {
+                      location: '/',
+                      method: :head,
+                      api_key_required: true,
+                      authenticated: true,
+                      name: :head_somewhere
+                  }
                 ]
               end
             end
@@ -265,10 +265,10 @@ describe Bubbles::Resources do
     context 'accessed using https' do
       before do
         Bubbles.configure do |config|
-          config.environment = {
-            :scheme => 'https',
-            :host => 'reqres.in'
-          }
+          config.environments = [{
+            scheme: 'https',
+            host: 'reqres.in'
+          }]
         end
       end
 
@@ -277,12 +277,12 @@ describe Bubbles::Resources do
           Bubbles.configure do |config|
             config.endpoints = [
               {
-                :method => :get,
-                :location => 'api/users/{id}',
-                :name => 'get_user_by_id',
-                :return_type => :body_as_object,
-                :authenticated => false,
-                :api_key_required => false
+                method: :get,
+                location: 'api/users/{id}',
+                name: 'get_user_by_id',
+                return_type: :body_as_object,
+                authenticated: false,
+                api_key_required: false
               }
             ]
 
@@ -295,7 +295,7 @@ describe Bubbles::Resources do
           VCR.use_cassette('reqres_get_user_by_id') do
             environment = @resources.environment
 
-            data = {:id => 1}
+            data = {id: 1}
             response = environment.get_user_by_id data
 
             expect(response).to_not be_nil
@@ -320,25 +320,25 @@ describe Bubbles::Resources do
 
           Bubbles.configure do |config|
             config.endpoints = [
-                {
-                    :method => :get,
-                    :location => 'categories',
-                    :name => 'get_categories',
-                    :return_type => :body_as_object,
-                    :authenticated => false,
-                    :api_key_required => true,
-                    :headers => {
-                        :'X-RapidAPI-Host' => @host
-                    }
+              {
+                method: :get,
+                location: 'categories',
+                name: 'get_categories',
+                return_type: :body_as_object,
+                authenticated: false,
+                api_key_required: true,
+                headers: {
+                  'X-RapidAPI-Host': @host
                 }
+              }
             ]
 
-            config.environment = {
-                :scheme => 'https',
-                :host => @host,
-                :api_key => @api_key,
-                :api_key_name => 'X-RapidAPI-Key'
-            }
+            config.environments = [{
+              scheme: 'https',
+              host: @host,
+              api_key: @api_key,
+              api_key_name: 'X-RapidAPI-Key'
+            }]
           end
         end
 
@@ -359,11 +359,11 @@ describe Bubbles::Resources do
   context 'when using the FoamFactory API, accessed remotely' do
     before do
       Bubbles.configure do |config|
-        config.environment = {
-            :scheme => 'https',
-            :host => 'api.foamfactory.io',
-            :api_key => '0c4e97c2f7af608117e519d941f1d2fbc25fe46a'
-        }
+        config.environments = [{
+          scheme: 'https',
+          host: 'api.foamfactory.io',
+          api_key: '0c4e97c2f7af608117e519d941f1d2fbc25fe46a'
+        }]
       end
     end
 
@@ -373,20 +373,20 @@ describe Bubbles::Resources do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
-                  {
-                      :location => :login,
-                      :method => :post,
-                      :encode_authorization => [:username, :password],
-                      :api_key_required => true,
-                      :return_type => :body_as_object
-                  },
-                  {
-                      :location => :users,
-                      :method => :get,
-                      :authenticated => true,
-                      :api_key_required => true,
-                      :return_type => :body_as_object
-                  }
+                {
+                  location: :login,
+                  method: :post,
+                  encode_authorization: %i[username password],
+                  api_key_required: true,
+                  return_type: :body_as_object
+                },
+                {
+                  location: :users,
+                  method: :get,
+                  authenticated: true,
+                  api_key_required: true,
+                  return_type: :body_as_object
+                }
               ]
             end
           end
@@ -395,8 +395,8 @@ describe Bubbles::Resources do
             VCR.use_cassette('get_all_users_foamfactory_remote') do
               env = Bubbles::Resources.new.environment
               data = {
-                  :username => 'scottj',
-                  :password => '123qwe456'
+                username: 'scottj',
+                password: '123qwe456'
               }
 
               authenticated_user = env.login data
@@ -416,12 +416,12 @@ describe Bubbles::Resources do
   context 'when using the FoamFactory API, accessed locally' do
     before do
       Bubbles.configure do |config|
-        config.environment = {
-          :scheme => 'http',
-          :host => 'localhost',
-          :port => 1234,
-          :api_key => 'fc411dc1b9bcc75f113951e574e243cca92fbddc'
-        }
+        config.environments = [{
+          scheme: 'http',
+          host: 'localhost',
+          port: 1234,
+          api_key: 'fc411dc1b9bcc75f113951e574e243cca92fbddc'
+        }]
       end
     end
 
@@ -431,20 +431,20 @@ describe Bubbles::Resources do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
-                  {
-                      :location => :login,
-                      :method => :post,
-                      :encode_authorization => [:username, :password],
-                      :api_key_required => true,
-                      :return_type => :body_as_object
-                  },
-                  {
-                      :location => :users,
-                      :method => :get,
-                      :authenticated => true,
-                      :api_key_required => true,
-                      :return_type => :body_as_object
-                  }
+                {
+                  location: :login,
+                  method: :post,
+                  encode_authorization: %i[username password],
+                  api_key_required: true,
+                  return_type: :body_as_object
+                },
+                {
+                  location: :users,
+                  method: :get,
+                  authenticated: true,
+                  api_key_required: true,
+                  return_type: :body_as_object
+                }
               ]
             end
           end
@@ -453,8 +453,8 @@ describe Bubbles::Resources do
             VCR.use_cassette('get_all_users_foamfactory_local') do
               env = Bubbles::Resources.new.environment
               data = {
-                  :username => 'scottj',
-                  :password => '123qwe456'
+                  username: 'scottj',
+                  password: '123qwe456'
               }
 
               authenticated_user = env.login data
@@ -474,12 +474,12 @@ describe Bubbles::Resources do
   context 'when using the SinkingMoon API' do
     before do
       Bubbles.configure do |config|
-        config.environment = {
-          :scheme => 'http',
-          :host => '127.0.0.1',
-          :port => '9002',
-          :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
-        }
+        config.environments = [{
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: '9002',
+          api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+        }]
       end
     end
 
@@ -488,44 +488,44 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-                {
-                    :method => :post,
-                    :location => :students,
-                    :authenticated => true,
-                    :name => 'create_student',
-                    :return_type => :body_as_object
-                }
+              {
+                method: :post,
+                location: :students,
+                authenticated: true,
+                name: 'create_student',
+                return_type: :body_as_object
+              }
             ]
 
-            config.environment = {
-                :scheme => 'https',
-                :host => '127.0.0.1',
-                :port => '1234',
-                :api_key => 'blah'
-            }
+            config.environments = [{
+              scheme: 'https',
+              host: '127.0.0.1',
+              port: '1234',
+              api_key: 'blah'
+            }]
           end
         end
 
         it 'should fail gracefully' do
           # NOTE: We don't want to use a cassette for this next test.
           VCR.turned_off do
-              WebMock.allow_net_connect!
-              data = {
-                :name => 'Scott Klein',
-                :address => '871 Anywhere St. #109',
-                :city => 'Minneapolis',
-                :state => 'MN',
-                :zip => '55412',
-                :phone => '(612) 761-8172',
-                :email => 'scotty.kleiny@gmail.com',
-                :preferredContact => 'text',
-                :emergencyContactName => 'Nancy Klein',
-                :emergencyContactPhone => '(701) 762-5442',
-                :rank => 'white',
-                :joinDate => Date.today,
-                :lastAdvancementDate => Date.today,
-                :waiverSigned => true
-            }
+            WebMock.allow_net_connect!
+            data = {
+              name: 'Scott Klein',
+              address: '871 Anywhere St. #109',
+              city: 'Minneapolis',
+              state: 'MN',
+              zip: '55412',
+              phone: '(612) 761-8172',
+              email: 'scotty.kleiny@gmail.com',
+              preferredContact: 'text',
+              emergencyContactName: 'Nancy Klein',
+              emergencyContactPhone: '(701) 762-5442',
+              rank: 'white',
+              joinDate: Date.today,
+              lastAdvancementDate: Date.today,
+              waiverSigned: true
+          }
 
             resources = Bubbles::Resources.new
             environment = resources.environment
@@ -543,22 +543,22 @@ describe Bubbles::Resources do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
-                  {
-                      :method => :post,
-                      :location => 'password/forgot',
-                      :name => :forgot_password,
-                      :authenticated => false,
-                      :api_key_required => true,
-                      :return_type => :body_as_object
-                  }
+                {
+                  method: :post,
+                  location: 'password/forgot',
+                  name: :forgot_password,
+                  authenticated: false,
+                  api_key_required: true,
+                  return_type: :body_as_object
+                }
               ]
 
-              config.environment = {
-                  :scheme => 'https',
-                  :host => '127.0.0.1',
-                  :port => '9002',
-                  :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
-              }
+              config.environments = [{
+                scheme: 'https',
+                host: '127.0.0.1',
+                port: '9002',
+                api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+              }]
             end
           end
 
@@ -567,7 +567,7 @@ describe Bubbles::Resources do
               resources = Bubbles::Resources.new
               environment = resources.environment
 
-              data = { :email => 'eat@example.com' }
+              data = { email: 'eat@example.com' }
               response = environment.forgot_password data
 
               expect(response).to_not be_nil
@@ -581,14 +581,14 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
-                {
-                    :method => :post,
-                    :location => :login,
-                    :authenticated => false,
-                    :api_key_required => true,
-                    :encode_authorization => [:username, :password],
-                    :return_type => :body_as_object
-                }
+              {
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
+              }
             ]
           end
         end
@@ -598,7 +598,7 @@ describe Bubbles::Resources do
             resources = Bubbles::Resources.new
             environment = resources.environment
 
-            data = { :username => 'scottj', :password => '123qwe456' }
+            data = { username: 'scottj', password: '123qwe456' }
             login_object = environment.login data
 
             expect(login_object.id).to eq(1)
@@ -614,20 +614,20 @@ describe Bubbles::Resources do
         before do
           Bubbles.configure do |config|
             config.endpoints = [
+              {
+                  method: :post,
+                  location: :students,
+                  authenticated: true,
+                  name: 'create_student',
+                  return_type: :body_as_object
+              },
                 {
-                    :method => :post,
-                    :location => :students,
-                    :authenticated => true,
-                    :name => 'create_student',
-                    :return_type => :body_as_object
-                },
-                {
-                    :method => :post,
-                    :location => :login,
-                    :authenticated => false,
-                    :api_key_required => true,
-                    :encode_authorization => [:username, :password],
-                    :return_type => :body_as_object
+                    method: :post,
+                    location: :login,
+                    authenticated: false,
+                    api_key_required: true,
+                    encode_authorization: %i[username password],
+                    return_type: :body_as_object
                 }
             ]
           end
@@ -639,7 +639,7 @@ describe Bubbles::Resources do
             @environment = @resources.environment
 
             VCR.use_cassette('login') do
-              data = { :username => 'scottj', :password => '123qwe456' }
+              data = { username: 'scottj', password: '123qwe456' }
               login_object = @environment.login data
 
               @auth_token = login_object.auth_token
@@ -649,20 +649,20 @@ describe Bubbles::Resources do
           it 'should correctly add a record using a POST request' do
             VCR.use_cassette('post_student_authenticated') do
               data = {
-                  :name => 'Scott Klein',
-                  :address => '871 Anywhere St. #109',
-                  :city => 'Minneapolis',
-                  :state => 'MN',
-                  :zip => '55412',
-                  :phone => '(612) 761-8172',
-                  :email => 'scotty.kleiny@gmail.com',
-                  :preferredContact => 'text',
-                  :emergencyContactName => 'Nancy Klein',
-                  :emergencyContactPhone => '(701) 762-5442',
-                  :rank => 'white',
-                  :joinDate => Date.today,
-                  :lastAdvancementDate => Date.today,
-                  :waiverSigned => true
+                  name: 'Scott Klein',
+                  address: '871 Anywhere St. #109',
+                  city: 'Minneapolis',
+                  state: 'MN',
+                  zip: '55412',
+                  phone: '(612) 761-8172',
+                  email: 'scotty.kleiny@gmail.com',
+                  preferredContact: 'text',
+                  emergencyContactName: 'Nancy Klein',
+                  emergencyContactPhone: '(701) 762-5442',
+                  rank: 'white',
+                  joinDate: Date.today,
+                  lastAdvancementDate: Date.today,
+                  waiverSigned: true
               }
 
               student = @environment.create_student @auth_token, data
@@ -675,22 +675,22 @@ describe Bubbles::Resources do
           context 'and an API key is required in the header X-Something-Key' do
             before do
               Bubbles.configure do |config|
-                config.environment = {
-                    :scheme => 'http',
-                    :host => '127.0.0.1',
-                    :port => '9002',
-                    :api_key_name => 'X-Something-Key',
-                    :api_key => 'blahblahblah'
-                }
+                config.environments = [{
+                  scheme: 'http',
+                  host: '127.0.0.1',
+                  port: '9002',
+                  api_key_name: 'X-Something-Key',
+                  api_key: 'blahblahblah'
+                }]
 
                 config.endpoints = [
                   {
-                    :method => :post,
-                    :location => :students,
-                    :authenticated => true,
-                    :name => 'create_student',
-                    :return_type => :body_as_object,
-                    :api_key_required => true
+                    method: :post,
+                    location: :students,
+                    authenticated: true,
+                    name: 'create_student',
+                    return_type: :body_as_object,
+                    api_key_required: true
                   }
                 ]
               end
@@ -701,20 +701,20 @@ describe Bubbles::Resources do
                 env = Bubbles::Resources.new.environment
 
                 data = {
-                    :name => 'Scott Klein',
-                    :address => '871 Anywhere St. #109',
-                    :city => 'Minneapolis',
-                    :state => 'MN',
-                    :zip => '55412',
-                    :phone => '(612) 761-8172',
-                    :email => 'scotty.kleiny@gmail.com',
-                    :preferredContact => 'text',
-                    :emergencyContactName => 'Nancy Klein',
-                    :emergencyContactPhone => '(701) 762-5442',
-                    :rank => 'white',
-                    :joinDate => Date.today,
-                    :lastAdvancementDate => Date.today,
-                    :waiverSigned => true
+                    name: 'Scott Klein',
+                    address: '871 Anywhere St. #109',
+                    city: 'Minneapolis',
+                    state: 'MN',
+                    zip: '55412',
+                    phone: '(612) 761-8172',
+                    email: 'scotty.kleiny@gmail.com',
+                    preferredContact: 'text',
+                    emergencyContactName: 'Nancy Klein',
+                    emergencyContactPhone: '(701) 762-5442',
+                    rank: 'white',
+                    joinDate: Date.today,
+                    lastAdvancementDate: Date.today,
+                    waiverSigned: true
                 }
 
                 student = env.create_student @auth_token, data
@@ -728,21 +728,21 @@ describe Bubbles::Resources do
           context 'when using https' do
             before do
               Bubbles.configure do |config|
-                config.environment = {
-                    :scheme => 'https',
-                    :host => '127.0.0.1',
-                    :port => '9002',
-                    :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
-                }
+                config.environments = [{
+                    scheme: 'https',
+                    host: '127.0.0.1',
+                    port: '9002',
+                    api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                }]
 
                 config.endpoints = [
-                    {
-                        :method => :post,
-                        :location => :students,
-                        :authenticated => true,
-                        :name => 'create_student_https',
-                        :return_type => :body_as_object
-                    }
+                  {
+                    method: :post,
+                    location: :students,
+                    authenticated: true,
+                    name: 'create_student_https',
+                    return_type: :body_as_object
+                  }
                 ]
 
                 @auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
@@ -754,20 +754,20 @@ describe Bubbles::Resources do
                 env = Bubbles::Resources.new.environment
 
                 data = {
-                    :name => 'Scott Klein',
-                    :address => '871 Anywhere St. #109',
-                    :city => 'Minneapolis',
-                    :state => 'MN',
-                    :zip => '55412',
-                    :phone => '(612) 761-8172',
-                    :email => 'scotty.kleiny@gmail.com',
-                    :preferredContact => 'text',
-                    :emergencyContactName => 'Nancy Klein',
-                    :emergencyContactPhone => '(701) 762-5442',
-                    :rank => 'white',
-                    :joinDate => Date.today,
-                    :lastAdvancementDate => Date.today,
-                    :waiverSigned => true
+                  name: 'Scott Klein',
+                  address: '871 Anywhere St. #109',
+                  city: 'Minneapolis',
+                  state: 'MN',
+                  zip: '55412',
+                  phone: '(612) 761-8172',
+                  email: 'scotty.kleiny@gmail.com',
+                  preferredContact: 'text',
+                  emergencyContactName: 'Nancy Klein',
+                  emergencyContactPhone: '(701) 762-5442',
+                  rank: 'white',
+                  joinDate: Date.today,
+                  lastAdvancementDate: Date.today,
+                  waiverSigned: true
                 }
 
                 student = env.create_student_https @auth_token, data
@@ -788,13 +788,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :method => :get,
-                        :location => :version,
-                        :authenticated => false,
-                        :api_key_required => false,
-                        :return_type => :body_as_object
-                    }
+                  {
+                      method: :get,
+                      location: :version,
+                      authenticated: false,
+                      api_key_required: false,
+                      return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -823,27 +823,27 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :get,
-                  :location => :students,
-                  :authenticated => true,
-                  :api_key_required => false,
-                  :name => :list_students,
-                  :return_type => :body_as_object
+                  method: :get,
+                  location: :students,
+                  authenticated: true,
+                  api_key_required: false,
+                  name: :list_students,
+                  return_type: :body_as_object
                 },
                 {
-                  :method => :get,
-                  :location => 'students/{id}',
-                  :authenticated => true,
-                  :name => :get_student,
-                  :return_type => :body_as_object
+                  method: :get,
+                  location: 'students/{id}',
+                  authenticated: true,
+                  name: :get_student,
+                  return_type: :body_as_object
                 },
                 {
-                  :method => :post,
-                  :location => :login,
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :encode_authorization => [:username, :password],
-                  :return_type => :body_as_object
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
                 }
               ]
             end
@@ -855,7 +855,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -877,7 +877,7 @@ describe Bubbles::Resources do
             it 'should be able to retrieve a single record from the server' do
               VCR.use_cassette('get_student_by_id') do
 
-                student = @environment.get_student(@auth_token, {:id => 4})
+                student = @environment.get_student(@auth_token, {id: 4})
                 expect(student).to_not be_nil
 
                 expect(student.id).to eq(4)
@@ -893,11 +893,11 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :get,
-                  :location => :version,
-                  :authenticated => false,
-                  :api_key_required => false,
-                  :return_type => :body_as_string
+                  method: :get,
+                  location: :version,
+                  authenticated: false,
+                  api_key_required: false,
+                  return_type: :body_as_string
                 }
               ]
             end
@@ -921,27 +921,27 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :get,
-                  :location => :students,
-                  :authenticated => true,
-                  :api_key_required => false,
-                  :name => :list_students,
-                  :return_type => :body_as_string
+                  method: :get,
+                  location: :students,
+                  authenticated: true,
+                  api_key_required: false,
+                  name: :list_students,
+                  return_type: :body_as_string
                 },
                 {
-                  :method => :get,
-                  :location => 'students/{id}',
-                  :authenticated => true,
-                  :name => :get_student,
-                  :return_type => :body_as_string
+                  method: :get,
+                  location: 'students/{id}',
+                  authenticated: true,
+                  name: :get_student,
+                  return_type: :body_as_string
                 },
                 {
-                  :method => :post,
-                  :location => :login,
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :encode_authorization => [:username, :password],
-                  :return_type => :body_as_object
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
                 }
               ]
             end
@@ -953,7 +953,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -972,7 +972,7 @@ describe Bubbles::Resources do
             it 'should be able to retrieve a single record from the server' do
               VCR.use_cassette('get_student_by_id') do
 
-                response = @environment.get_student(@auth_token, {:id => 4})
+                response = @environment.get_student(@auth_token, {id: 4})
                 expect(response).to_not be_nil
                 expect(response).to eq('{"id":4,"name":"Scott Klein","address":"871 Anywhere St. #109","city":"Minneapolis","state":"MN","zip":"55412","phone":"(612) 761-8172","email":"scotty.kleiny@gmail.com","emergencyContactName":"Nancy Klein","emergencyContactPhone":"(701) 762-5442","joinDate":"2019-04-28T00:00:00.000Z","waiverSigned":true,"created_at":"2019-04-28T23:53:18.013Z","updated_at":"2019-04-28T23:53:18.013Z","preferredContact":"text","rank":"white","active":true,"advancements":[{"id":12,"date":"2019-04-28","rank":"white","student_id":4,"created_at":"2019-04-28T23:53:18.035Z","updated_at":"2019-04-28T23:53:18.035Z"}]}')
               end
@@ -987,11 +987,11 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :get,
-                  :location => :version,
-                  :authenticated => false,
-                  :api_key_required => false,
-                  :return_type => :full_response
+                  method: :get,
+                  location: :version,
+                  authenticated: false,
+                  api_key_required: false,
+                  return_type: :full_response
                 }
               ]
             end
@@ -1023,27 +1023,27 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :get,
-                  :location => :students,
-                  :authenticated => true,
-                  :api_key_required => false,
-                  :name => :list_students,
-                  :return_type => :full_response
+                  method: :get,
+                  location: :students,
+                  authenticated: true,
+                  api_key_required: false,
+                  name: :list_students,
+                  return_type: :full_response
                 },
                 {
-                  :method => :get,
-                  :location => 'students/{id}',
-                  :authenticated => true,
-                  :name => :get_student,
-                  :return_type => :full_response
+                  method: :get,
+                  location: 'students/{id}',
+                  authenticated: true,
+                  name: :get_student,
+                  return_type: :full_response
                 },
                 {
-                  :method => :post,
-                  :location => :login,
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :encode_authorization => [:username, :password],
-                  :return_type => :body_as_object
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
                 }
               ]
             end
@@ -1055,7 +1055,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -1078,7 +1078,7 @@ describe Bubbles::Resources do
             it 'should be able to retrieve a single record from the server' do
               VCR.use_cassette('get_student_by_id') do
 
-                response = @environment.get_student(@auth_token, {:id => 4})
+                response = @environment.get_student(@auth_token, {id: 4})
                 expect(response).to_not be_nil
                 expect(response.code).to eq(200);
 
@@ -1096,15 +1096,15 @@ describe Bubbles::Resources do
         it 'should raise an exception' do
           expect {
             Bubbles.configure do |config|
-                config.endpoints = [
-                    {
-                        :method => :delete,
-                        :location => 'students',
-                        :authenticated => true,
-                        :name => 'delete_student_no_params',
-                        :return_type => :body_as_object
-                    }
-                ]
+              config.endpoints = [
+                {
+                    method: :delete,
+                    location: 'students',
+                    authenticated: true,
+                    name: 'delete_student_no_params',
+                    return_type: :body_as_object
+                }
+              ]
             end
           }.to raise_error('DELETE requests without URI parameters are not allowed')
         end
@@ -1115,22 +1115,22 @@ describe Bubbles::Resources do
           context 'with a valid api key' do
             before do
               Bubbles.configure do |config|
-                config.environment = {
-                  :scheme => 'http',
-                  :host => '127.0.0.1',
-                  :port => 9002,
-                  :api_key => 'blahblahblah'
-                }
+                config.environments = [{
+                  scheme: 'http',
+                  host: '127.0.0.1',
+                  port: 9002,
+                  api_key: 'blahblahblah'
+                }]
 
                 config.endpoints = [
-                    {
-                        :method => :delete,
-                        :location => 'students/{id}',
-                        :name => 'delete_student_no_auth',
-                        :authenticated => false,
-                        :api_key_required => true,
-                        :return_type => :body_as_object
-                    }
+                  {
+                    method: :delete,
+                    location: 'students/{id}',
+                    name: 'delete_student_no_auth',
+                    authenticated: false,
+                    api_key_required: true,
+                    return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -1138,7 +1138,7 @@ describe Bubbles::Resources do
             it 'should successfully delete the record' do
               VCR.use_cassette('delete_unauthenticated_student_by_id') do
                 uri_params = {
-                    :id => 2
+                  id: 2
                 }
 
                 env = Bubbles::Resources.new.environment
@@ -1155,13 +1155,13 @@ describe Bubbles::Resources do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
-                  {
-                      :method => :delete,
-                      :location => 'students/{id}',
-                      :authenticated => true,
-                      :name => 'delete_student',
-                      :return_type => :body_as_object
-                  }
+                {
+                    method: :delete,
+                    location: 'students/{id}',
+                    authenticated: true,
+                    name: 'delete_student',
+                    return_type: :body_as_object
+                }
               ]
             end
           end
@@ -1169,21 +1169,21 @@ describe Bubbles::Resources do
           context 'when accessing a host via HTTPS that requires an API key' do
             before do
               Bubbles.configure do |config|
-                config.environment = {
-                    :scheme => 'https',
-                    :host => 'testbed.foamfactory.io',
-                    :api_key => 'blahblahblah'
-                }
+                config.environments = [{
+                  scheme: 'https',
+                  host: 'testbed.foamfactory.io',
+                  api_key: 'blahblahblah'
+                }]
 
                 config.endpoints = [
-                    {
-                      :method => :delete,
-                      :location => 'students/{id}',
-                      :authenticated => true,
-                      :api_key_required => true,
-                      :name => 'delete_student_https',
-                      :return_type => :body_as_object
-                    }
+                  {
+                    method: :delete,
+                    location: 'students/{id}',
+                    authenticated: true,
+                    api_key_required: true,
+                    name: 'delete_student_https',
+                    return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -1192,7 +1192,7 @@ describe Bubbles::Resources do
               VCR.use_cassette('delete_student_by_id_api_key_https') do
                 auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
                 env = Bubbles::Resources.new.environment
-                response = env.delete_student_https auth_token, {:id => 2}
+                response = env.delete_student_https auth_token, {id: 2}
 
                 expect(response.success).to eq(true)
               end
@@ -1205,7 +1205,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -1214,7 +1214,7 @@ describe Bubbles::Resources do
 
             it 'should be able to successfully delete a record' do
               VCR.use_cassette('delete_student_by_id') do
-                response = @environment.delete_student @auth_token, {:id => 2}
+                response = @environment.delete_student @auth_token, {id: 2}
 
                 expect(response.success).to eq(true)
               end
@@ -1231,13 +1231,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :method => :patch,
-                        :location => 'password/change',
-                        :authenticated => true,
-                        :name => 'change_password_no_uri',
-                        :return_type => :body_as_object
-                    }
+                  {
+                      method: :patch,
+                      location: 'password/change',
+                      authenticated: true,
+                      name: 'change_password_no_uri',
+                      return_type: :body_as_object
+                  }
                 ]
               end
 
@@ -1247,8 +1247,8 @@ describe Bubbles::Resources do
             it 'should execute the request and return a 200 ok' do
               VCR.use_cassette('patch_change_password_authenticated') do
                 data = {
-                    :new_password => @new_password,
-                    :password_confirmation => @new_password
+                    new_password: @new_password,
+                    password_confirmation: @new_password
                 }
 
                 env = Bubbles::Resources.new.environment
@@ -1264,19 +1264,19 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :patch,
-                  :location => 'students/{id}',
-                  :authenticated => true,
-                  :name => 'update_student',
-                  :return_type => :body_as_object
+                  method: :patch,
+                  location: 'students/{id}',
+                  authenticated: true,
+                  name: 'update_student',
+                  return_type: :body_as_object
                 },
                 {
-                  :method => :post,
-                  :location => :login,
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :encode_authorization => [:username, :password],
-                  :return_type => :body_as_object
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
                 }
               ]
             end
@@ -1288,7 +1288,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -1298,21 +1298,21 @@ describe Bubbles::Resources do
             context 'when using https and an api key is required' do
               before do
                 Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => 'https',
-                      :host => '127.0.0.1',
-                      :api_key => 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
-                  }
+                  config.environments = [{
+                    scheme: 'https',
+                    host: '127.0.0.1',
+                    api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                  }]
 
                   config.endpoints = [
-                      {
-                          :method => :patch,
-                          :location => 'students/{id}',
-                          :authenticated => true,
-                          :name => 'update_student',
-                          :return_type => :body_as_object,
-                          :api_key_required => true
-                      },
+                    {
+                      method: :patch,
+                      location: 'students/{id}',
+                      authenticated: true,
+                      name: 'update_student',
+                      return_type: :body_as_object,
+                      api_key_required: true
+                    }
                   ]
                 end
               end
@@ -1320,7 +1320,7 @@ describe Bubbles::Resources do
               it 'should update part of a record' do
                 VCR.use_cassette('patch_update_student_https') do
                   env = Bubbles::Resources.new.environment
-                  response = env.update_student @auth_token, {:id => 4}, {:student => {:email => 'kleinhammer@gmail.com' } }
+                  response = env.update_student @auth_token, {id: 4}, {student: {email: 'kleinhammer@gmail.com' } }
 
                   expect(response.id).to eq(4)
                   expect(response.name).to eq('Scott Klein')
@@ -1337,7 +1337,7 @@ describe Bubbles::Resources do
 
             it 'should update part of a record' do
               VCR.use_cassette('patch_update_student') do
-                response = @environment.update_student @auth_token, {:id => 4}, {:student => {:email => 'kleinhammer@gmail.com' } }
+                response = @environment.update_student @auth_token, {id: 4}, {student: {email: 'kleinhammer@gmail.com' } }
 
                 expect(response.id).to eq(4)
                 expect(response.name).to eq('Scott Klein')
@@ -1358,11 +1358,11 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :patch,
-                  :location => 'password/change',
-                  :authenticated => false,
-                  :name => 'change_forgotten_password',
-                  :return_type => :body_as_object
+                  method: :patch,
+                  location: 'password/change',
+                  authenticated: false,
+                  name: 'change_forgotten_password',
+                  return_type: :body_as_object
                 }
               ]
 
@@ -1380,21 +1380,21 @@ describe Bubbles::Resources do
             context 'when using https and passing an API key' do
               before do
                 Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => :https,
-                      :host => 'api.something.com',
-                      :api_key => 'blahblahblahblah'
-                  }
+                  config.environments = [{
+                    scheme: :https,
+                    host: 'api.something.com',
+                    api_key: 'blahblahblahblah'
+                  }]
 
                   config.endpoints = [
-                      {
-                          :method => :patch,
-                          :authenticated => false,
-                          :api_key_required => true,
-                          :location => 'password/change',
-                          :name => 'change_forgotten_password',
-                          :return_type => :body_as_object
-                      }
+                    {
+                      method: :patch,
+                      authenticated: false,
+                      api_key_required: true,
+                      location: 'password/change',
+                      name: 'change_forgotten_password',
+                      return_type: :body_as_object
+                    }
                   ]
                 end
               end
@@ -1402,9 +1402,9 @@ describe Bubbles::Resources do
               it 'should allow the successful execution of the request' do
                 VCR.use_cassette('patch_change_password_unauthenticated_https') do
                   data = {
-                      :one_time_login_hash => @hash,
-                      :new_password => @new_password,
-                      :password_confirmation => @new_password
+                    one_time_login_hash: @hash,
+                    new_password: @new_password,
+                    password_confirmation: @new_password
                   }
 
                   env = Bubbles::Resources.new.environment
@@ -1419,9 +1419,9 @@ describe Bubbles::Resources do
             it 'should allow the successful execution of the request' do
               VCR.use_cassette('patch_change_password_unauthenticated') do
                 data = {
-                  :one_time_login_hash => @hash,
-                  :new_password => @new_password,
-                  :password_confirmation => @new_password
+                  one_time_login_hash: @hash,
+                  new_password: @new_password,
+                  password_confirmation: @new_password
                 }
 
                 response = @environment.change_forgotten_password data
@@ -1436,13 +1436,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :method => :patch,
-                        :location => 'password/change/{hash}',
-                        :authenticated => false,
-                        :name => 'change_forgotten_password_uri',
-                        :return_type => :body_as_object
-                    }
+                  {
+                      method: :patch,
+                      location: 'password/change/{hash}',
+                      authenticated: false,
+                      name: 'change_forgotten_password_uri',
+                      return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -1456,12 +1456,12 @@ describe Bubbles::Resources do
               it 'should allow the successful execution of the request' do
                 VCR.use_cassette('patch_change_password_unauthenticated_uri_params') do
                   uri_params = {
-                      :hash => @hash
+                      hash: @hash
                   }
 
                   data = {
-                      :new_password => @new_password,
-                      :password_confirmation => @new_password
+                      new_password: @new_password,
+                      password_confirmation: @new_password
                   }
 
                   env = Bubbles::Resources.new.environment
@@ -1483,11 +1483,11 @@ describe Bubbles::Resources do
               Bubbles.configure do |config|
                 config.endpoints = [
                   {
-                    :method => :patch,
-                    :location => 'password/change',
-                    :authenticated => false,
-                    :name => 'change_forgotten_password',
-                    :return_type => :full_response
+                    method: :patch,
+                    location: 'password/change',
+                    authenticated: false,
+                    name: 'change_forgotten_password',
+                    return_type: :full_response
                   }
                 ]
               end
@@ -1502,9 +1502,9 @@ describe Bubbles::Resources do
             it 'should respond with a RestClient error indicating a 404 exception was encountered' do
               VCR.use_cassette('patch_change_password_unauthenticated_bad_hash') do
                 data = {
-                  :one_time_login_hash => @hash,
-                  :new_password => @new_password,
-                  :password_confirmation => @new_password
+                  one_time_login_hash: @hash,
+                  new_password: @new_password,
+                  password_confirmation: @new_password
                 }
 
                 saw_error = false
@@ -1529,13 +1529,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :method => :put,
-                        :location => 'password/change',
-                        :authenticated => true,
-                        :name => 'change_password_no_uri',
-                        :return_type => :body_as_object
-                    }
+                  {
+                      method: :put,
+                      location: 'password/change',
+                      authenticated: true,
+                      name: 'change_password_no_uri',
+                      return_type: :body_as_object
+                  }
                 ]
               end
 
@@ -1545,8 +1545,8 @@ describe Bubbles::Resources do
             it 'should execute the request and return a 200 ok' do
               VCR.use_cassette('put_change_password_authenticated') do
                 data = {
-                    :new_password => @new_password,
-                    :password_confirmation => @new_password
+                    new_password: @new_password,
+                    password_confirmation: @new_password
                 }
 
                 env = Bubbles::Resources.new.environment
@@ -1561,20 +1561,20 @@ describe Bubbles::Resources do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
+                {
+                  method: :put,
+                  location: 'students/{id}',
+                  authenticated: true,
+                  name: 'update_student',
+                  return_type: :body_as_object
+                },
               {
-                :method => :put,
-                :location => 'students/{id}',
-                :authenticated => true,
-                :name => 'update_student',
-                :return_type => :body_as_object
-              },
-              {
-                  :method => :post,
-                  :location => :login,
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :encode_authorization => [:username, :password],
-                  :return_type => :body_as_object
+                  method: :post,
+                  location: :login,
+                  authenticated: false,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
                 }
               ]
             end
@@ -1586,7 +1586,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token
@@ -1597,42 +1597,42 @@ describe Bubbles::Resources do
               before do
                 Bubbles.configure do |config|
                   config.endpoints = [
-                      {
-                          :method => :put,
-                          :location => 'students/{id}',
-                          :authenticated => true,
-                          :name => 'update_student',
-                          :return_type => :body_as_object,
-                          :api_key_required => true
-                      }
+                    {
+                        method: :put,
+                        location: 'students/{id}',
+                        authenticated: true,
+                        name: 'update_student',
+                        return_type: :body_as_object,
+                        api_key_required: true
+                    }
                   ]
 
-                  config.environment = {
-                      :scheme => :https,
-                      :host => 'testbed.foamfactory.io',
-                      :api_key => 'blahblahblah'
-                  }
+                  config.environments = [{
+                    scheme: :https,
+                    host: 'testbed.foamfactory.io',
+                    api_key: 'blahblahblah'
+                  }]
                 end
               end
 
               it 'should update the entire record' do
                 VCR.use_cassette('put_update_student_https') do
                   data = {
-                      :student => {
-                          :email => 'michael.moribs@mikesmail-moribss.com',
-                          :name => 'Michael Moribsu',
-                          :address => '123 Anywhere St.',
-                          :city => 'Onetown',
-                          :state => 'MN',
-                          :zip => '55081',
-                          :phone => '(555) 123-9045',
-                          :emergencyContactName => 'Katie Moribsu',
-                          :emergencyContactPhone => '(765) 192-8123'
-                      }
+                    student: {
+                      email: 'michael.moribs@mikesmail-moribss.com',
+                      name: 'Michael Moribsu',
+                      address: '123 Anywhere St.',
+                      city: 'Onetown',
+                      state: 'MN',
+                      zip: '55081',
+                      phone: '(555) 123-9045',
+                      emergencyContactName: 'Katie Moribsu',
+                      emergencyContactPhone: '(765) 192-8123'
+                    }
                   }
 
                   env = Bubbles::Resources.new.environment
-                  response = env.update_student @auth_token, {:id => 4}, data
+                  response = env.update_student @auth_token, {id: 4}, data
 
                   expect(response.id).to eq(4)
                   expect(response.email).to eq('michael.moribs@mikesmail-moribss.com')
@@ -1651,20 +1651,20 @@ describe Bubbles::Resources do
             it 'should update the entire record' do
               VCR.use_cassette('put_update_student') do
                 data = {
-                  :student => {
-                    :email => 'michael.moribs@mikesmail-moribss.com',
-                    :name => 'Michael Moribsu',
-                    :address => '123 Anywhere St.',
-                    :city => 'Onetown',
-                    :state => 'MN',
-                    :zip => '55081',
-                    :phone => '(555) 123-9045',
-                    :emergencyContactName => 'Katie Moribsu',
-                    :emergencyContactPhone => '(765) 192-8123'
+                  student: {
+                    email: 'michael.moribs@mikesmail-moribss.com',
+                    name: 'Michael Moribsu',
+                    address: '123 Anywhere St.',
+                    city: 'Onetown',
+                    state: 'MN',
+                    zip: '55081',
+                    phone: '(555) 123-9045',
+                    emergencyContactName: 'Katie Moribsu',
+                    emergencyContactPhone: '(765) 192-8123'
                   }
                 }
 
-                response = @environment.update_student @auth_token, {:id => 4}, data
+                response = @environment.update_student @auth_token, {id: 4}, data
 
                 expect(response.id).to eq(4)
                 expect(response.email).to eq('michael.moribs@mikesmail-moribss.com')
@@ -1686,11 +1686,11 @@ describe Bubbles::Resources do
             Bubbles.configure do |config|
               config.endpoints = [
                 {
-                  :method => :put,
-                  :location => 'password/change',
-                  :authenticated => false,
-                  :name => 'change_forgotten_password_put',
-                  :return_type => :body_as_object
+                  method: :put,
+                  location: 'password/change',
+                  authenticated: false,
+                  name: 'change_forgotten_password_put',
+                  return_type: :body_as_object
                 }
               ]
 
@@ -1708,30 +1708,30 @@ describe Bubbles::Resources do
             context 'when accessed with https and an API key' do
               before do
                 Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => :https,
-                      :host => 'testbed.foamfactory.io',
-                      :api_key => 'foamfactorybeermaker'
-                  }
+                  config.environments = [{
+                    scheme: :https,
+                    host: 'testbed.foamfactory.io',
+                    api_key: 'foamfactorybeermaker'
+                  }]
 
                   config.endpoints = [
-                      {
-                          :method => :put,
-                          :location => 'password/change',
-                          :authenticated => false,
-                          :api_key_required => true,
-                          :name => 'change_forgotten_password_put',
-                          :return_type => :body_as_object
-                      }
+                    {
+                      method: :put,
+                      location: 'password/change',
+                      authenticated: false,
+                      api_key_required: true,
+                      name: 'change_forgotten_password_put',
+                      return_type: :body_as_object
+                    }
                   ]
                 end
               end
               it 'should allow the successful execution of the request' do
                 VCR.use_cassette('put_change_password_unauthenticated_https') do
                   data = {
-                      :one_time_login_hash => @hash,
-                      :new_password => @new_password,
-                      :password_confirmation => @new_password
+                    one_time_login_hash: @hash,
+                    new_password: @new_password,
+                    password_confirmation: @new_password
                   }
 
                   env = Bubbles::Resources.new.environment
@@ -1746,9 +1746,9 @@ describe Bubbles::Resources do
             it 'should allow the successful execution of the request' do
               VCR.use_cassette('put_change_password_unauthenticated') do
                 data = {
-                  :one_time_login_hash => @hash,
-                  :new_password => @new_password,
-                  :password_confirmation => @new_password
+                  one_time_login_hash: @hash,
+                  new_password: @new_password,
+                  password_confirmation: @new_password
                 }
 
                 response = @environment.change_forgotten_password_put data
@@ -1763,13 +1763,13 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    {
-                        :method => :put,
-                        :location => 'password/change/{hash}',
-                        :authenticated => false,
-                        :name => 'change_forgotten_password_uri',
-                        :return_type => :body_as_object
-                    }
+                  {
+                      method: :put,
+                      location: 'password/change/{hash}',
+                      authenticated: false,
+                      name: 'change_forgotten_password_uri',
+                      return_type: :body_as_object
+                  }
                 ]
               end
             end
@@ -1783,12 +1783,12 @@ describe Bubbles::Resources do
               it 'should allow the successful execution of the request' do
                 VCR.use_cassette('put_change_password_unauthenticated_uri_params') do
                   uri_params = {
-                      :hash => @hash
+                      hash: @hash
                   }
 
                   data = {
-                      :new_password => @new_password,
-                      :password_confirmation => @new_password
+                      new_password: @new_password,
+                      password_confirmation: @new_password
                   }
 
                   env = Bubbles::Resources.new.environment
@@ -1810,11 +1810,11 @@ describe Bubbles::Resources do
               Bubbles.configure do |config|
                 config.endpoints = [
                   {
-                    :method => :put,
-                    :location => 'password/change',
-                    :authenticated => false,
-                    :name => 'change_forgotten_password_put',
-                    :return_type => :full_response
+                    method: :put,
+                    location: 'password/change',
+                    authenticated: false,
+                    name: 'change_forgotten_password_put',
+                    return_type: :full_response
                   }
                 ]
               end
@@ -1829,9 +1829,9 @@ describe Bubbles::Resources do
             it 'should respond with a RestClient error indicating a 404 exception was encountered' do
               VCR.use_cassette('put_change_password_unauthenticated_bad_hash') do
                 data = {
-                  :one_time_login_hash => @hash,
-                  :new_password => @new_password,
-                  :password_confirmation => @new_password
+                  one_time_login_hash: @hash,
+                  new_password: @new_password,
+                  password_confirmation: @new_password
                 }
 
                 saw_error = false
@@ -1853,33 +1853,33 @@ describe Bubbles::Resources do
       context 'for an endpoint that does not require authorization' do
         before do
           Bubbles.configure do |config|
-            config.environment = {
-              :scheme => 'http',
-              :host => '127.0.0.1',
-              :port => '1234',
-              :api_key => 'bf414e8accf8155d650fb48500b48c569dc305e8'
-            }
+            config.environments = [{
+              scheme: 'http',
+              host: '127.0.0.1',
+              port: '1234',
+              api_key: 'bf414e8accf8155d650fb48500b48c569dc305e8'
+            }]
           end
         end
 
         context 'for an endpoint that does not require an API key' do
           context 'when at least one url parameter is expected' do
             before do
-                Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => 'http',
-                      :host => '127.0.0.1',
-                      :port => '1234'
-                  }
+              Bubbles.configure do |config|
+              config.environments = [{
+                scheme: 'http',
+                host: '127.0.0.1',
+                port: '1234'
+              }]
 
-                  config.endpoints = [
-                    :method => :head,
-                    :name => 'validate_login_hash',
-                    :location => '/validate/{hash}',
-                    :authenticated => false,
-                    :return_type => :full_response
-                ]
-              end
+              config.endpoints = [
+                method: :head,
+                name: 'validate_login_hash',
+                location: '/validate/{hash}',
+                authenticated: false,
+                return_type: :full_response
+              ]
+            end
 
               @resources = Bubbles::Resources.new
             end
@@ -1893,7 +1893,7 @@ describe Bubbles::Resources do
                 VCR.use_cassette('head_validate_login_hash_with_invalid_hash') do
                   saw_error = false
                   begin
-                    response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                    response = @resources.environment.validate_login_hash({hash: @login_hash})
                   rescue RestClient::Unauthorized
                     saw_error = true
                   end
@@ -1909,7 +1909,7 @@ describe Bubbles::Resources do
               end
               it 'should return a 204 no_content' do
                 VCR.use_cassette('head_validate_login_hash_with_valid_hash') do
-                  response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                  response = @resources.environment.validate_login_hash({hash: @login_hash})
 
                   expect(response).to_not be_nil
                   expect(response.code).to eq(204)
@@ -1924,12 +1924,12 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                  :method => :head,
-                  :name => 'validate_login_hash',
-                  :location => '/validate/{hash}',
-                  :authenticated => false,
-                  :api_key_required => true,
-                  :return_type => :full_response
+                  method: :head,
+                  name: 'validate_login_hash',
+                  location: '/validate/{hash}',
+                  authenticated: false,
+                  api_key_required: true,
+                  return_type: :full_response
                 ]
               end
 
@@ -1945,7 +1945,7 @@ describe Bubbles::Resources do
                 VCR.use_cassette('head_api_key_validate_login_hash_with_invalid_hash') do
                   saw_error = false
                   begin
-                    response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                    response = @resources.environment.validate_login_hash({hash: @login_hash})
                   rescue RestClient::Unauthorized
                     saw_error = true
                   end
@@ -1961,7 +1961,7 @@ describe Bubbles::Resources do
               end
               it 'should return a 204 no_content' do
                 VCR.use_cassette('head_api_key_validate_login_hash_with_valid_hash') do
-                  response = @resources.environment.validate_login_hash({:hash => @login_hash})
+                  response = @resources.environment.validate_login_hash({hash: @login_hash})
 
                   expect(response).to_not be_nil
                   expect(response.code).to eq(204)
@@ -1976,23 +1976,23 @@ describe Bubbles::Resources do
             context 'after redefining the environment to use Google with additional headers' do
               before do
                 Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => 'http',
-                      :host => 'www.google.com',
-                      :port => '80'
-                  }
+                  config.environments = [{
+                    scheme: 'http',
+                    host: 'www.google.com',
+                    port: '80'
+                  }]
 
                   config.endpoints = [
-                      {
-                          :method => :head,
-                          :location => '/',
-                          :authenticated => false,
-                          :name => 'head_google',
-                          :return_type => :full_response,
-                          :headers => {
-                              :'X-Something' => 'anything'
-                          }
+                    {
+                      method: :head,
+                      location: '/',
+                      authenticated: false,
+                      name: 'head_google',
+                      return_type: :full_response,
+                      headers: {
+                        'X-Something': 'anything'
                       }
+                    }
                   ]
                 end
 
@@ -2015,20 +2015,20 @@ describe Bubbles::Resources do
               # NOTE - this is required so we know that we can redefine environments without issues
               before do
                 Bubbles.configure do |config|
-                  config.environment = {
-                      :scheme => 'http',
-                      :host => 'www.google.com',
-                      :port => '80'
-                  }
+                  config.environments = [{
+                    scheme: 'http',
+                    host: 'www.google.com',
+                    port: '80'
+                  }]
 
                   config.endpoints = [
-                      {
-                          :method => :head,
-                          :location => '/',
-                          :authenticated => false,
-                          :name => 'head_google',
-                          :return_type => :full_response
-                      }
+                    {
+                      method: :head,
+                      location: '/',
+                      authenticated: false,
+                      name: 'head_google',
+                      return_type: :full_response
+                    }
                   ]
                 end
 
@@ -2053,19 +2053,19 @@ describe Bubbles::Resources do
           Bubbles.configure do |config|
             config.endpoints = [
               {
-                :method => :head,
-                :location => '/students',
-                :authenticated => true,
-                :name => 'head_students',
-                :api_key_required => false
+                method: :head,
+                location: '/students',
+                authenticated: true,
+                name: 'head_students',
+                api_key_required: false
               },
               {
-                :method => :post,
-                :location => :login,
-                :authenticated => false,
-                :api_key_required => true,
-                :encode_authorization => [:username, :password],
-                :return_type => :body_as_object
+                method: :post,
+                location: :login,
+                authenticated: false,
+                api_key_required: true,
+                encode_authorization: %i[username password],
+                return_type: :body_as_object
               }
             ]
           end
@@ -2076,11 +2076,11 @@ describe Bubbles::Resources do
             before do
               Bubbles.configure do |config|
                 config.endpoints = [
-                    :method => :head,
-                    :authenticated => true,
-                    :api_key_required => false,
-                    :location => 'students/{id}',
-                    :name => 'head_student_by_id'
+                  method: :head,
+                  authenticated: true,
+                  api_key_required: false,
+                  location: 'students/{id}',
+                  name: 'head_student_by_id'
                 ]
               end
             end
@@ -2088,7 +2088,7 @@ describe Bubbles::Resources do
             it 'should return a 200 ok response' do
               VCR.use_cassette('head_students_authenticated_uri_params') do
                 env = Bubbles::Resources.new.environment
-                response = env.head_student_by_id 'blahblahblah', { :id => 32 }
+                response = env.head_student_by_id 'blahblahblah', { id: 32 }
 
                 expect(response).to_not be_nil
                 expect(response.code).to eq(200)
@@ -2102,7 +2102,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { :username => 'scottj', :password => '123qwe456' }
+                data = { username: 'scottj', password: '123qwe456' }
                 login_object = @environment.login data
 
                 @auth_token = login_object.auth_token

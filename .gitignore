@@ -1,3 +1,5 @@
 Gemfile.lock
 bin/
 _site/**
+.idea/**
+coverage/**

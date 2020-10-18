@@ -43,3 +43,6 @@
 
 # Ignore RubyMine files
 .idea/**
+
+# Ignore Gemfile.lock because this is a gem
+Gemfile.lock

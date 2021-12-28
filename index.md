@@ -1,4 +1,4 @@
-# Bubbles
+# Bubbles v0.7.0
 
 A gem for easily defining client REST interfaces in ruby
 

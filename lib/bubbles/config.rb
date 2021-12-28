@@ -217,23 +217,31 @@ module Bubbles
             end
           end
         elsif endpoint.method == :post
-          if endpoint.authenticated?
+          if endpoint.authenticated? and !endpoint.encode_authorization_header?
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |auth_token, data|
-                RestClientResources.execute_post_authenticated self, endpoint, auth_token, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                RestClientResources.execute_post_authenticated self, endpoint, :bearer, auth_token, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+              end
+            end
+          elsif endpoint.encode_authorization_header?
+            Bubbles::RestEnvironment.class_exec do
+              define_method(endpoint_name_as_sym) do |username, password, data = {}|
+                login_data = {
+                  :username => username,
+                  :password => password
+                }
+
+                auth_value = RestClientResources.get_encoded_authorization(endpoint, login_data)
+                # composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
+                #                                                                   Authorization: 'Basic ' + Base64.strict_encode64(auth_value)
+                #                                                                 })
+                RestClientResources.execute_post_authenticated self, endpoint, :basic, auth_value, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
               end
             end
           else
             Bubbles::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |data|
                 composite_headers = endpoint.additional_headers
-                if endpoint.encode_authorization_header?
-                  auth_value = RestClientResources.get_encoded_authorization(endpoint, data)
-                  composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
-                                                                                    Authorization: 'Basic ' + Base64.strict_encode64(auth_value)
-                                                                                  })
-                end
-
                 RestClientResources.execute_post_unauthenticated self, endpoint, data, composite_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
               end
             end

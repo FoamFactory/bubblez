@@ -76,6 +76,41 @@ describe Bubbles::Resources do
     end
   end
 
+  context 'when using the listmonk API' do
+    context 'when accessed using http' do
+      context 'when a GET request is used' do
+        before do
+          Bubbles.configure do |config|
+            config.environments = [{
+                                     scheme: 'http',
+                                     host: 'listmonk.example.com'
+                                   }]
+            config.endpoints = [
+              {
+                location: '/api/lists',
+                method: :get,
+                api_key_required: false,
+                authenticated: true,
+                encode_authorization: %i[username password],
+                name: "get_lists"
+              }
+            ]
+          end
+        end
+
+        it 'should return a 200 ok' do
+          VCR.use_cassette 'get_lists_authenticated' do
+            env = Bubbles::Resources.new.environment
+
+            # Use a dummy login and password
+            response = env.get_lists 'someone', '7162jahd89'
+            expect(response).to_not be_nil
+          end
+        end
+      end
+    end
+  end
+
   context 'when using a dummy manufactured API' do
     context 'when accessed using https' do
       context 'when accessed using a HEAD request' do

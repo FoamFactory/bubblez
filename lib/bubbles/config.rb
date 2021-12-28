@@ -171,12 +171,35 @@ module Bubbles
           if endpoint.authenticated?
             Bubbles::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
-                define_method(endpoint_name_as_sym) do |auth_token, uri_params|
-                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                if endpoint.encode_authorization_header?
+                  define_method(endpoint_name_as_sym) do |username, password, uri_params|
+                    login_data = {
+                      :login => username,
+                      :password => password
+                    }
+                    auth_value = RestClientResources.get_encoded_authorization(endpoint, login_data)
+                    RestClientResources.execute_get_authenticated self, endpoint, :basic, auth_value, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                  end
+                else
+                  define_method(endpoint_name_as_sym) do |auth_token, uri_params|
+                    RestClientResources.execute_get_authenticated self, endpoint, :bearer, auth_token, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                  end
                 end
               else
-                define_method(endpoint_name_as_sym) do |auth_token|
-                  RestClientResources.execute_get_authenticated self, endpoint, auth_token, {}, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                if endpoint.encode_authorization_header?
+                  define_method(endpoint_name_as_sym) do |username, password|
+                    login_data = {
+                      :username => username,
+                      :password => password
+                    }
+                    auth_value = RestClientResources.get_encoded_authorization(endpoint, login_data)
+
+                    RestClientResources.execute_get_authenticated self, endpoint, :basic, auth_value, {}, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                  end
+                else
+                  define_method(endpoint_name_as_sym) do |auth_token|
+                    RestClientResources.execute_get_authenticated self, endpoint, :bearer, auth_token, {}, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
+                  end
                 end
               end
             end

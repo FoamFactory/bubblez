@@ -234,7 +234,7 @@ Bubbles.configure do |config|
     {
       :method => :post,
       :location => :login,
-      :authenticated => false,
+      :authenticated => true,
       :api_key_required => true,
       :encode_authorization => [:username, :password],
       :return_type => :body_as_object
@@ -255,8 +255,7 @@ end
 it 'should return a user data structure with a valid authorization token' do
   environment = Bubbles::Resources.new.environment
 
-  data = { :username => 'myusername', :password => 'mypassword' }
-  login_object = environment.login data
+  login_object = environment.login 'myusername', 'mypassword'
 
   auth_token = login_object.auth_token
 

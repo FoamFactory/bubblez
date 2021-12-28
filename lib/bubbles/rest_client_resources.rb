@@ -51,7 +51,8 @@ module Bubbles
     #
     # @param [RestEnvironment] env The +RestEnvironment+ to use to execute the request
     # @param [Endpoint] endpoint The +Endpoint+ which should be requested
-    # @param [String] auth_token The authorization token to use for authentication.
+    # @param [Symbol] auth_type The authorization type to use (Bearer, or Basic)
+    # @param [String] auth_value The authorization token OR encoded value (login/password )to use for authentication.
     # @param [Hash] uri_params A +Hash+ of identifiers to values to replace in the URI string.
     # @param [Hash] additional_headers A +Hash+ of key-value pairs that will be sent as additional headers in the API
     #        call. Defaults to an empty +Hash+.
@@ -62,10 +63,17 @@ module Bubbles
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the GET call.
     #
-    def self.execute_get_authenticated(env, endpoint, auth_token, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
+    def self.execute_get_authenticated(env, endpoint, auth_type, auth_value, uri_params, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if auth_type == :basic
+        composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
+          Authorization: 'Basic ' + Base64.strict_encode64(auth_value)
+        })
+        auth_value = nil
+      else
+        composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
+      end
 
-      execute_rest_call(env, endpoint, nil, auth_token, composite_headers, uri_params) do |env, url, data, headers|
+      execute_rest_call(env, endpoint, nil, auth_value, composite_headers, uri_params) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).get(headers)
       end
     end

@@ -7,7 +7,7 @@ module Bubbles
     end
 
     def self.version_name
-      '0.6.0'
+      '0.7.0'
     end
 
     def self.version_code

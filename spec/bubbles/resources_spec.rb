@@ -404,7 +404,7 @@ describe Bubbles::Resources do
 
     context 'when accessed with a GET request' do
       context 'listing users' do
-        context 'with an authenticated API requiring an API key' do
+        context 'with an authenticated endpoint requiring an API key' do
           before do
             Bubbles.configure do |config|
               config.endpoints = [
@@ -429,12 +429,8 @@ describe Bubbles::Resources do
           it 'should successfully list all users in the system' do
             VCR.use_cassette('get_all_users_foamfactory_remote') do
               env = Bubbles::Resources.new.environment
-              data = {
-                username: 'scottj',
-                password: '123qwe456'
-              }
 
-              authenticated_user = env.login data
+              authenticated_user = env.login 'scottj', '123qwe456'
               expect(authenticated_user).to_not be_nil
               expect(authenticated_user.auth_token).to_not be_nil
 
@@ -487,12 +483,8 @@ describe Bubbles::Resources do
           it 'should successfully list all users in the system' do
             VCR.use_cassette('get_all_users_foamfactory_local') do
               env = Bubbles::Resources.new.environment
-              data = {
-                  username: 'scottj',
-                  password: '123qwe456'
-              }
 
-              authenticated_user = env.login data
+              authenticated_user = env.login 'scottj', '123qwe456'
               expect(authenticated_user).to_not be_nil
               expect(authenticated_user.auth_token).to_not be_nil
 
@@ -619,7 +611,7 @@ describe Bubbles::Resources do
               {
                   method: :post,
                   location: :login,
-                  authenticated: false,
+                  authenticated: true,
                   api_key_required: true,
                   encode_authorization: %i[username password],
                   return_type: :body_as_object
@@ -633,8 +625,8 @@ describe Bubbles::Resources do
             resources = Bubbles::Resources.new
             environment = resources.environment
 
-            data = { username: 'scottj', password: '123qwe456' }
-            login_object = environment.login data
+            # data = { username: 'scottj', password: '123qwe456' }
+            login_object = environment.login 'scottj', '123qwe456'
 
             expect(login_object.id).to eq(1)
             expect(login_object.name).to eq('Scott Johnson')
@@ -656,14 +648,14 @@ describe Bubbles::Resources do
                   name: 'create_student',
                   return_type: :body_as_object
               },
-                {
-                    method: :post,
-                    location: :login,
-                    authenticated: false,
-                    api_key_required: true,
-                    encode_authorization: %i[username password],
-                    return_type: :body_as_object
-                }
+              {
+                  method: :post,
+                  location: :login,
+                  authenticated: true,
+                  api_key_required: true,
+                  encode_authorization: %i[username password],
+                  return_type: :body_as_object
+              }
             ]
           end
         end
@@ -674,8 +666,7 @@ describe Bubbles::Resources do
             @environment = @resources.environment
 
             VCR.use_cassette('login') do
-              data = { username: 'scottj', password: '123qwe456' }
-              login_object = @environment.login data
+              login_object = @environment.login 'scottj', '123qwe456'
 
               @auth_token = login_object.auth_token
             end
@@ -890,8 +881,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -988,8 +978,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -1090,8 +1079,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -1240,8 +1228,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -1323,8 +1310,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -1621,8 +1607,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -2137,8 +2122,7 @@ describe Bubbles::Resources do
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
-                data = { username: 'scottj', password: '123qwe456' }
-                login_object = @environment.login data
+                login_object = @environment.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end

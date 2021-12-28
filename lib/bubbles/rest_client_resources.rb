@@ -171,10 +171,17 @@ module Bubbles
     #
     # @return [RestClient::Response] The +Response+ resulting from the execution of the POST call.
     #
-    def self.execute_post_authenticated(env, endpoint, auth_token, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
-      composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
+    def self.execute_post_authenticated(env, endpoint, auth_type, auth_value, data, additional_headers = {}, api_key = nil, api_key_name = 'X-API-Key')
+      if auth_type == :basic
+        composite_headers = RestClientResources.build_composite_headers(endpoint.additional_headers, {
+          Authorization: 'Basic ' + Base64.strict_encode64(auth_value)
+        })
+        auth_value = nil
+      else
+        composite_headers = self.get_headers_with_api_key(endpoint, api_key, api_key_name, additional_headers)
+      end
 
-      return execute_rest_call(env, endpoint, data, auth_token, composite_headers) do |env, url, data, headers|
+      execute_rest_call(env, endpoint, data, auth_value, composite_headers) do |env, url, data, headers|
         next RestClient::Resource.new(url.to_s, :verify_ssl => OpenSSL::SSL::VERIFY_NONE).post(data.to_json, headers)
       end
     end

@@ -146,7 +146,7 @@ Each _endpoint_ object can have the following attributes:
 | `method`| The HTTP method to use to access the API for this endpoint. Must be one of `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, or `HEAD`. | Yes | N/A |
 | `location`| The path to access the endpoint. This is placed after the `host:port` section to build the URI. It may have URI parameters in the form of `{paramName}`. If a URI parameter is specified within the `location`, a `uri_params` hash will be expected to be passed to the calling method to replace the placeholder values. | Yes | N/A |
 | `name` | The name to give the method created to make this REST call. | No | The value of the `location` parameter, with slashes (`/`) replaced with underscores (`_`). |
-| `authorization` | Whether or not this endpoint requires authentication prior to executing the call. If true, then an `authorization_token` will be added to the method as a parameter to be passed when the method is called. This parameter will be placed in an `Authorization` header when the REST call is executed. | No | `false` |
+| `authenticatedd` | Whether or not this endpoint requires authentication prior to executing the call. If true, then an `Authorization` header will be added to the request. If the `encode_authorization` flag is also set, then the `Authorization` will be of type `Basic` and a base64-encoded `username:password` string will be added as the value. If the `encode_authorization` flag is not set, then an auth token will be expected as part of the method's parameters and will be passed with an authorization type of `Bearer` within the header.| No | `false` |
 | `api_key_required` | Whether or not an API key is required. If `true`, a parameter will be added to the method created to execute the REST API call named `api_key`. The value of this parameter will be set as the value of the `X-Api-Key` header when making the REST API call. | No | `false` |
 | `return_type` | Must be one of: `[full_response, body_as_object, body_as_string]`. This specifies what type of response is expected from the `Endpoint`. A value of `full_response` will return the full `RestClient::Response` object to the client. A value of `body_as_string` will return the `RestClient::Response.body` value as a `String`. A value of `body_as_object` will take the `RestClient::Response.body` parameter and parse it as an `OpenStruct` object, and return the result of this parsing operation. | No | `body_as_string` |
 | `encode_authorization` | Whether the `data` passed as part of the request should be re-encoded as an `Authorization: Basic` header (and Base64 encoded). Typically, this is only used for initial username/password authentication. | No | `false` |
@@ -193,7 +193,7 @@ it 'should return an object containing the version information from the API' do
 end
 ```
 
-#### GET a specific user by id (authentication required)
+#### GET a specific user by id (authentication via authorization token required)
 **Configuration**:
 ```ruby
 Bubbles.configure do |config|
@@ -220,6 +220,40 @@ end
 it 'should return an object containing a user with id = 4' do
   environment = Bubbles::Resources.new.environment
   user = environment.get_user(@auth_token, {:id => 4})
+  expect(user).to_not be_nil
+
+  expect(user.id).to eq(4)
+end
+```
+
+#### GET a specific user by id (authentication via login/password)
+**Configuration**:
+```ruby
+Bubbles.configure do |config|
+  config.endpoints = [
+    {
+      :method => :get,
+      :location => 'users/{id}',
+      :authenticated => true,
+      :encode_authorization => true,
+      :name => :get_user,
+      :return_type => :body_as_object
+    }
+  ]
+
+  config.environments = [{
+    :scheme => 'http',
+    :host => '127.0.0.1',
+    :port => '9002'
+  }]
+end
+```
+
+**Usage**:
+```ruby
+it 'should return an object containing a user with id = 4' do
+  environment = Bubbles::Resources.new.environment
+  user = environment.get_user 'somelogin', 'somepassword', {:id => 4})
   expect(user).to_not be_nil
 
   expect(user.id).to eq(4)

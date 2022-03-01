@@ -1,15 +1,15 @@
-# Bubbles v0.7.0
+# Bubblez v1.0.0
 
 A gem for easily defining client REST interfaces in ruby
 
-> If you're using Rails, it's suggested to have a `config/initializers/bubbles.rb` configuration file where you can easily configure your endpoints and environments. If you're not using Rails, then you can put this configuration just about anywhere, provided it's executed before where you want to use it.
+> If you're using Rails, it's suggested to have a `config/initializers/bubblez.rb` configuration file where you can easily configure your endpoints and environments. If you're not using Rails, then you can put this configuration just about anywhere, provided it's executed before where you want to use it.
 
 ## Quickstart
-In `config/initializers/bubbles.rb`, add the following:
+In `config/initializers/bubblez.rb`, add the following:
 ```ruby
-require 'bubbles'
+require 'bubblez'
 
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :get,
@@ -31,11 +31,11 @@ The `config.endpoints` section is where you configure which endpoints you want t
 
 Now, you can use this endpoint with:
 ```ruby
-require 'bubbles'
+require 'bubblez'
 ...
 
 def version
-  resources = Bubbles::Resources.new
+  resources = Bubblez::Resources.new
 
   # The following will make a GET request to
   # http://0.0.0.0:1234/version and return the result.
@@ -46,21 +46,21 @@ end
 ```
 
 ## Detailed Documentation
-There are currently two parts to a bubbles configuration: the _environments_ and the _endpoints_. Bubbles is configured in a _bubbles configuration block_:
+There are currently two parts to a bubblez configuration: the _environments_ and the _endpoints_. Bubblez is configured in a _bubblez configuration block_:
 ```ruby
-Bubbles.configure do |config|
-  # You can add configuration for Bubbles here using config.endpoints and config.environments
+Bubblez.configure do |config|
+  # You can add configuration for Bubblez here using config.endpoints and config.environments
 end
 ```
 
 This configuration block can be run at any time, but is typically set up in the initializer section of an app's startup. If desired, configuration can happen separately. That is, you can initialize environments within your initializer file and then initialize endpoints within another section of the application. Just note that when endpoints are defined, it overwrites _all_ endpoints of a configuration, not just the ones you choose to change.
 
 ### Environments
-You can set up any number of environments in bubbles. If you choose to have more than one, though, each of these environments requires that you specify an `environment_name` parameter to uniquely identify it. If you specify multiple environments with
+You can set up any number of environments in bubblez. If you choose to have more than one, though, each of these environments requires that you specify an `environment_name` parameter to uniquely identify it. If you specify multiple environments with
 the same `environment_name`, only the environment with this name that was defined _last_ will take effect.
 
 #### Configuration of Environments
-Environments are configured as part of the _bubbles configuration block_ and can have the following parameters:
+Environments are configured as part of the _bubblez configuration block_ and can have the following parameters:
 
   - `scheme`: The scheme for accessing endpoints on this host. Should be one of `http` or `https`. Defaults to `http`.
   - `host`: A domain name or IP address for the remote host to access for the environment.  Defaults to `127.0.0.1`.
@@ -75,9 +75,9 @@ Consider the possibility of wanting to configure three environments:
   - A _staging_ environment, accessed via `https`, and using `stage.foamfactory.io` as the host and `8080` as the port
   - A _production_ environment, accessed via `https` and using `api.foamfactory.io` as the host and `80` as the port
 
-You can configure all of these environments at once in the _bubbles configuration block_:
+You can configure all of these environments at once in the _bubblez configuration block_:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.environments = [{
     :scheme => 'http',
     :host => '0.0.0.0',
@@ -104,13 +104,13 @@ If you choose a scheme of `http` and leave off the `port` configuration variable
 You can now access the environments using the method `RestClientResources.environment`:
 
 ```ruby
-resources = Bubbles::Resources.new
+resources = Bubblez::Resources.new
 staging_environment = resources.environment 'staging'
 ```
 
 The `environment_name` parameter is optional if you have only a single `Environment`. In this case, you can access a single environment by leaving the parameter off of the call to `resources.environment`:
 ```ruby
-resources = Bubbles::Resources.new
+resources = Bubblez::Resources.new
 
 # Note: This line will raise an error if there is more than one Environment defined
 environment = resources.environment
@@ -119,7 +119,7 @@ environment = resources.environment
 #### Configuration of Endpoints
 Endpoints are the meat and potatoes of REST interaction. By indicating a _method_, _uri_, _body_, and _headers_, you are effectively making a function call on a remote server.
 
-_Endpoints_ are specified as an array of objects within the _bubbles configuration block_:
+_Endpoints_ are specified as an array of objects within the _bubblez configuration block_:
 
 ```ruby
 config.endpoints = [
@@ -153,15 +153,15 @@ Each _endpoint_ object can have the following attributes:
 | `headers` | A `Hash` of key-value pairs specifying additional headers (the `key` specifies the name of the header, and the `value` specifies the value) that should be passed with each call to this `Endpoint`. Defaults to `{}`.
 
 ### Examples
-These examples are taken almost directly from our [test suite](https://github.com/FoamFactory/bubbles/blob/master/spec/bubbles/resources_spec.rb). For more detailed examples, please refer to our specifications located in the `/spec` directory.
+These examples are taken almost directly from our [test suite](https://github.com/FoamFactory/bubblez/blob/master/spec/bubblez/resources_spec.rb). For more detailed examples, please refer to our specifications located in the `/spec` directory.
 
 #### GET the version of the software (unauthenticated, no API key required)
 **Configuration**:
 
 ```ruby
-require 'bubbles'
+require 'bubblez'
 
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :get,
@@ -183,7 +183,7 @@ end
 **Usage**:
 ```ruby
 it 'should return an object containing the version information from the API' do
-  resources = Bubbles::Resources.new
+  resources = Bubblez::Resources.new
   environment = resources.environment
 
   response = environment.version
@@ -196,7 +196,7 @@ end
 #### GET a specific user by id (authentication via authorization token required)
 **Configuration**:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :get,
@@ -218,7 +218,7 @@ end
 **Usage**:
 ```ruby
 it 'should return an object containing a user with id = 4' do
-  environment = Bubbles::Resources.new.environment
+  environment = Bubblez::Resources.new.environment
   user = environment.get_user(@auth_token, {:id => 4})
   expect(user).to_not be_nil
 
@@ -229,7 +229,7 @@ end
 #### GET a specific user by id (authentication via login/password)
 **Configuration**:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :get,
@@ -252,7 +252,7 @@ end
 **Usage**:
 ```ruby
 it 'should return an object containing a user with id = 4' do
-  environment = Bubbles::Resources.new.environment
+  environment = Bubblez::Resources.new.environment
   user = environment.get_user 'somelogin', 'somepassword', {:id => 4})
   expect(user).to_not be_nil
 
@@ -263,7 +263,7 @@ end
 #### POST a login (i.e. retrieve an authorization token)
 **Configuration**:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :post,
@@ -287,7 +287,7 @@ end
 **Usage**:
 ```ruby
 it 'should return a user data structure with a valid authorization token' do
-  environment = Bubbles::Resources.new.environment
+  environment = Bubblez::Resources.new.environment
 
   login_object = environment.login 'myusername', 'mypassword'
 
@@ -300,7 +300,7 @@ end
 #### DELETE a user by id
 **Configuration**:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :delete,
@@ -321,7 +321,7 @@ Bubbles.configure do |config|
 **Usage**:
 ```ruby
 it 'should successfully delete the given user' do
-  environment = Bubbles::Resources.new.environment
+  environment = Bubblez::Resources.new.environment
   response = environment.delete_user_by_id @auth_token, {:id => 2}
   expect(response.success).to eq(true)
 end
@@ -330,7 +330,7 @@ end
 #### PATCH a user's information by providing a body containing information to update
 **Configuration**:
 ```ruby
-Bubbles.configure do |config|
+Bubblez.configure do |config|
   config.endpoints = [
     {
       :method => :patch,
@@ -351,7 +351,7 @@ Bubbles.configure do |config|
 **Usage**:
 ```ruby
 it 'should update information for the specified user' do
-  environment = Bubbles::Resources.new.environment
+  environment = Bubblez::Resources.new.environment
   response = environment.update_user @auth_token, {:id => 4}, {:user => {:email => 'kleinhammer@somewhere.com' } }
 
   expect(response.id).to eq(4)

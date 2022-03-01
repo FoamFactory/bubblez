@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'bubbles'
+require 'bubblez'
 
-describe 'Bubbles Configuration' do
+describe 'Bubblez Configuration' do
   context '#endpoints' do
     context 'when we specify an environment with two endpoints' do
       before do
-        Bubbles.configure do |config|
+        Bubblez.configure do |config|
           config.environments = [
             {
               scheme: 'http',
@@ -38,7 +38,7 @@ describe 'Bubbles Configuration' do
       end
 
       it 'should return that two endpoints were defined' do
-        config = Bubbles.configuration
+        config = Bubblez.configuration
         expect(config).to_not be_nil
         expect(config.endpoints.length).to eq(2)
       end

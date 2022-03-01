@@ -1,10 +1,10 @@
-require 'bubbles/config'
-require 'bubbles/rest_environment'
+require 'bubblez/config'
+require 'bubblez/rest_environment'
 
-module Bubbles
+module Bubblez
   class RestClientResources
     def environment(env_name = nil)
-      Bubbles.configuration.environment(env_name)
+      Bubblez.configuration.environment(env_name)
     end
 
     ##

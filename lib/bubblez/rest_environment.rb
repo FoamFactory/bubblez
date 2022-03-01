@@ -1,4 +1,4 @@
-module Bubbles
+module Bubblez
   class RestEnvironment
     attr_accessor :host, :port, :api_key, :api_key_name
 

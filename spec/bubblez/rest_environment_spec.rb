@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'bubbles'
+require 'bubblez'
 
-describe Bubbles::RestEnvironment do
+describe Bubblez::RestEnvironment do
   describe '#initialize' do
     context 'for an environment that specifies a scheme of http and a default port' do
       before do
-        Bubbles.configure do |config|
+        Bubblez.configure do |config|
           config.environments = [{
             scheme: 'http',
             host: 'somewhere.something.net',
@@ -14,14 +14,14 @@ describe Bubbles::RestEnvironment do
       end
 
       it 'should actually set the port to 80' do
-        env = Bubbles::Resources.new.environment
+        env = Bubblez::Resources.new.environment
         expect(env.port).to eq(80)
       end
     end
 
     context 'for an environment that specifies a scheme of https and a default port' do
       before do
-        Bubbles.configure do |config|
+        Bubblez.configure do |config|
           config.environments = [{
             scheme: 'https',
             host: 'somewhere.something.net',
@@ -30,15 +30,15 @@ describe Bubbles::RestEnvironment do
       end
 
       it 'should actually set the port to 443' do
-        env = Bubbles::Resources.new.environment
+        env = Bubblez::Resources.new.environment
         expect(env.port).to eq(443)
       end
     end
   end
 
-  describe 'Bubbles::Configure' do
+  describe 'Bubblez::Configure' do
     before do
-      Bubbles.configure do |config|
+      Bubblez.configure do |config|
         config.endpoints = [
           {
             method: :get,
@@ -71,21 +71,21 @@ describe Bubbles::RestEnvironment do
     end
 
     it 'should create a method "version" on each RestEnvironment' do
-      expect(Bubbles::RestEnvironment.instance_methods(false).include?(:version)).to eq(true)
+      expect(Bubblez::RestEnvironment.instance_methods(false).include?(:version)).to eq(true)
     end
 
     it 'should create a method "list_students" on each RestEnvironment' do
-      expect(Bubbles::RestEnvironment.instance_methods(false).include?(:list_students)).to eq(true)
+      expect(Bubblez::RestEnvironment.instance_methods(false).include?(:list_students)).to eq(true)
     end
 
     it 'should create a method "login" on each RestEnvironment' do
-      expect(Bubbles::RestEnvironment.instance_methods(false).include?(:login)).to eq(true)
+      expect(Bubblez::RestEnvironment.instance_methods(false).include?(:login)).to eq(true)
     end
   end
 
   describe '#environments' do
     before do
-      Bubbles.configure do |config|
+      Bubblez.configure do |config|
         config.environments = [{
           scheme: 'https',
           host: '127.0.1.1',
@@ -98,7 +98,7 @@ describe Bubbles::RestEnvironment do
     describe 'with more than one environment specified where one or more do not have an environment name' do
       it 'should raise an exception' do
         expect {
-          Bubbles.configure do |config|
+          Bubblez.configure do |config|
             config.environments = [
               {
                 scheme: 'https',
@@ -117,7 +117,7 @@ describe Bubbles::RestEnvironment do
     end
 
     it 'returns an address of https://127.0.1.1:2222' do
-      resources = Bubbles::Resources.new
+      resources = Bubblez::Resources.new
       environment = resources.environment 'local'
 
       expect(environment).to_not be_nil
@@ -130,7 +130,7 @@ describe Bubbles::RestEnvironment do
   describe '#api_key_name' do
     context 'for an environment that has an API key name specified' do
       before do
-        Bubbles.configure do |config|
+        Bubblez.configure do |config|
           config.environments = [{
             scheme: 'https',
             host: '127.0.1.1',
@@ -142,14 +142,14 @@ describe Bubbles::RestEnvironment do
       end
 
       it 'should return the name of the API key' do
-        env = Bubbles::Resources.new.environment
+        env = Bubblez::Resources.new.environment
         expect(env.api_key_name).to eq('X-Something-Key')
       end
     end
 
     context 'for an environment that does not have an API key name specified' do
       before do
-        Bubbles.configure do |config|
+        Bubblez.configure do |config|
           config.environments = [{
             scheme: 'https',
             host: '127.0.1.1',
@@ -160,7 +160,7 @@ describe Bubbles::RestEnvironment do
       end
 
       it 'should return "X-API-Key"' do
-        env = Bubbles::Resources.new.environment
+        env = Bubblez::Resources.new.environment
         expect(env.api_key_name).to eq('X-API-Key')
       end
     end
@@ -168,7 +168,7 @@ describe Bubbles::RestEnvironment do
 
   # describe '#get_environment' do
   #   before do
-  #     Bubbles.configure do |config|
+  #     Bubblez.configure do |config|
   #       config.environment = {
   #         :scheme => 'https',
   #         :host => '127.0.1.1',
@@ -190,7 +190,7 @@ describe Bubbles::RestEnvironment do
   #   end
   #
   #   it 'should retrieve the correct environment' do
-  #     resources = Bubbles::Resources.new
+  #     resources = Bubblez::Resources.new
   #     local_env = resources.get_environment :local
   #     staging_env = resources.get_environment :staging
   #     production_env = resources.get_environment :production

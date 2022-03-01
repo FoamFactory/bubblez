@@ -75,4 +75,4 @@ end
 ```
 
 ## Detailed Documentation
-For more examples and detailed documentation, please see [the Bubbles GitHub page](http://foamfactory.github.io/bubblez).
+For more examples and detailed documentation, please see [the Bubblez GitHub page](http://foamfactory.github.io/bubblez).

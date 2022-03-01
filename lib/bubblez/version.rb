@@ -1,13 +1,13 @@
 require 'date'
 
-module Bubbles
+module Bubblez
   class VersionInformation
     def self.package_name
-      return 'bubbles-rest-client'
+      return 'bubblez'
     end
 
     def self.version_name
-      '0.7.0'
+      '1.0.0'
     end
 
     def self.version_code

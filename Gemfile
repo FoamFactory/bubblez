@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in bubbles.gemspec
+# Specify your gem's dependencies in bubblez.gemspec
 gemspec

@@ -1,8 +1,8 @@
 require 'addressable/template'
 
-module Bubbles
+module Bubblez
   ##
-  # Representation of a single API endpoint within the Bubbles infrastructure.
+  # Representation of a single API endpoint within the Bubblez infrastructure.
   #
   # In order to access an API Endpoint, an {RestEnvironment} must also be provided. This class is an abstract
   # representation of an +Endpoint+, without any information provided as part of the Environment. In other words, an
@@ -53,7 +53,7 @@ module Bubbles
     ## A template for specifying the complete URL for endpoints, with a port attached to the host.
     API_URL_WITH_PORT = ::Addressable::Template.new("{scheme}://{host}:{port}/{endpoint}")
 
-    ## The HTTP methods supported by a rest client utilizing Bubbles.
+    ## The HTTP methods supported by a rest client utilizing Bubblez.
     METHODS = %w[get post patch put delete head].freeze
 
     ## The possible return types for successful REST calls. Defaults to :body_as_string.

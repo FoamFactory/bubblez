@@ -1,20 +1,20 @@
-require 'bubbles/rest_environment'
-require 'bubbles/endpoint'
+require 'bubblez/rest_environment'
+require 'bubblez/endpoint'
 require 'base64'
 
-module Bubbles
+module Bubblez
   class << self
     attr_writer :configuration
   end
 
   ##
-  # Configure the Bubbles instance.
+  # Configure the Bubblez instance.
   #
-  # Use this method if you want to configure the Bubbles instance, typically during initialization of your Gem or
+  # Use this method if you want to configure the Bubblez instance, typically during initialization of your Gem or
   # application.
   #
-  # @example In app/config/initializers/bubbles.rb
-  #    Bubbles.configure do |config|
+  # @example In app/config/initializers/bubblez.rb
+  #    Bubblez.configure do |config|
   #      config.endpoints = [
   #        {
   #          :type => :get,
@@ -33,7 +33,7 @@ module Bubbles
   end
 
   ##
-  # The configuration of the Bubbles rest client.
+  # The configuration of the Bubblez rest client.
   #
   # Use this class if you want to retrieve configuration values set during initialization.
   #
@@ -86,7 +86,7 @@ module Bubbles
     # environment have a +:environment_name:+ parameter to differentiate it from other environments.
     #
     # @example In app/config/environments/staging.rb:
-    #    Bubbles.configure do |config|
+    #    Bubblez.configure do |config|
     #      config.environments = [{
     #         :scheme => 'https',
     #         :host => 'stage.api.somehost.com',
@@ -161,15 +161,15 @@ module Bubbles
           endpoint_name_as_sym = endpoint.get_location_string.to_sym
         end
 
-        if Bubbles::RestEnvironment.instance_methods(false).include?(endpoint_name_as_sym)
-          Bubbles::RestEnvironment.class_exec do
+        if Bubblez::RestEnvironment.instance_methods(false).include?(endpoint_name_as_sym)
+          Bubblez::RestEnvironment.class_exec do
             remove_method endpoint_name_as_sym
           end
         end
 
         if endpoint.method == :get
           if endpoint.authenticated?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 if endpoint.encode_authorization_header?
                   define_method(endpoint_name_as_sym) do |username, password, uri_params|
@@ -204,7 +204,7 @@ module Bubbles
               end
             end
           else
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params|
                   RestClientResources.execute_get_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -218,13 +218,13 @@ module Bubbles
           end
         elsif endpoint.method == :post
           if endpoint.authenticated? and !endpoint.encode_authorization_header?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |auth_token, data|
                 RestClientResources.execute_post_authenticated self, endpoint, :bearer, auth_token, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
               end
             end
           elsif endpoint.encode_authorization_header?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |username, password, data = {}|
                 login_data = {
                   :username => username,
@@ -239,7 +239,7 @@ module Bubbles
               end
             end
           else
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               define_method(endpoint_name_as_sym) do |data|
                 composite_headers = endpoint.additional_headers
                 RestClientResources.execute_post_unauthenticated self, endpoint, data, composite_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -249,13 +249,13 @@ module Bubbles
         elsif endpoint.method == :delete
           if endpoint.has_uri_params?
             if endpoint.authenticated?
-              Bubbles::RestEnvironment.class_exec do
+              Bubblez::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
                   RestClientResources.execute_delete_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
                 end
               end
             else
-              Bubbles::RestEnvironment.class_exec do
+              Bubblez::RestEnvironment.class_exec do
                 define_method(endpoint_name_as_sym) do |uri_params|
                   RestClientResources.execute_delete_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
                 end
@@ -270,7 +270,7 @@ module Bubbles
           end
         elsif endpoint.method == :patch
           if endpoint.authenticated?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
                   RestClientResources.execute_patch_authenticated self, endpoint, auth_token, uri_params, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -282,7 +282,7 @@ module Bubbles
               end
             end
           else
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params, data|
                   RestClientResources.execute_patch_unauthenticated self, endpoint, uri_params, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -296,7 +296,7 @@ module Bubbles
           end
         elsif endpoint.method == :put
           if endpoint.authenticated?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params, data|
                   RestClientResources.execute_put_authenticated self, endpoint, auth_token, uri_params, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -308,7 +308,7 @@ module Bubbles
               end
             end
           else
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params, data|
                   RestClientResources.execute_put_unauthenticated self, endpoint, uri_params, data, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -322,7 +322,7 @@ module Bubbles
           end
         elsif endpoint.method == :head
           if endpoint.authenticated?
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |auth_token, uri_params|
                   RestClientResources.execute_head_authenticated self, endpoint, auth_token, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name
@@ -334,7 +334,7 @@ module Bubbles
               end
             end
           else
-            Bubbles::RestEnvironment.class_exec do
+            Bubblez::RestEnvironment.class_exec do
               if endpoint.has_uri_params?
                 define_method(endpoint_name_as_sym) do |uri_params|
                   RestClientResources.execute_head_unauthenticated self, endpoint, uri_params, endpoint.additional_headers, self.get_api_key_if_needed(endpoint), self.api_key_name

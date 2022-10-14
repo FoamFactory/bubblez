@@ -1,7 +1,0 @@
-language: ruby
-rvm:
-  - 2.6.1
-script: bundle exec rake spec
-branches:
-  only:
-    - master

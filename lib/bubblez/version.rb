@@ -7,7 +7,7 @@ module Bubblez
     end
 
     def self.version_name
-      '1.0.0'
+      '1.0.1'
     end
 
     def self.version_code

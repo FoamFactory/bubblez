@@ -1,0 +1,40 @@
+name: "Build, Test, and Deploy"
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  Build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6.1' # Not needed with a .ruby-version file
+          bundler-cache: true
+      - name: Build
+        run: gem build bubblez.gemspec
+      - uses: actions/upload-artifact@v2
+        with:
+          name: bubblez-gemfile
+          path: bubblez-*.gem
+  Deploy:
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6.1' # Not needed with a .ruby-version file
+          bundler-cache: true
+      - uses: actions/download-artifact@v2
+        with:
+          name: bubblez-gemfile
+      - name: Release Gem to GitHub Packages
+        uses: jstastny/publish-gem-to-github@v2.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          owner: FoamFactory

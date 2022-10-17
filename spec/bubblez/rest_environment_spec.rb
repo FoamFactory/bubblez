@@ -6,7 +6,7 @@ describe Bubblez::RestEnvironment do
     context 'for an environment that specifies a scheme of http and a default port' do
       before do
         Bubblez.configure do |config|
-          config.environments = [{
+          config['Default'].environments = [{
             scheme: 'http',
             host: 'somewhere.something.net',
           }]
@@ -14,7 +14,8 @@ describe Bubblez::RestEnvironment do
       end
 
       it 'should actually set the port to 80' do
-        env = Bubblez::Resources.new.environment
+        resources = Bubblez::Resources.new 'Default'
+        env = resources.environment
         expect(env.port).to eq(80)
       end
     end
@@ -22,7 +23,7 @@ describe Bubblez::RestEnvironment do
     context 'for an environment that specifies a scheme of https and a default port' do
       before do
         Bubblez.configure do |config|
-          config.environments = [{
+          config['Default'].environments = [{
             scheme: 'https',
             host: 'somewhere.something.net',
           }]
@@ -30,7 +31,8 @@ describe Bubblez::RestEnvironment do
       end
 
       it 'should actually set the port to 443' do
-        env = Bubblez::Resources.new.environment
+        resources = Bubblez::Resources.new 'Default'
+        env = resources.environment
         expect(env.port).to eq(443)
       end
     end
@@ -39,7 +41,7 @@ describe Bubblez::RestEnvironment do
   describe 'Bubblez::Configure' do
     before do
       Bubblez.configure do |config|
-        config.endpoints = [
+        config['Default'].endpoints = [
           {
             method: :get,
             location: :students,
@@ -61,7 +63,7 @@ describe Bubblez::RestEnvironment do
           }
         ]
 
-        config.environments = [{
+        config['Default'].environments = [{
           scheme: 'http',
           host: '127.0.0.1',
           port: '1234',
@@ -86,7 +88,7 @@ describe Bubblez::RestEnvironment do
   describe '#environments' do
     before do
       Bubblez.configure do |config|
-        config.environments = [{
+        config['Default'].environments = [{
           scheme: 'https',
           host: '127.0.1.1',
           port: '2222',
@@ -99,7 +101,7 @@ describe Bubblez::RestEnvironment do
       it 'should raise an exception' do
         expect {
           Bubblez.configure do |config|
-            config.environments = [
+            config['Default'].environments = [
               {
                 scheme: 'https',
                 host: '127.0.1.1',
@@ -117,7 +119,7 @@ describe Bubblez::RestEnvironment do
     end
 
     it 'returns an address of https://127.0.1.1:2222' do
-      resources = Bubblez::Resources.new
+      resources = Bubblez::Resources.new 'Default'
       environment = resources.environment 'local'
 
       expect(environment).to_not be_nil
@@ -131,7 +133,7 @@ describe Bubblez::RestEnvironment do
     context 'for an environment that has an API key name specified' do
       before do
         Bubblez.configure do |config|
-          config.environments = [{
+          config['Default'].environments = [{
             scheme: 'https',
             host: '127.0.1.1',
             port: '2222',
@@ -142,7 +144,8 @@ describe Bubblez::RestEnvironment do
       end
 
       it 'should return the name of the API key' do
-        env = Bubblez::Resources.new.environment
+        resources = Bubblez::Resources.new 'Default'
+        env = resources.environment
         expect(env.api_key_name).to eq('X-Something-Key')
       end
     end
@@ -150,7 +153,7 @@ describe Bubblez::RestEnvironment do
     context 'for an environment that does not have an API key name specified' do
       before do
         Bubblez.configure do |config|
-          config.environments = [{
+          config['Default'].environments = [{
             scheme: 'https',
             host: '127.0.1.1',
             port: '2222',
@@ -160,7 +163,8 @@ describe Bubblez::RestEnvironment do
       end
 
       it 'should return "X-API-Key"' do
-        env = Bubblez::Resources.new.environment
+        resources = Bubblez::Resources.new 'Default'
+        env = resources.environment
         expect(env.api_key_name).to eq('X-API-Key')
       end
     end

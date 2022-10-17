@@ -15,14 +15,14 @@ module Bubblez
   #
   # @example In app/config/initializers/bubblez.rb
   #    Bubblez.configure do |config|
-  #      config.endpoints = [
-  #        {
-  #          :type => :get,
-  #          :location => :version,
-  #          :authenticated => false,
-  #          :api_key_required => false
-  #        }
-  #      ]
+  #      config.add_api('someApiName', endpoints: [
+  #            {
+  #              :type => :get,
+  #              :location => :version,
+  #              :authenticated => false,
+  #              :api_key_required => false
+  #            }
+  #          ])
   #    end
   def self.configure
     yield(configuration)
@@ -30,17 +30,67 @@ module Bubblez
 
   def self.configuration
     @configuration ||= Configuration.new
+
+    @configuration
+  end
+
+  class Configuration
+    def initialize
+      @apis = []
+    end
+
+    def num_apis
+      @apis.length
+    end
+
+    def [] (key = nil)
+      if key.nil? && @apis.length == 1
+        return @apis[0]
+      end
+
+      unless @apis.include? key
+        self.add_api(name: key)
+      end
+
+      if key.is_a? Integer and key < @apis.length
+        return @apis[key]
+      end
+
+      if key.is_a? String
+        return @apis.detect {|e| e.name == key}
+      end
+
+      nil
+    end
+
+    def add_api(name: 'Default', environments: nil, endpoints: nil)
+      api_config = ApiConfiguration.new name
+      unless environments == nil
+        api_config.environments = environments
+      end
+
+      unless endpoints == nil
+        api_config.endpoints = endpoints
+      end
+
+      @apis.push(api_config)
+    end
   end
 
   ##
-  # The configuration of the Bubblez rest client.
+  # The configuration of a single API within the Bubblez rest client.
   #
   # Use this class if you want to retrieve configuration values set during initialization.
   #
-  class Configuration
-    def initialize
+  class ApiConfiguration
+    def initialize(name = '')
+      @name = name
       @environments = Hash.new
       @endpoints = Hash.new
+    end
+
+    def name
+      @name
     end
 
     ##

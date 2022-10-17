@@ -9,12 +9,17 @@ require 'json'
 
 module Bubblez
   class Resources < RestClientResources
-    def initialize(api_key='')
+    def initialize(name, api_key='')
       super
 
+      @config = Bubblez.configuration[name]
       @package_name = Bubblez::VersionInformation.package_name
       @version_name = Bubblez::VersionInformation.version_name
       @version_code = Bubblez::VersionInformation.version_code
+    end
+
+    def config
+      @config
     end
 
     def get_version_info

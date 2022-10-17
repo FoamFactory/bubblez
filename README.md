@@ -1,5 +1,5 @@
 # bubblez
-[![Build Status](https://travis-ci.org/FoamFactory/bubbles.svg?branch=master)](https://travis-ci.org/FoamFactory/bubbles)
+[![Build Status](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml)
 
 A gem for easily defining client REST interfaces in ruby
 
@@ -38,25 +38,28 @@ In `config/initializers/bubblez.rb`, add the following:
 require 'bubblez'
 
 Bubblez.configure do |config|
-  config.endpoints = [
-    {
-      :method => :get,
-      :location => :version,
-      :authenticated => false,
-      :api_key_required => false
-    }
-  ]
-
-  config.environments = [{
-    :scheme => 'http',
-    :host => '0.0.0.0',
-    :port => '1234'
-  }]
+  config.add_api(name: 'MyApi',
+                 environments: [{
+                                  :scheme => 'http',
+                                  :host => '0.0.0.0',
+                                  :port => '1234'
+                                }],
+                 endpoints: [
+                   {
+                     :method => :get,
+                     :location => :version,
+                     :authenticated => false,
+                     :api_key_required => false
+                   }
+                 ])
 end
 ```
 
-The `config.endpoints` section is where you configure which endpoints you want to support. The `config.environments`
-defines the environments, or remote configurations, for accessing the endpoint on specific remote destinations.
+The `config` object is the root of the `bubblez` configuration. It contains one or more API configurations, each added using the `add_api` method. Each API configuration must have a unique name.
+
+The `endpoints` parameter of the method  is where you configure which endpoints you want to support.
+The `environments` parameter of the method defines the environments, or remote configurations, for accessing the
+endpoints on specific remote destinations.
 
 Now, you can use this endpoint with:
 ```ruby
@@ -64,7 +67,7 @@ require 'bubblez'
 ...
 
 def version
-  resources = Bubbles::Resources.new
+  resources = Bubblez::Resources.new 'Default'
 
   # The following will make a GET request to
   # http://0.0.0.0:1234/version and return the result.
@@ -73,6 +76,7 @@ def version
   puts(result)
 end
 ```
+
 
 ## Detailed Documentation
 For more examples and detailed documentation, please see [the Bubblez GitHub page](http://foamfactory.github.io/bubblez).

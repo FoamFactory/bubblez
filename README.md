@@ -1,5 +1,5 @@
 # bubblez
-[![Build Status](https://travis-ci.org/FoamFactory/bubbles.svg?branch=master)](https://travis-ci.org/FoamFactory/bubbles)
+[![Build Status](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml)
 
 A gem for easily defining client REST interfaces in ruby
 

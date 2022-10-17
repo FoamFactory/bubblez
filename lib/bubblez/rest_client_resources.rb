@@ -3,8 +3,10 @@ require 'bubblez/rest_environment'
 
 module Bubblez
   class RestClientResources
+    ## @TODO_jwir3: This isn't ideal. We should choose an API using the Resources.new, and then simply be able to
+    #               retrieve environments from there.
     def environment(env_name = nil)
-      Bubblez.configuration.environment(env_name)
+      config.environment(env_name)
     end
 
     ##

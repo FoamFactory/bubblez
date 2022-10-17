@@ -76,31 +76,33 @@ describe Bubblez::Resources do
     end
   end
 
-  context 'when using the listmonk API' do
+  context 'when using the BoredApi API' do
     context 'when accessed using http' do
       context 'when a GET request is used' do
         before do
           Bubblez.configure do |config|
-            config.environments = [{
-                                     scheme: 'http',
-                                     host: 'listmonk.example.com'
-                                   }]
-            config.endpoints = [
-              {
-                location: '/api/lists',
-                method: :get,
-                api_key_required: false,
-                authenticated: true,
-                encode_authorization: %i[username password],
-                name: "get_lists"
-              }
-            ]
+            config.add_api(name: 'Listmonk',
+                           environments: [{
+                                            scheme: 'http',
+                                            host: 'listmonk.example.com'
+                                          }],
+                           endpoints: [
+                             {
+                               location: '/api/lists',
+                               method: :get,
+                               api_key_required: false,
+                               authenticated: true,
+                               encode_authorization: %i[username password],
+                               name: "get_lists"
+                             }
+                           ])
           end
         end
 
         it 'should return a 200 ok' do
           VCR.use_cassette 'get_lists_authenticated' do
-            env = Bubblez::Resources.new.environment
+            env = Bubblez::Resources.new('Listmonk').environment
+            # env = Bubblez::Resources.new.environment 'Listmonk'
 
             # Use a dummy login and password
             response = env.get_lists 'someone', '7162jahd89'
@@ -113,16 +115,18 @@ describe Bubblez::Resources do
 
   context 'when using a dummy manufactured API' do
     context 'when accessed using https' do
-      context 'when accessed using a HEAD request' do
-        before do
-          Bubblez.configure do |config|
-            config.environments = [{
-              scheme: 'https',
-              host: 'www.somewhere.com',
-              api_key: 'somemadeupkey2'
-            }]
-          end
+      before do
+        Bubblez.configure do |config|
+          config.add_api(name: 'DummyApi',
+                         environments: [{
+                                          scheme: 'https',
+                                          host: 'www.somewhere.com',
+                                          api_key: 'somemadeupkey2'
+                                        }])
         end
+      end
+
+      context 'when accessed using a HEAD request' do
 
         context 'when using an authorization token' do
           before do
@@ -132,7 +136,7 @@ describe Bubblez::Resources do
           context 'when an api key is required' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['DummyApi'].endpoints = [
                   {
                     location: '/',
                     method: :head,
@@ -146,7 +150,7 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok' do
               VCR.use_cassette 'head_madeup_api_key_authenticated_https' do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('DummyApi').environment
                 response = env.head_somewhere @auth_token
                 expect(response).to_not be_nil
               end
@@ -158,13 +162,13 @@ describe Bubblez::Resources do
           context 'when an API key is required' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['DummyApi'].endpoints = [
                   {
-                      location: '/',
-                      method: :head,
-                      api_key_required: true,
-                      authenticated: false,
-                      name: :head_somewhere
+                    location: '/',
+                    method: :head,
+                    api_key_required: true,
+                    authenticated: false,
+                    name: :head_somewhere
                   }
                 ]
               end
@@ -172,7 +176,7 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok' do
               VCR.use_cassette 'head_madeup_api_key_https' do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('DummyApi').environment
                 response = env.head_somewhere
                 expect(response).to_not be_nil
               end
@@ -183,10 +187,21 @@ describe Bubblez::Resources do
     end
 
     context 'when accessed using http' do
+        before do
+          Bubblez.configure do |config|
+            config.add_api(name: 'DummyApi',
+                           environments: [{
+                                            scheme: 'http',
+                                            host: 'www.somewhere.com',
+                                            api_key: 'somemadeupkey2'
+                                          }])
+          end
+        end
+
       context 'when accessed using a POST request' do
         before do
           Bubblez.configure do |config|
-            config.environments = [{
+            config['DummyApi'].environments = [{
               scheme: 'https',
               host: '127.0.0.1',
               port: '9002'
@@ -198,7 +213,7 @@ describe Bubblez::Resources do
           context 'when an api key is not required' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['DummyApi'].endpoints = [
                   {
                     location: :blah,
                     api_key_required: false,
@@ -212,7 +227,7 @@ describe Bubblez::Resources do
 
             it 'should respond with 200 ok' do
               VCR.use_cassette('post_unauthenticated_no_api_key') do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('DummyApi').environment
                 data = {
                   email: 'eat@example.com'
                 }
@@ -229,7 +244,7 @@ describe Bubblez::Resources do
       context 'when accessed using a HEAD request' do
         before do
           Bubblez.configure do |config|
-            config.environments = [{
+            config['DummyApi'].environments = [{
               scheme: 'http',
               host: 'www.somewhere.com',
               api_key: 'somemadeupkey'
@@ -241,7 +256,7 @@ describe Bubblez::Resources do
           context 'when an API key is required' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['DummyApi'].endpoints = [
                   {
                     location: '/',
                     method: :head,
@@ -255,7 +270,7 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok' do
               VCR.use_cassette 'head_madeup_api_key' do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('DummyApi').environment
                 response = env.head_somewhere
                 expect(response).to_not be_nil
               end
@@ -271,7 +286,7 @@ describe Bubblez::Resources do
           context 'when an api key is required' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['DummyApi'].endpoints = [
                   {
                       location: '/',
                       method: :head,
@@ -285,7 +300,7 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok' do
               VCR.use_cassette 'head_madeup_api_key_authenticated' do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('DummyApi').environment
                 response = env.head_somewhere @auth_token
                 expect(response).to_not be_nil
               end
@@ -297,10 +312,15 @@ describe Bubblez::Resources do
   end
 
   context 'when using the dummy reqres API' do
+    before do
+      Bubblez.configure do |config|
+        config.add_api(name: 'reqres')
+      end
+    end
     context 'accessed using https' do
       before do
         Bubblez.configure do |config|
-          config.environments = [{
+          config['reqres'].environments = [{
             scheme: 'https',
             host: 'reqres.in'
           }]
@@ -310,7 +330,7 @@ describe Bubblez::Resources do
       context 'when accessing the users endpoint without authentication' do
         before do
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['reqres'].endpoints = [
               {
                 method: :get,
                 location: 'api/users/{id}',
@@ -321,7 +341,7 @@ describe Bubblez::Resources do
               }
             ]
 
-            @resources = Bubblez::Resources.new
+            @resources = Bubblez::Resources.new('reqres')
           end
         end
 
@@ -345,6 +365,9 @@ describe Bubblez::Resources do
 
   context 'when using the joke API' do
     before do
+      Bubblez.configure do |config|
+        config.add_api(name: 'Joke Api')
+      end
       @host = 'jokeapi.p.rapidapi.com'
     end
 
@@ -354,7 +377,7 @@ describe Bubblez::Resources do
           @api_key = 'f950bc6c01msh14699dc76e5c505p1299d6jsncc2bf32a60af'
 
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['Joke Api'].endpoints = [
               {
                 method: :get,
                 location: 'categories',
@@ -368,7 +391,7 @@ describe Bubblez::Resources do
               }
             ]
 
-            config.environments = [{
+            config['Joke Api'].environments = [{
               scheme: 'https',
               host: @host,
               api_key: @api_key,
@@ -379,7 +402,7 @@ describe Bubblez::Resources do
 
         it 'should return four categories for jokes that can be retrieved' do
           VCR.use_cassette('get_jokeapi_categories') do
-            resources = Bubblez::Resources.new
+            resources = Bubblez::Resources.new('Joke Api')
             environment = resources.environment
             response = environment.get_categories
 
@@ -394,11 +417,11 @@ describe Bubblez::Resources do
   context 'when using the FoamFactory API, accessed remotely' do
     before do
       Bubblez.configure do |config|
-        config.environments = [{
+        config.add_api(name: 'FoamFactory', environments: [{
           scheme: 'https',
           host: 'api.foamfactory.io',
           api_key: '0c4e97c2f7af608117e519d941f1d2fbc25fe46a'
-        }]
+        }])
       end
     end
 
@@ -407,7 +430,7 @@ describe Bubblez::Resources do
         context 'with an authenticated endpoint requiring an API key' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['FoamFactory'].endpoints = [
                 {
                   location: :login,
                   method: :post,
@@ -428,7 +451,7 @@ describe Bubblez::Resources do
 
           it 'should successfully list all users in the system' do
             VCR.use_cassette('get_all_users_foamfactory_remote') do
-              env = Bubblez::Resources.new.environment
+              env = Bubblez::Resources.new('FoamFactory').environment
 
               authenticated_user = env.login 'scottj', '123qwe456'
               expect(authenticated_user).to_not be_nil
@@ -447,12 +470,12 @@ describe Bubblez::Resources do
   context 'when using the FoamFactory API, accessed locally' do
     before do
       Bubblez.configure do |config|
-        config.environments = [{
-          scheme: 'http',
-          host: 'localhost',
-          port: 1234,
-          api_key: 'fc411dc1b9bcc75f113951e574e243cca92fbddc'
-        }]
+        config.add_api(name: 'FoamFactory-Local', environments: [{
+                                                                   scheme: 'http',
+                                                                   host: 'localhost',
+                                                                   port: 1234,
+                                                                   api_key: 'fc411dc1b9bcc75f113951e574e243cca92fbddc'
+                                                                 }])
       end
     end
 
@@ -461,7 +484,7 @@ describe Bubblez::Resources do
         context 'with an authenticated API requiring an API key' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['FoamFactory-Local'].endpoints = [
                 {
                   location: :login,
                   method: :post,
@@ -482,7 +505,7 @@ describe Bubblez::Resources do
 
           it 'should successfully list all users in the system' do
             VCR.use_cassette('get_all_users_foamfactory_local') do
-              env = Bubblez::Resources.new.environment
+              env = Bubblez::Resources.new('FoamFactory-Local').environment
 
               authenticated_user = env.login 'scottj', '123qwe456'
               expect(authenticated_user).to_not be_nil
@@ -501,12 +524,12 @@ describe Bubblez::Resources do
   context 'when using the SinkingMoon API' do
     before do
       Bubblez.configure do |config|
-        config.environments = [{
+        config.add_api(name: 'Sinking Moon', environments: [{
           scheme: 'http',
           host: '127.0.0.1',
           port: '9002',
           api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
-        }]
+        }])
       end
     end
 
@@ -514,7 +537,7 @@ describe Bubblez::Resources do
       context 'when the host is unavailable' do
         before do
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['Sinking Moon'].endpoints = [
               {
                 method: :post,
                 location: :students,
@@ -524,7 +547,7 @@ describe Bubblez::Resources do
               }
             ]
 
-            config.environments = [{
+            config['Sinking Moon'].environments = [{
               scheme: 'https',
               host: '127.0.0.1',
               port: '1234',
@@ -554,7 +577,7 @@ describe Bubblez::Resources do
               waiverSigned: true
           }
 
-            resources = Bubblez::Resources.new
+            resources = Bubblez::Resources.new 'Sinking Moon'
             environment = resources.environment
             student = environment.create_student 'someauthtoken', data
 
@@ -569,7 +592,7 @@ describe Bubblez::Resources do
         context 'and accessed using https' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :post,
                   location: 'password/forgot',
@@ -580,7 +603,7 @@ describe Bubblez::Resources do
                 }
               ]
 
-              config.environments = [{
+              config['Sinking Moon'].environments = [{
                 scheme: 'https',
                 host: '127.0.0.1',
                 port: '9002',
@@ -591,7 +614,7 @@ describe Bubblez::Resources do
 
           it 'should successfully send a request to the server at the correct location' do
             VCR.use_cassette('post_unauthenticated_slash_in_path_https') do
-              resources = Bubblez::Resources.new
+              resources = Bubblez::Resources.new 'Sinking Moon'
               environment = resources.environment
 
               data = { email: 'eat@example.com' }
@@ -607,7 +630,13 @@ describe Bubblez::Resources do
       context 'when the endpoint has encoded authorization' do
         before do
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['Sinking Moon'].environments = [{
+                                                     scheme: 'http',
+                                                     host: '127.0.0.1',
+                                                     port: '9002',
+                                                     api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                                                   }]
+            config['Sinking Moon'].endpoints = [
               {
                   method: :post,
                   location: :login,
@@ -622,7 +651,7 @@ describe Bubblez::Resources do
 
         it 'should retrieve an authorization token' do
           VCR.use_cassette('login') do
-            resources = Bubblez::Resources.new
+            resources = Bubblez::Resources.new 'Sinking Moon'
             environment = resources.environment
 
             # data = { username: 'scottj', password: '123qwe456' }
@@ -640,7 +669,7 @@ describe Bubblez::Resources do
       context 'when an authorization token is required' do
         before do
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['Sinking Moon'].endpoints = [
               {
                   method: :post,
                   location: :students,
@@ -662,7 +691,7 @@ describe Bubblez::Resources do
 
         context 'with a valid authorization token' do
           before do
-            @resources = Bubblez::Resources.new
+            @resources = Bubblez::Resources.new 'Sinking Moon'
             @environment = @resources.environment
 
             VCR.use_cassette('login') do
@@ -701,7 +730,7 @@ describe Bubblez::Resources do
           context 'and an API key is required in the header X-Something-Key' do
             before do
               Bubblez.configure do |config|
-                config.environments = [{
+                config['Sinking Moon'].environments = [{
                   scheme: 'http',
                   host: '127.0.0.1',
                   port: '9002',
@@ -709,7 +738,7 @@ describe Bubblez::Resources do
                   api_key: 'blahblahblah'
                 }]
 
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :post,
                     location: :students,
@@ -724,7 +753,7 @@ describe Bubblez::Resources do
 
             it 'should correctly add a record using a POST request' do
               VCR.use_cassette('post_student_authenticated_api_key') do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('Sinking Moon').environment
 
                 data = {
                     name: 'Scott Klein',
@@ -754,14 +783,14 @@ describe Bubblez::Resources do
           context 'when using https' do
             before do
               Bubblez.configure do |config|
-                config.environments = [{
+                config['Sinking Moon'].environments = [{
                     scheme: 'https',
                     host: '127.0.0.1',
                     port: '9002',
                     api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
                 }]
 
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :post,
                     location: :students,
@@ -777,7 +806,7 @@ describe Bubblez::Resources do
 
             it 'should correctly add a record using a POST request' do
               VCR.use_cassette('post_student_authenticated_https') do
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('Sinking Moon').environment
 
                 data = {
                   name: 'Scott Klein',
@@ -813,7 +842,13 @@ describe Bubblez::Resources do
           context 'for an endpoint that does not require an api key' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].environments = [{
+                                                         scheme: 'http',
+                                                         host: '127.0.0.1',
+                                                         port: '9002',
+                                                         api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                                                       }]
+                config['Sinking Moon'].endpoints = [
                   {
                       method: :get,
                       location: :version,
@@ -827,7 +862,7 @@ describe Bubblez::Resources do
 
             it 'should be able to retrieve a response from the API' do
               VCR.use_cassette('get_version_unauthenticated') do
-                resources = Bubblez::Resources.new
+                resources = Bubblez::Resources.new 'Sinking Moon'
                 environment = resources.environment
 
                 response = environment.version
@@ -847,7 +882,7 @@ describe Bubblez::Resources do
         context 'that requires an authorization token' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :get,
                   location: :students,
@@ -877,7 +912,7 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -916,7 +951,7 @@ describe Bubblez::Resources do
         context 'for an endpoint that requires no authentication' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :get,
                   location: :version,
@@ -930,7 +965,7 @@ describe Bubblez::Resources do
 
           it 'should be able to retrieve a response from the API' do
             VCR.use_cassette('get_version_unauthenticated') do
-              resources = Bubblez::Resources.new
+              resources = Bubblez::Resources.new 'Sinking Moon'
               environment = resources.environment
 
               response = environment.version
@@ -944,7 +979,7 @@ describe Bubblez::Resources do
         context 'that requires an authorization token' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :get,
                   location: :students,
@@ -974,7 +1009,7 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -1009,7 +1044,7 @@ describe Bubblez::Resources do
         context 'for an endpoint that requires no authentication' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :get,
                   location: :version,
@@ -1023,7 +1058,7 @@ describe Bubblez::Resources do
 
           it 'should be able to retrieve a response from the API' do
             VCR.use_cassette('get_version_unauthenticated') do
-              resources = Bubblez::Resources.new
+              resources = Bubblez::Resources.new 'Sinking Moon'
               environment = resources.environment
 
               response = environment.version
@@ -1045,7 +1080,7 @@ describe Bubblez::Resources do
         context 'that requires an authorization token' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :get,
                   location: :students,
@@ -1075,7 +1110,7 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -1119,7 +1154,7 @@ describe Bubblez::Resources do
         it 'should raise an exception' do
           expect {
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                     method: :delete,
                     location: 'students',
@@ -1138,14 +1173,14 @@ describe Bubblez::Resources do
           context 'with a valid api key' do
             before do
               Bubblez.configure do |config|
-                config.environments = [{
+                config['Sinking Moon'].environments = [{
                   scheme: 'http',
                   host: '127.0.0.1',
                   port: 9002,
                   api_key: 'blahblahblah'
                 }]
 
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :delete,
                     location: 'students/{id}',
@@ -1164,7 +1199,7 @@ describe Bubblez::Resources do
                   id: 2
                 }
 
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('Sinking Moon').environment
                 response = env.delete_student_no_auth uri_params
 
                 expect(response).to_not be_nil
@@ -1177,7 +1212,7 @@ describe Bubblez::Resources do
         context 'for an endpoint that requires authorization' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                     method: :delete,
                     location: 'students/{id}',
@@ -1192,13 +1227,13 @@ describe Bubblez::Resources do
           context 'when accessing a host via HTTPS that requires an API key' do
             before do
               Bubblez.configure do |config|
-                config.environments = [{
+                config['Sinking Moon'].environments = [{
                   scheme: 'https',
                   host: 'testbed.foamfactory.io',
                   api_key: 'blahblahblah'
                 }]
 
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :delete,
                     location: 'students/{id}',
@@ -1214,7 +1249,7 @@ describe Bubblez::Resources do
             it 'should successfully delete the record' do
               VCR.use_cassette('delete_student_by_id_api_key_https') do
                 auth_token = 'eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGlvbl9kYXRlIjoiMjAxOS0wNC0yOFQxMDo0NDo0MS0wNTowMCIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMTktMDUtMjhUMTA6NDQ6NDEtMDU6MDAiLCJ1c2VyX2lkIjoxfQ.C1mSYJ7ho6Cly8Ik_BcDzfC6rKb6cheY-NMbXV7QWvE'
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('Sinking Moon').environment
                 response = env.delete_student_https auth_token, {id: 2}
 
                 expect(response.success).to eq(true)
@@ -1224,7 +1259,23 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              Bubblez.configure do |config|
+                config['Sinking Moon'].environments = [{
+                                                         scheme: 'http',
+                                                         host: '127.0.0.1',
+                                                         port: 9002,
+                                                         api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
+                                                       }]
+                config['Sinking Moon'].endpoints = [{
+                                                      method: :post,
+                                                      location: :login,
+                                                      authenticated: false,
+                                                      api_key_required: true,
+                                                      encode_authorization: %i[username password],
+                                                      return_type: :body_as_object
+                                                    }]
+              end
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -1252,7 +1303,7 @@ describe Bubblez::Resources do
           context 'for an endpoint that does not have URI parameters' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                       method: :patch,
                       location: 'password/change',
@@ -1273,7 +1324,7 @@ describe Bubblez::Resources do
                     password_confirmation: @new_password
                 }
 
-                env = Bubblez::Resources.new.environment
+                env = Bubblez::Resources.new('Sinking Moon').environment
                 response = env.change_password_no_uri 'blahblahblah', data
 
                 expect(response).to_not be_nil
@@ -1284,7 +1335,7 @@ describe Bubblez::Resources do
 
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :patch,
                   location: 'students/{id}',
@@ -1306,7 +1357,7 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new('Sinking Moon')
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -1319,13 +1370,13 @@ describe Bubblez::Resources do
             context 'when using https and an api key is required' do
               before do
                 Bubblez.configure do |config|
-                  config.environments = [{
+                  config['Sinking Moon'].environments = [{
                     scheme: 'https',
                     host: '127.0.0.1',
                     api_key: 'e5528cb7ee0c5f6cb67af63c8f8111dce91a23e6'
                   }]
 
-                  config.endpoints = [
+                  config['Sinking Moon'].endpoints = [
                     {
                       method: :patch,
                       location: 'students/{id}',
@@ -1340,7 +1391,7 @@ describe Bubblez::Resources do
 
               it 'should update part of a record' do
                 VCR.use_cassette('patch_update_student_https') do
-                  env = Bubblez::Resources.new.environment
+                  env = Bubblez::Resources.new('Sinking Moon').environment
                   response = env.update_student @auth_token, {id: 4}, {student: {email: 'kleinhammer@gmail.com' } }
 
                   expect(response.id).to eq(4)
@@ -1377,7 +1428,7 @@ describe Bubblez::Resources do
         context 'for an endpoint that does not require authentication' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :patch,
                   location: 'password/change',
@@ -1387,7 +1438,7 @@ describe Bubblez::Resources do
                 }
               ]
 
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
             end
           end
@@ -1401,13 +1452,13 @@ describe Bubblez::Resources do
             context 'when using https and passing an API key' do
               before do
                 Bubblez.configure do |config|
-                  config.environments = [{
+                  config['Sinking Moon'].environments = [{
                     scheme: :https,
                     host: 'api.something.com',
                     api_key: 'blahblahblahblah'
                   }]
 
-                  config.endpoints = [
+                  config['Sinking Moon'].endpoints = [
                     {
                       method: :patch,
                       authenticated: false,
@@ -1428,7 +1479,7 @@ describe Bubblez::Resources do
                     password_confirmation: @new_password
                   }
 
-                  env = Bubblez::Resources.new.environment
+                  env = Bubblez::Resources.new('Sinking Moon').environment
                   response = env.change_forgotten_password data
 
                   expect(response).to_not be_nil
@@ -1436,27 +1487,17 @@ describe Bubblez::Resources do
                 end
               end
             end
-
-            it 'should allow the successful execution of the request' do
-              VCR.use_cassette('patch_change_password_unauthenticated') do
-                data = {
-                  one_time_login_hash: @hash,
-                  new_password: @new_password,
-                  password_confirmation: @new_password
-                }
-
-                response = @environment.change_forgotten_password data
-
-                expect(response).to_not be_nil
-                expect(response.success).to be_truthy
-              end
-            end
           end
 
           context 'for an endpoint that requires URI parameters' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].environments = [{
+                                                         scheme: :http,
+                                                         host: '127.0.0.1',
+                                                         port: 9002
+                                                       }]
+                config['Sinking Moon'].endpoints = [
                   {
                       method: :patch,
                       location: 'password/change/{hash}',
@@ -1485,7 +1526,8 @@ describe Bubblez::Resources do
                       password_confirmation: @new_password
                   }
 
-                  env = Bubblez::Resources.new.environment
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
                   response = env.change_forgotten_password_uri uri_params, data
 
                   expect(response).to_not be_nil
@@ -1502,7 +1544,7 @@ describe Bubblez::Resources do
           context 'with an invalid identification parameter' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :patch,
                     location: 'password/change',
@@ -1513,7 +1555,7 @@ describe Bubblez::Resources do
                 ]
               end
 
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               @hash = '0xdeadbeef'
@@ -1549,7 +1591,7 @@ describe Bubblez::Resources do
           context 'for an endpoint that does not have URI parameters' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                       method: :put,
                       location: 'password/change',
@@ -1570,7 +1612,8 @@ describe Bubblez::Resources do
                     password_confirmation: @new_password
                 }
 
-                env = Bubblez::Resources.new.environment
+                resources = Bubblez::Resources.new 'Sinking Moon'
+                env = resources.environment
                 response = env.change_password_no_uri 'blahblahblah', data
 
                 expect(response).to_not be_nil
@@ -1581,7 +1624,7 @@ describe Bubblez::Resources do
 
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :put,
                   location: 'students/{id}',
@@ -1603,7 +1646,7 @@ describe Bubblez::Resources do
 
           context 'with a valid authorization token' do
             before do
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               VCR.use_cassette('login') do
@@ -1616,7 +1659,7 @@ describe Bubblez::Resources do
             context 'when accessed using https and an api key' do
               before do
                 Bubblez.configure do |config|
-                  config.endpoints = [
+                  config['Sinking Moon'].endpoints = [
                     {
                         method: :put,
                         location: 'students/{id}',
@@ -1627,7 +1670,7 @@ describe Bubblez::Resources do
                     }
                   ]
 
-                  config.environments = [{
+                  config['Sinking Moon'].environments = [{
                     scheme: :https,
                     host: 'testbed.foamfactory.io',
                     api_key: 'blahblahblah'
@@ -1651,7 +1694,8 @@ describe Bubblez::Resources do
                     }
                   }
 
-                  env = Bubblez::Resources.new.environment
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
                   response = env.update_student @auth_token, {id: 4}, data
 
                   expect(response.id).to eq(4)
@@ -1704,7 +1748,7 @@ describe Bubblez::Resources do
         context 'for an endpoint that does not require authentication' do
           before do
             Bubblez.configure do |config|
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 {
                   method: :put,
                   location: 'password/change',
@@ -1714,7 +1758,7 @@ describe Bubblez::Resources do
                 }
               ]
 
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
             end
           end
@@ -1728,13 +1772,13 @@ describe Bubblez::Resources do
             context 'when accessed with https and an API key' do
               before do
                 Bubblez.configure do |config|
-                  config.environments = [{
-                    scheme: :https,
-                    host: 'testbed.foamfactory.io',
-                    api_key: 'foamfactorybeermaker'
+                  config['Sinking Moon'].environments = [{
+                    scheme: :http,
+                    host: '127.0.0.1',
+                    port: 9002
                   }]
 
-                  config.endpoints = [
+                  config['Sinking Moon'].endpoints = [
                     {
                       method: :put,
                       location: 'password/change',
@@ -1746,15 +1790,58 @@ describe Bubblez::Resources do
                   ]
                 end
               end
+
+              context 'when using https instead of http' do
+                before do
+                  Bubblez.configure do |config|
+                    config['Sinking Moon'].environments = [{
+                                                             scheme: :https,
+                                                             host: 'testbed.foamfactory.io',
+                                                             api_key: 'foamfactorybeermaker'
+                                                           }]
+                  end
+                end
+
+                it 'should allow the successful execution of the request' do
+                  VCR.use_cassette('put_change_password_unauthenticated_https') do
+                    data = {
+                      one_time_login_hash: @hash,
+                      new_password: @new_password,
+                      password_confirmation: @new_password
+                    }
+
+                    resources = Bubblez::Resources.new 'Sinking Moon'
+                    env = resources.environment
+                    response = env.change_forgotten_password_put data
+
+                    expect(response).to_not be_nil
+                    expect(response.success).to be_truthy
+                  end
+                end
+              end
+            end
+
+            context 'when using http' do
+              before do
+                Bubblez.configure do |config|
+                  config['Sinking Moon'].environments = [{
+                                                           scheme: :http,
+                                                           host: '127.0.0.1',
+                                                           port: 9002
+                                                         }]
+                end
+              end
+
               it 'should allow the successful execution of the request' do
-                VCR.use_cassette('put_change_password_unauthenticated_https') do
+                VCR.use_cassette('put_change_password_unauthenticated') do
                   data = {
                     one_time_login_hash: @hash,
                     new_password: @new_password,
                     password_confirmation: @new_password
                   }
 
-                  env = Bubblez::Resources.new.environment
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
                   response = env.change_forgotten_password_put data
 
                   expect(response).to_not be_nil
@@ -1762,27 +1849,12 @@ describe Bubblez::Resources do
                 end
               end
             end
-
-            it 'should allow the successful execution of the request' do
-              VCR.use_cassette('put_change_password_unauthenticated') do
-                data = {
-                  one_time_login_hash: @hash,
-                  new_password: @new_password,
-                  password_confirmation: @new_password
-                }
-
-                response = @environment.change_forgotten_password_put data
-
-                expect(response).to_not be_nil
-                expect(response.success).to be_truthy
-              end
-            end
           end
 
           context 'for an endpoint that requires URI parameters' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                       method: :put,
                       location: 'password/change/{hash}',
@@ -1811,7 +1883,8 @@ describe Bubblez::Resources do
                       password_confirmation: @new_password
                   }
 
-                  env = Bubblez::Resources.new.environment
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
                   response = env.change_forgotten_password_uri uri_params, data
 
                   expect(response).to_not be_nil
@@ -1828,7 +1901,7 @@ describe Bubblez::Resources do
           context 'with an invalid identification parameter' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   {
                     method: :put,
                     location: 'password/change',
@@ -1839,7 +1912,7 @@ describe Bubblez::Resources do
                 ]
               end
 
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
               @environment = @resources.environment
 
               @hash = '0xdeadbeef'
@@ -1873,7 +1946,7 @@ describe Bubblez::Resources do
       context 'for an endpoint that does not require authorization' do
         before do
           Bubblez.configure do |config|
-            config.environments = [{
+            config['Sinking Moon'].environments = [{
               scheme: 'http',
               host: '127.0.0.1',
               port: '1234',
@@ -1886,13 +1959,13 @@ describe Bubblez::Resources do
           context 'when at least one url parameter is expected' do
             before do
               Bubblez.configure do |config|
-              config.environments = [{
+              config['Sinking Moon'].environments = [{
                 scheme: 'http',
                 host: '127.0.0.1',
                 port: '1234'
               }]
 
-              config.endpoints = [
+              config['Sinking Moon'].endpoints = [
                 method: :head,
                 name: 'validate_login_hash',
                 location: '/validate/{hash}',
@@ -1901,7 +1974,7 @@ describe Bubblez::Resources do
               ]
             end
 
-              @resources = Bubblez::Resources.new
+              @resources = Bubblez::Resources.new 'Sinking Moon'
             end
 
             context 'and that url parameter is specified on the url path and is not valid' do
@@ -1943,7 +2016,7 @@ describe Bubblez::Resources do
           context 'when at least one url parameter is expected' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].endpoints = [
                   method: :head,
                   name: 'validate_login_hash',
                   location: '/validate/{hash}',
@@ -1952,8 +2025,6 @@ describe Bubblez::Resources do
                   return_type: :full_response
                 ]
               end
-
-              @resources = Bubblez::Resources.new
             end
 
             context 'and that url parameter is specified on the url path and is not valid' do
@@ -1964,8 +2035,10 @@ describe Bubblez::Resources do
               it 'should return a 401 unauthorized' do
                 VCR.use_cassette('head_api_key_validate_login_hash_with_invalid_hash') do
                   saw_error = false
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
                   begin
-                    response = @resources.environment.validate_login_hash({hash: @login_hash})
+                    response = env.validate_login_hash({hash: @login_hash})
                   rescue RestClient::Unauthorized
                     saw_error = true
                   end
@@ -1981,7 +2054,9 @@ describe Bubblez::Resources do
               end
               it 'should return a 204 no_content' do
                 VCR.use_cassette('head_api_key_validate_login_hash_with_valid_hash') do
-                  response = @resources.environment.validate_login_hash({hash: @login_hash})
+                  resources = Bubblez::Resources.new 'Sinking Moon'
+                  env = resources.environment
+                  response = env.validate_login_hash({hash: @login_hash})
 
                   expect(response).to_not be_nil
                   expect(response.code).to eq(204)
@@ -1996,13 +2071,13 @@ describe Bubblez::Resources do
             context 'after redefining the environment to use Google with additional headers' do
               before do
                 Bubblez.configure do |config|
-                  config.environments = [{
+                  config['Google'].environments = [{
                     scheme: 'http',
                     host: 'www.google.com',
                     port: '80'
                   }]
 
-                  config.endpoints = [
+                  config['Google'].endpoints = [
                     {
                       method: :head,
                       location: '/',
@@ -2015,13 +2090,13 @@ describe Bubblez::Resources do
                     }
                   ]
                 end
-
-                @resources = Bubblez::Resources.new
               end
 
               it 'should add the header to the request' do
                 VCR.use_cassette('head_google_with_headers') do
-                  response = @resources.environment.head_google
+                  resources = Bubblez::Resources.new 'Google'
+                  env = resources.environment
+                  response = env.head_google
                   request = response.request
 
                   expect(request).to_not be_nil
@@ -2035,13 +2110,13 @@ describe Bubblez::Resources do
               # NOTE - this is required so we know that we can redefine environments without issues
               before do
                 Bubblez.configure do |config|
-                  config.environments = [{
+                  config['Google'].environments = [{
                     scheme: 'http',
                     host: 'www.google.com',
                     port: '80'
                   }]
 
-                  config.endpoints = [
+                  config['Google'].endpoints = [
                     {
                       method: :head,
                       location: '/',
@@ -2051,13 +2126,13 @@ describe Bubblez::Resources do
                     }
                   ]
                 end
-
-                @resources = Bubblez::Resources.new
               end
 
               it 'should return a 200 Ok response' do
                 VCR.use_cassette('head_google') do
-                  response = @resources.environment.head_google
+                  resources = Bubblez::Resources.new 'Google'
+                  env = resources.environment
+                  response = env.head_google
 
                   expect(response).to_not be_nil
                   expect(response.code).to eq(200)
@@ -2071,7 +2146,7 @@ describe Bubblez::Resources do
       context 'for an endpoint that requires authorization' do
         before do
           Bubblez.configure do |config|
-            config.endpoints = [
+            config['Sinking Moon'].endpoints = [
               {
                 method: :head,
                 location: '/students',
@@ -2095,7 +2170,12 @@ describe Bubblez::Resources do
           context 'having URI parameters specified' do
             before do
               Bubblez.configure do |config|
-                config.endpoints = [
+                config['Sinking Moon'].environments = [{
+                                                         scheme: 'http',
+                                                         host: '127.0.0.1',
+                                                         port: '9002'
+                                                       }]
+                config['Sinking Moon'].endpoints = [
                   method: :head,
                   authenticated: true,
                   api_key_required: false,
@@ -2107,7 +2187,8 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok response' do
               VCR.use_cassette('head_students_authenticated_uri_params') do
-                env = Bubblez::Resources.new.environment
+                resources = Bubblez::Resources.new 'Sinking Moon'
+                env = resources.environment
                 response = env.head_student_by_id 'blahblahblah', { id: 32 }
 
                 expect(response).to_not be_nil
@@ -2118,11 +2199,10 @@ describe Bubblez::Resources do
 
           context 'with no URI parameters' do
             before do
-              @resources = Bubblez::Resources.new
-              @environment = @resources.environment
-
               VCR.use_cassette('login') do
-                login_object = @environment.login 'scottj', '123qwe456'
+                resources = Bubblez::Resources.new 'Sinking Moon'
+                env = resources.environment
+                login_object = env.login 'scottj', '123qwe456'
 
                 @auth_token = login_object.auth_token
               end
@@ -2130,7 +2210,9 @@ describe Bubblez::Resources do
 
             it 'should return a 200 ok response' do
               VCR.use_cassette('head_students_authenticated') do
-                response = @environment.head_students @auth_token
+                resources = Bubblez::Resources.new 'Sinking Moon'
+                env = resources.environment
+                response = env.head_students @auth_token
 
                 expect(response).to_not be_nil
                 expect(response.code).to eq(200)

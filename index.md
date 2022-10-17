@@ -1,4 +1,4 @@
-# Bubblez v1.0.0
+# Bubblez v2.0.0
 
 A gem for easily defining client REST interfaces in ruby
 

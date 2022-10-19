@@ -1,5 +1,9 @@
+<img src="./assets/logo.png" width=20% height=20%>
+
 # bubblez
+
 [![Build Status](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/FoamFactory/bubblez/actions/workflows/test.yml)
+
 
 A gem for easily defining client REST interfaces in ruby
 

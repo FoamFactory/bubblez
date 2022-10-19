@@ -1,5 +1,4 @@
-<img src="assets/logo.png" width=20% height=20%>
-
+![Bubblez Logo](https://github.com/FoamFactory/bubblez/raw/main/assets/logo-small.png)
 # Bubblez v2.0.0
 
 A gem for easily defining client REST interfaces in ruby

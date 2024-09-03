@@ -30,7 +30,7 @@ jobs:
         with:
           ruby-version: '2.6.1' # Not needed with a .ruby-version file
           bundler-cache: true
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: bubblez-gemfile
       - name: Release Gem to GitHub Packages
